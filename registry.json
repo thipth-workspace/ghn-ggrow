@@ -1791,12 +1791,6 @@
       "scope": "local",
       "note": "Bề rộng cố định của droplist đơn vị trong ô Chỉ tiêu — chỉ thị 2026-09-08. Trước đó nó hug theo mã đơn vị nên mỗi dòng một bề ngang khác nhau."
     },
-    "size-content-inner": {
-      "$value": "1100px",
-      "$type": "dimension",
-      "scope": "local",
-      "description": "Be ngang toi da cua COT NOI DUNG (spec muc 15.3). O viewport 1440: main content 1180 - gutter 40x2 = 1100. Man rong hon thi cot dung yen o 1100 va canh giua."
-    },
     "size-footer-h": {
       "$value": "76px",
       "$type": "dimension",
@@ -1862,6 +1856,11 @@
     },
     "size-capacity-col": {
       "$value": "100px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "size-objc-title-min": {
+      "$value": "200px",
       "$type": "dimension",
       "scope": "local"
     },
