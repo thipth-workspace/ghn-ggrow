@@ -1864,6 +1864,21 @@
       "$type": "dimension",
       "scope": "local"
     },
+    "size-aiw-fab": {
+      "$value": "56px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "size-aiw-panel-w": {
+      "$value": "300px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "size-aiw-panel-h": {
+      "$value": "360px",
+      "$type": "dimension",
+      "scope": "local"
+    },
     "size-result-col": {
       "$value": "200px",
       "$type": "dimension",
@@ -9751,6 +9766,32 @@
       "renderSrc": "render/components/kpi-detail-card.js",
       "specSrc": "spec/components/kpi-detail-card.json",
       "dsMatch": null
+    },
+    {
+      "id": "ai-chat-widget",
+      "name": "AI Chat Widget",
+      "level": "molecule",
+      "renderFn": "renderCmpAiChatWidget",
+      "renderSrc": "render/components/ai-chat-widget.js",
+      "properties": [
+        {
+          "id": "state",
+          "label": "Trạng thái",
+          "type": "select",
+          "default": "default",
+          "options": [
+            {
+              "label": "Đóng",
+              "value": "default"
+            },
+            {
+              "label": "Đang mở",
+              "value": "open"
+            }
+          ]
+        }
+      ],
+      "specSrc": "spec/components/ai-chat-widget.json"
     }
   ],
   "screens": [
@@ -10129,7 +10170,8 @@
       "renderFn": "renderScreenChiTietNhanVien",
       "roles": [
         "hr",
-        "manager"
+        "manager",
+        "high-level-manager"
       ],
       "layout": {
         "type": "stack",
@@ -11528,7 +11570,6 @@
       "name": "Hiệu suất phòng ban · Ủy quyền đánh giá",
       "renderFn": "renderScreenHieuSuatPhongBanUyQuyen",
       "roles": [
-        "high-level-manager",
         "supervisor"
       ],
       "layout": {
