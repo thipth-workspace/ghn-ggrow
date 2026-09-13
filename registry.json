@@ -1844,6 +1844,46 @@
       "$type": "dimension",
       "scope": "local",
       "description": "Be ngang o hanh dong ben phai dong \"Ket qua thuc dat\" cua Objective/Task. Spec muc 12.6 bat giu slot nay rong cho nut xem log hieu chinh; frame 9162:117007 do Action Container = 95. Giu be ngang that de dong chu khong giat khi nut that xuat hien."
+    },
+    "font-size-display": {
+      "$value": "26px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "line-height-display": {
+      "$value": "34px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "border-width-accent": {
+      "$value": "3px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "size-capacity-col": {
+      "$value": "100px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "size-result-col": {
+      "$value": "200px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "size-search-w": {
+      "$value": "320px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "size-filter-w": {
+      "$value": "124px",
+      "$type": "dimension",
+      "scope": "local"
+    },
+    "size-lsdg-col-1": {
+      "$value": "320px",
+      "$type": "dimension",
+      "scope": "local"
     }
   },
   "components": [
@@ -10215,16 +10255,6 @@
           "state": "default"
         },
         {
-          "id": "goal-search-grid",
-          "label": "Search input + 3-column card grid of goal cycles — clicking a card drills into that cycle's detail view",
-          "orgId": "searchable-card-grid",
-          "tokens": [
-            "--radius-control",
-            "--bg-secondary-muted"
-          ],
-          "state": "default"
-        },
-        {
           "id": "goal-detail-header",
           "label": "Detail view header: round back button + goal name + goal-set/not-set status tag + date range",
           "orgId": "detail-view-header",
@@ -12066,6 +12096,54 @@
           "verifiedAt": "2026-09-03",
           "note": "Thay 8245:39197 (2026-08-28)."
         }
+      ]
+    },
+    {
+      "id": "lich-su-danh-gia",
+      "name": "Lịch sử đánh giá",
+      "type": "page",
+      "roles": [
+        "hr",
+        "manager",
+        "high-level-manager",
+        "supervisor",
+        "employee"
+      ],
+      "renderFn": "renderScreenLichSuDanhGia",
+      "renderSrc": "render/screens/lich-su-danh-gia.js",
+      "figmaNode": "9242:66611",
+      "elements": [
+        {
+          "id": "header-footer-app",
+          "orgId": "header-footer-app"
+        },
+        {
+          "id": "page-header",
+          "orgId": "page-header"
+        },
+        {
+          "id": "input",
+          "orgId": "input"
+        },
+        {
+          "id": "dropdown-select",
+          "orgId": "dropdown-select"
+        },
+        {
+          "id": "table",
+          "orgId": "table"
+        },
+        {
+          "id": "status-tag",
+          "orgId": "status-tag"
+        }
+      ],
+      "logicNotes": [
+        "Hai lối vào: `canhan` (từ Hiệu suất cá nhân) và `dept` (từ Trực tiếp quản lý → chi tiết nhân viên). Breadcrumb và nút back đổi theo lối vào; chủ thể (employeeId) và tên đi kèm lối vào chứ không suy từ persona.",
+        "Bảng không bịa dữ liệu: hai hàng đầu là hai pha đang chạy trong GG_PHASES (điểm `--`), các hàng sau là chu kỳ trong kpiSets của chính người đó đã chấm xong, điểm do pbKpiWeightedScore tính từ điểm từng mục tiêu.",
+        "pbKpiWeightedScore trả null khi còn mục tiêu chưa có điểm — dùng luôn làm bộ lọc `đã chốt hay chưa`, không cần cờ riêng.",
+        "Bấm hàng: `phase:*` mở đúng tab của màn chi tiết; `goal:*` là chu kỳ đã chốt nên mở ở chế độ chỉ đọc (PB_HCP_OPEN + PB_HCP_VIEWONLY).",
+        "Trạng thái dùng đúng bộ từ vựng 4 nấc của Nguyên tắc 7 — ở đây đọc được 3 nấc: Bản nháp, Đang đánh giá, Hoàn thành."
       ]
     }
   ],

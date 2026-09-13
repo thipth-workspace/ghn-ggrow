@@ -36,4 +36,39 @@ for old, new in pairs:
 io.open(p, 'w', encoding='utf-8').write(s)
 PY
 
+# Shell prototype KHÔNG dựng switcher (chỉ shell design-system có), nên trên Pages trang
+# index là ngõ cụt: vào được prototype thì không có đường sang design system. Chèn một liên
+# kết vào thanh meta-nav. Phải chèn vào CHUỖI mà `renderMetaNav()` trả về chứ không vào DOM —
+# hàm đó gán lại `innerHTML` của #meta-nav mỗi lần render, chèn thẳng vào DOM sẽ bị xoá ngay.
+python3 - "$OUT/index.html" <<'PYLINK'
+import io, sys
+p = sys.argv[1]
+s = io.open(p, encoding="utf-8").read()
+
+k = s.find("<span>Sandbox</span>")
+if k == -1:
+    sys.exit("  KHÔNG thấy nút Sandbox — shell đã đổi, bỏ bước chèn liên kết")
+tail = "</button>`;"
+end = s.find(tail, k)
+if end == -1:
+    sys.exit("  KHÔNG thấy điểm kết nút Sandbox — bỏ bước chèn")
+anchor = s[k:end + len(tail)]
+link = '<a class="pb-ds-link" href="design-system.html">Design system</a>'
+s = s.replace(anchor, anchor[:-2] + link + "`;", 1)
+
+css = ('<style>.pb-ds-link{display:inline-flex;align-items:center;height:30px;'
+       'padding:0 12px;margin-left:8px;border-radius:var(--radius, 8px);'
+       'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);'
+       'color:var(--neutral-10, #e5e7eb);text-decoration:none;'
+       'font-family:var(--font-heading);font-size:var(--font-size-s);'
+       'font-weight:var(--font-weight-bold)}'
+       '.pb-ds-link:hover{background:rgba(255,255,255,0.12)}</style>')
+if s.count("</head>") != 1:
+    sys.exit("  </head> không duy nhất — bỏ bước chèn css")
+s = s.replace("</head>", css + "</head>", 1)
+
+io.open(p, "w", encoding="utf-8").write(s)
+print("  liên kết  index.html -> design-system.html            x1")
+PYLINK
+
 echo "xong · $OUT/index.html · $OUT/design-system.html"
