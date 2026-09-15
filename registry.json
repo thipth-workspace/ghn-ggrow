@@ -12139,7 +12139,10 @@
       "name": "Chu kỳ thử việc — Chi tiết nhân viên",
       "renderFn": "renderScreenTheoDoiThuViecChiTiet",
       "roles": [
-        "hr"
+        "hr",
+        "manager",
+        "high-level-manager",
+        "supervisor"
       ],
       "layout": {
         "type": "stack",
@@ -12150,7 +12153,7 @@
       "elements": [
         {
           "id": "app-shell",
-          "label": "Persistent app shell with the sidebar active item still on Chu kỳ thử việc — the list this page is one level below.",
+          "label": "Persistent app shell. `activeScreenId` stays on Theo dõi chu kỳ — this page has no sidebar row of its own, so the list it belongs to stays lit.",
           "orgId": "header-footer-app",
           "tokens": [
             "--size-sidebar"
@@ -12159,37 +12162,30 @@
         },
         {
           "id": "page-chrome",
-          "label": "Breadcrumb (Chu kỳ thử việc › <name>) + name as title + stage chip + a one-field info strip, from the shared config-page-shell — the same chrome chi-tiet-phong-ban uses.",
+          "label": "Breadcrumb (Theo dõi chu kỳ › Nhân viên thử việc › <tên>) + the person's name as title. The middle crumb calls `cqGoTabFresh('probation')` rather than a plain nav: both tabs of the host share one screen id, so declarative navigation cannot tell them apart. The third crumb appears only when a person is stashed.",
           "orgId": "config-page-shell",
+          "tokens": [],
           "state": "default"
         },
         {
-          "id": "person-body",
-          "label": "The 8-section employee body in its new bodyOnly mode, so config-page-shell supplies the chrome instead of the component's own breadcrumb + h2. Four gates open with this payload (E1/E2/E3/E4-empty); E6 \"Quyết định\" stays hidden because no viewer is passed.",
-          "orgId": "employee-detail-drawer",
-          "state": "default"
-        },
-        {
-          "id": "empty-state",
-          "label": "No stash → an explicit empty state + a \"Về Chu kỳ thử việc\" button.",
+          "id": "design-in-progress",
+          "label": "`Design in-progress` — the whole body while this surface is being designed (15/09/2026 instruction). Every probation person's detail click lands here, so the message is unconditional: no per-person branch, no partial content that would suggest the feature is half-live.",
           "orgId": "empty-state",
+          "tokens": [],
           "state": "default"
         },
         {
           "id": "back-to-list",
-          "label": "The \"Về Chu kỳ thử việc\" button in the no-stash empty state — the only button this page composes directly.",
+          "label": "`Về danh sách nhân viên thử việc` — returns to the probation TAB, not the host's default tab, via the same `cqGoTabFresh` the breadcrumb uses.",
           "orgId": "button",
+          "tokens": [],
           "state": "default"
         }
       ],
       "logicNotes": [
-        "NO INFO STRIP (2026-07-31, direct user instruction — \"remove ngày đánh giá\"). It held exactly one field; with it gone `infoFields` is empty and config-page-shell omits the whole strip, so the page runs from the title row straight into the body with no leftover gap. `decisionDays`/`reviewDate`/the local stripChip reader went dead with it and were deleted. The date is still derivable from Ngày kết thúc + the standing policy, and the list screen still shows it per person in its own \"Ngày đánh giá\" column. The page also passes fieldColumns:4 so the four metadata labels align on one row in declared order.",
-        "KPI TABLE + MERGED METADATA (2026-07-31, direct user instruction). The KPI table is employee-detail-drawer's own `goalsKpi()` renderer, which fires on a non-empty `kpi` array — it had nothing to render from, so EVERY person showed the \"Chưa có mục tiêu.\" empty state regardless of reality. `tdtvKpiFor(member)` (top level in theo-doi-thu-viec.js) now supplies rows, gated on the roster's existing `hasKpiGoals` flag — literally \"has the manager set up this person's probation KPI yet?\" — so the empty state became a true statement about the person instead of an artifact of the surface. Rows are routed by JOB TITLE (kho/giao nhận on throughput, chuyên viên on quality, …) with a generic fallback, three rows summing to 100% weight, and are DETERMINISTIC (a stable name hash, no Math.random) so a re-render or a /pb:test reset shows the same table. Results appear only once a decision exists: an ongoing probation shows targets with \"—\" and 0%, a passed person clears every row, a failed one misses the heaviest. Shape: omitSections [\"E2\",\"E3\"] + hideSectionTitles. E2 was the avatar + name + job title, which the page header already states (the name IS the page title); E3 handed its manager row to E1. Verified in the DOM: gate trace reads E2=OMIT | E3=OMIT, the three named texts are absent, the avatar is gone, the first section reads Loại hiệu suất · Ngày bắt đầu · Ngày kết thúc · Quản lý in that order, the KPI table renders its 5 columns, and the Lộ trình is kept (it was not part of the removal list).",
-        "REPLACES 14 PER-ROW DRAWERS (2026-07-31, the \"chu kì thử việc\" half of the same instruction). Each roster row emitted its own fully-rendered employee-detail-drawer; rows now navigate here. One instance at a time.",
-        "STASH IS KEYED BY NAME, NOT ROW INDEX — the one genuinely dangerous detail in this conversion. The roster has no `id` field, which is why the deleted toggles were tdtv-view-<arrayIndex>. An index stash fails two ways: index 0 is FALSY, so the `if (!id) return null` guard that quan-ly-chu-ky's cqLeafTarget uses (the function this trio is modelled on) would make only the FIRST row render the empty state; and any later filter/sort/splice/re-seed desynchronises stash-index from array-index and shows a real but WRONG person, silently. `name` is unique across the seed and is already the cross-screen join key hieu-suat-phong-ban's probation decision writer matches on.",
-        "THE CHIP IS NOT DUPLICATED: probation.statusVariant/statusLabel are deliberately NOT passed to the body, because E1's \"Kết quả thử việc\" row is conditional on exactly those two — omitting them keeps the status in one place, beside the page title, which is where chi-tiet-phong-ban puts its own. The info strip is exactly ONE field (\"Ngày đánh giá\") for the same reason: it is the only datum the list row shows that the body does not.",
-        "LỘ TRÌNH BUG FIXED, carried by this pass rather than left in place. roadmapSteps() reads member.cycleSettings (which the old call site never passed) and probation.months (it passed only monthsLabel), so computeProbationSteps ran on all-undefined args: a 3-month row showed \"3 tháng\" in E1 beside a roadmap ending Ngày 53 with a check-in marker reading \"Không nhắc\" that contradicted the stored 7-day policy — a policy the SAME screen reads correctly for its own \"Ngày đánh giá\" column. Passing cycleSettings + months makes the roadmap agree with both. Two payload keys at what is now the only call site.",
-        "bodyOnly + placement:\"page\" are SEPARATE props on purpose. employee-detail-drawer's density resolver tests `placement === \"page\"` literally, so a third placement value would silently fall through to DRAWER density (1 column, sm avatar, E7/E8 folded into <details>) and look intentional. Density comes from placement; the container from bodyOnly."
+        "15/09/2026 — the body is a `Design in-progress` placeholder by direct instruction; the real detail surface is a separate task. The previous body (three-field info strip, five-milestone probation timeline, employee-detail-drawer in bodyOnly mode) was removed rather than feature-flagged: a disabled body still has to be read and maintained on every pass while describing a design that is being replaced. Git history holds it, and all three pieces are shared components still live on other screens.",
+        "15/09/2026 — `roles` widened from ['hr'] to include manager / high-level-manager / supervisor. The probation tab is now reachable from the Hiệu suất phòng ban routes (Trực tiếp quản lý and Ủy quyền đánh giá), whose roles are exactly those three; without this the shell refuses the screen and the row click opens nothing. Same class of defect as chi-tiet-nhan-vien's missing supervisor role earlier the same day.",
+        "15/09/2026 — this page is now the SINGLE destination for every probation person. The Hiệu suất phòng ban probation rows used to route to chi-tiet-nhan-vien via ctnvOpenMember; hpbProbationPane now overrides rowOnClick to tdtvOpenPersonPage, which keys by name on the same PB_TDTV_TARGET stash the quan-ly-chu-ky roster already writes."
       ],
       "renderSrc": "render/screens/theo-doi-thu-viec-chi-tiet.js",
       "level": "page",
@@ -12274,7 +12270,124 @@
         "Trục tab (Chu kỳ phòng ban / Chu kỳ chức danh) ghi ra PB_HPBD_SCOPE vì drill xuống chức danh đi qua setProtoScreen, tức vẽ lại màn và radio thuần CSS sẽ reset."
       ],
       "renderSrc": "render/screens/hieu-suat-phong-ban-chi-tiet.js",
-      "specSrc": "spec/screens/hieu-suat-phong-ban-chi-tiet.json"
+      "specSrc": "spec/screens/hieu-suat-phong-ban-chi-tiet.json",
+      "elements": [
+        {
+          "id": "app-shell",
+          "label": "Persistent app shell wrapping this screen. `activeScreenId` is the L1 route the visitor arrived from (truc-tiep / gian-tiep / uy-quyen), not this screen — L2 has no sidebar entry of its own, so the parent route stays lit while the visitor is one level down.",
+          "orgId": "header-footer-app",
+          "tokens": [
+            "--size-sidebar"
+          ],
+          "state": "default"
+        },
+        {
+          "id": "page-chrome",
+          "label": "Three-level breadcrumb (Hiệu suất phòng ban › <tuyến> › <mã - tên phòng>), a back affordance to that tuyến, the department code+name as title, the info strip below, and the two-tab underline strip (Chu kỳ phòng ban / Chu kỳ chức danh) in page-header's own `tabs` slot.",
+          "orgId": "page-header",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "cycle-chip",
+          "label": "Department cadence (Quý / Tháng) in the info strip's `Chu kỳ` field. The SAME atom renders the `Chu kỳ` column of the Chu kỳ chức danh table, where it carries the title's own cadence instead of the department's — the two can disagree, which is the whole point of that tab.",
+          "orgId": "cycle-tag",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "delegate-avatars",
+          "label": "The info strip's `Ủy quyền` field — the people delegated to evaluate on the line manager's behalf. Rendered only when the department has delegates; `nameWhenOne:false` so one delegate still reads as a stack, not as a name.",
+          "orgId": "avatar-stack",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "period-pills",
+          "label": "Two period pills per scope tab — the current cycle (Đánh giá) and the next (Thiết lập), e.g. Q3/2026 | Q4/2026 or T9/2026 | T10/2026. Pill variant. These radios are the reveal source: a `:has()` rule keyed on the checked pill shows its pane, so switching period costs no re-render.",
+          "orgId": "tabs",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "pane-heading",
+          "label": "H6 heading of the open period — `Đánh giá hiệu suất <kỳ>` or `Thiết lập mục tiêu <kỳ>` — over a caption counting how many people still owe that action. The count is derived per row from its OWN department's cycle, so a borrowed child-department manager is counted against the right contract.",
+          "orgId": "typography",
+          "tokens": [
+            "--font-size-caption",
+            "--line-height-caption",
+            "--text-muted"
+          ],
+          "state": "default"
+        },
+        {
+          "id": "roster-toolbar",
+          "label": "The row above the roster table: search on the left, the status filter beside it, the two Excel actions right-aligned. `fit:true` so the bar hugs the card rather than stretching.",
+          "orgId": "filter-toolbar",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "roster-search",
+          "label": "Free-text filter over the roster. Filters rows in place (`hpbdRosterFilter`) against a per-pane table class — every period of every scope tab is in the DOM at once, so an unscoped selector would filter the hidden panes too.",
+          "orgId": "input",
+          "tokens": [
+            "--size-search-max-w"
+          ],
+          "state": "default"
+        },
+        {
+          "id": "status-filter",
+          "label": "`HS-02` — the status filter carries ONLY the open mode's values: Chưa thiết lập / Chờ duyệt / Đã thiết lập on a Thiết lập period, Đang đánh giá / Hoàn thành on an Đánh giá period. Merging both sets would invite filtering on a status that cannot occur in that period.",
+          "orgId": "dropdown-select",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "export-action",
+          "label": "`Xuất file Excel` — downloads exactly the rows currently showing, so it honours the search and status filter rather than the whole roster.",
+          "orgId": "button",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "bulk-evaluate",
+          "label": "`Đánh giá hàng loạt bằng Excel`, on an Đánh giá period only — the P3 round trip writing Kết quả / Điểm / Nhận xét. Scope is asserted by the host in the same gesture that opens it (`hpbdBulkScope`): this pane's people, and the current cycle.",
+          "orgId": "bulk-evaluate-action",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "bulk-assign",
+          "label": "`Thiết lập hàng loạt bằng Excel`, on a Thiết lập period only — the P2 round trip writing Mục tiêu / Chỉ tiêu / Tỷ trọng, the mirror of what P3 locks. Same scope hook, but with the period step set to one so the commit lands on the NEXT cycle, which is what this period is about.",
+          "orgId": "bulk-assign-kpi-action",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "roster-table",
+          "label": "Five columns — Tên nhân viên / Trạng thái / NV đánh giá / QL đánh giá / Kết quả cuối cùng. Rows are the department's own members minus probation staff and minus the line manager, plus the line managers of its child departments. A row click opens that person's detail page. The SAME molecule renders the Chu kỳ chức danh list (Chức danh / Chu kỳ), whose rows open a title instead of a person.",
+          "orgId": "table",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "back-to-titles",
+          "label": "`Về danh sách chức danh` — tertiary, leading arrow, shown only inside a title's detail view. Tertiary rather than primary: the page already has its actions, and this is a way back, not a next step.",
+          "orgId": "button",
+          "tokens": [],
+          "state": "default"
+        },
+        {
+          "id": "no-dept-selected",
+          "label": "Reached with no department stashed (a direct load, or a sandbox reset). An explicit empty state plus an outline button back to the tuyến, rather than a blank page that looks broken.",
+          "orgId": "empty-state",
+          "tokens": [
+            "--space-md"
+          ],
+          "state": "default"
+        }
+      ]
     }
   ],
   "staleness": {
