@@ -3020,6 +3020,41 @@
       "renderSrc": "render/components/cycle-tag.js"
     },
     {
+      "id": "kpi-type-tag",
+      "name": "KPI Type Tag",
+      "renderFn": "renderCmpKpiTypeTag",
+      "scope": "local",
+      "level": "atom",
+      "dsMatch": null,
+      "specSrc": "spec/components/kpi-type-tag.json",
+      "properties": [
+        {
+          "id": "type",
+          "type": "enum",
+          "default": "DEPARTMENT",
+          "options": [
+            {
+              "label": "Công ty",
+              "value": "COMPANY"
+            },
+            {
+              "label": "Phòng ban",
+              "value": "DEPARTMENT"
+            },
+            {
+              "label": "Dự án",
+              "value": "PROJECT"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<span class=\"pb-kpitype pb-kpitype--department\" style=\"display:inline-flex;align-items:center;gap:var(--space-xs);padding:var(--space-3xs) var(--space-xs);border-radius:var(--radius-sm);background:var(--bg-grey-muted);color:var(--text-grey-hover)\"><svg></svg><span>Phòng ban</span></span>"
+      },
+      "renderSrc": "render/components/kpi-type-tag.js"
+    },
+    {
       "id": "card",
       "name": "Card",
       "renderFn": "renderCmpCard",
@@ -9792,6 +9827,32 @@
         }
       ],
       "specSrc": "spec/components/ai-chat-widget.json"
+    },
+    {
+      "id": "field-result",
+      "name": "Field Result (monthly detail)",
+      "level": "molecule",
+      "renderFn": "renderCmpFieldResult",
+      "renderSrc": "render/components/field-result.js",
+      "specSrc": "spec/components/field-result.json",
+      "properties": [
+        {
+          "id": "state",
+          "label": "Trạng thái",
+          "type": "select",
+          "default": "default",
+          "options": [
+            {
+              "label": "Gập",
+              "value": "default"
+            },
+            {
+              "label": "Mở",
+              "value": "open"
+            }
+          ]
+        }
+      ]
     }
   ],
   "screens": [
@@ -12185,6 +12246,32 @@
         "Bấm hàng: `phase:*` mở đúng tab của màn chi tiết; `goal:*` là chu kỳ đã chốt nên mở ở chế độ chỉ đọc (PB_HCP_OPEN + PB_HCP_VIEWONLY).",
         "Trạng thái dùng đúng bộ từ vựng 4 nấc của Nguyên tắc 7 — ở đây đọc được 3 nấc: Bản nháp, Đang đánh giá, Hoàn thành."
       ]
+    },
+    {
+      "id": "hieu-suat-phong-ban-chi-tiet",
+      "name": "Hiệu suất phòng ban · Chi tiết phòng ban",
+      "renderFn": "renderScreenHieuSuatPhongBanChiTiet",
+      "roles": [
+        "manager",
+        "high-level-manager",
+        "supervisor"
+      ],
+      "layout": {
+        "type": "stack",
+        "gap": 24,
+        "maxWidth": 1440,
+        "padding": 24
+      },
+      "logicNotes": [
+        "CẤP 2 của Hiệu suất phòng ban, dựng 14/09/2026 theo spec mục 05 và Figma 9318:98383 / 98463 / 98543 / 98588 / 98653. Vào bằng stash PB_HPB_DEPT_TARGET = {dept, scope} do hpbOpenDept ghi ở cấp 1; `scope` quyết định breadcrumb và đích nút back, vì cùng một phòng ban vào được từ cả ba tuyến.",
+        "HS-01 — chế độ suy từ kỳ: kỳ đang chạy = Đánh giá, kỳ kế tiếp = Thiết lập. Một luật cho cả nhịp Quý lẫn nhịp Tháng (chốt 14/09/2026). Chế độ chi phối tiêu đề kỳ, nhãn nút Excel và tập giá trị bộ lọc Trạng thái.",
+        "HS-02 — bộ lọc Trạng thái và chip trạng thái chỉ mang giá trị của chế độ đang chạy. Nhãn `Chờ duyệt` đặt ở call site, KHÔNG sửa status-tag: biến thể handoff-pending đọc 'Đang đánh giá' cho mọi màn khác.",
+        "HS-03 — đổi kỳ không mất bộ lọc: mỗi kỳ có ô tìm và ô trạng thái riêng, nằm trong pane của chính nó.",
+        "Tab Chu kỳ chức danh có hai cấp, điều hướng bằng stash PB_HPBD_TITLE_TARGET + vẽ lại, không phải :has() — số cặp (chức danh × nhịp) không cố định. Nhịp của dải chọn kỳ ở cấp 2 lấy của CHỨC DANH, không của phòng ban.",
+        "Trục tab (Chu kỳ phòng ban / Chu kỳ chức danh) ghi ra PB_HPBD_SCOPE vì drill xuống chức danh đi qua setProtoScreen, tức vẽ lại màn và radio thuần CSS sẽ reset."
+      ],
+      "renderSrc": "render/screens/hieu-suat-phong-ban-chi-tiet.js",
+      "specSrc": "spec/screens/hieu-suat-phong-ban-chi-tiet.json"
     }
   ],
   "staleness": {
