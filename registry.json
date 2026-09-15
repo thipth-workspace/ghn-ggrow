@@ -2263,7 +2263,8 @@
       "code": {
         "lang": "html",
         "snippet": "<div class=\"pb-objc\">…</div>"
-      }
+      },
+      "specSrc": "spec/components/objective-card.json"
     },
     {
       "id": "objective-list",
@@ -10232,7 +10233,8 @@
       "roles": [
         "hr",
         "manager",
-        "high-level-manager"
+        "high-level-manager",
+        "supervisor"
       ],
       "layout": {
         "type": "stack",
@@ -10288,7 +10290,8 @@
         "DỮ LIỆU DEMO ĐẶT TẠI MÀN, không ở store: frame vẽ một cây mục tiêu có mục tiêu con, mà cqKpiRowsFor chỉ sinh danh sách PHẲNG. Sửa hàm sinh đó sẽ kéo theo hai màn hiệu suất đang đọc nó. Trang không có đường lưu nào nên dữ liệu tại màn là đủ; khi có luồng lưu thật thì chuyển vào một slice của app-store, chỗ cần đổi là hàm demoGoals.",
         "`Hạn đánh giá` KHÔNG viết cứng '17/10/2026' như frame — suy từ cấu hình thật của đơn vị qua pbCyclePeriodAnchor, nên nó đi theo dữ liệu. `Tổng mục tiêu chính` đếm từ chính cây bên dưới, không thể lệch với danh sách hiển thị.",
         "Ba textarea của 'Nhận xét chung' được ĐẶT NHÃN, frame thì không. Ba ô không nhãn thì người đọc không biết ô nào là gì; nhãn suy từ vai trò trong luồng đánh giá và là điểm tự suy đoán.",
-        "Ngưỡng 900px trong @container là ngoại lệ R-PX đã ghi nhận: custom property không hợp lệ bên trong điều kiện truy vấn, đó là giới hạn trình duyệt. @container chứ không @media vì prototype render bên trong khung thiết bị là một DIV."
+        "Ngưỡng 900px trong @container là ngoại lệ R-PX đã ghi nhận: custom property không hợp lệ bên trong điều kiện truy vấn, đó là giới hạn trình duyệt. @container chứ không @media vì prototype render bên trong khung thiết bị là một DIV.",
+        "`supervisor` THÊM 15/09/2026. Tuyến `Ủy quyền đánh giá` tồn tại riêng cho vai này và dẫn thẳng tới trang chi tiết nhân viên, nhưng `roles` của màn lại thiếu nó — nên Đào Thị Phương Linh đi hết được cấp 1 và cấp 2 rồi bị chặn ở cấp 3, đo được là trang trả về màn khác. Cổng SỬA vẫn do `ctnvViewerManages` quyết (là trưởng phòng, hoặc được uỷ quyền chấm phòng đó), nên mở `roles` không phát thêm quyền cho ai ngoài phạm vi của họ."
       ],
       "renderSrc": "render/screens/chi-tiet-nhan-vien.js",
       "level": "page",
