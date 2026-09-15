@@ -1,4 +1,3 @@
-# Prototype quản lý hiệu suất
 
 Clickable prototype. Hai trang tĩnh, tự chứa.
 
