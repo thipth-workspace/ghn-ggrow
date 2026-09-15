@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- pb-shell v1.11.0 · rendered 2026-09-15T01:53:00Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-09-15T02:57:35Z -->
 <!--
   ============================================================================
   PRODUCT BUILDER — the rendered prototype shell
@@ -45042,10 +45042,14 @@ function hpbDeptTree(scoped, scopeType, all) {
       type: kids.length ? 'branch' : 'leaf',
       children: kids,
       searchText: label.toLowerCase(),
-      // ── DÒNG TỔ TIÊN KHÔNG BẤM ĐƯỢC ──────────────────────────────────────────────────────────
-      // Nó có mặt để vẽ ra hình cây, không phải để mở. Cho bấm là mời người dùng vào một phòng ban
-      // nằm NGOÀI quyền của họ — trang cấp 2 sẽ mở ra danh sách nhân viên mà họ không được chấm.
-      onClick: inScope ? hpbOpenDeptCall(orgNode.id, scopeType) : undefined,
+      // ── MỌI DÒNG ĐỀU MỞ ĐƯỢC CHI TIẾT, KỂ CẢ DÒNG CHA (chỉ thị 15/09/2026) ───────────────────
+      // Đảo quyết định 14/09/2026 vốn để dòng tổ tiên trơ ra làm ngữ cảnh. Lý do đảo: `Theo dõi chu
+      // kỳ` — màn được lấy làm chuẩn — cho bấm cả dòng nhánh lẫn dòng lá, và người dùng đọc một
+      // dòng có tên phòng ban là một thứ mở được, không phải một nhãn.
+      // Lo ngại cũ (mở ra một phòng ngoài quyền) không mất đi nhưng đã có chỗ xử đúng hơn: trang
+      // cấp 2 tự gác quyền ghi bằng `pbCanWriteDept`, nên vào được là XEM được, không phải sửa được.
+      // `inScope` vẫn giữ trong chữ ký — nó còn nói cho người đọc biết dòng nào thuộc phạm vi thật.
+      onClick: hpbOpenDeptCall(orgNode.id, scopeType),
       cells: {
         cycle: pbUse('cycle-tag', { cycle: cadenceOf(orgNode, d) }),
         // `nameWhenOne:false` — frame vẽ một đĩa trần khi chỉ có một người, không kèm tên; cột này
@@ -45076,16 +45080,19 @@ function hpbDeptTree(scoped, scopeType, all) {
   }
 
   var nodes = collect(typeof DEPARTMENTS !== 'undefined' ? DEPARTMENTS : []);
-  var expanded = [];
-  (function mark(ns) {
-    ns.forEach(function (n) { if (n.children.length) { expanded.push(n.id); mark(n.children); } });
-  })(nodes);
 
   var treeClass = 'hpb-l1-tree-' + scopeType;
   var table = pbUse('tree-table', {
     rootId: 'hpb-l1-' + scopeType,
     rows: nodes,
-    expandedIds: expanded,
+    // ── MỞ MÀN Ở TRẠNG THÁI GẬP (chỉ thị 15/09/2026) ─────────────────────────────────────────
+    // Danh sách rỗng, không phải danh sách mọi nhánh: chỉ các phòng ban cấp cao nhất hiện ở trạng
+    // thái nghỉ, mở sâu hơn là việc của người dùng. Cùng hành vi `Theo dõi chu kỳ` đã chốt
+    // ("in the company structure we only show the first level only"), và cùng lý do — một cây bốn
+    // cấp bung hết là bốn mươi dòng đổ xuống trước khi người đọc kịp biết mình cần nhánh nào.
+    // Chevron vẫn giữ cú bấm riêng: `table.js` R13 nâng mọi control trong dòng lên trên lớp phủ
+    // bấm-cả-dòng, và R21 cho nó trạng thái hover riêng — không cần chặn sự kiện bằng tay.
+    expandedIds: [],
     // KHÔNG `stickyHeader`: bật nó là `tree-table` bọc bảng trong vùng cuộn cao đúng mười hai dòng
     // (luật R4-03 của chính nó). Frame không vẽ thanh cuộn nào trong thẻ — thẻ cao theo nội dung và
     // cả TRANG mới là thứ cuộn. Đo được trước khi sửa: bảng cao 1332 bị cắt còn 480.
@@ -50244,10 +50251,14 @@ function hpbDeptTree(scoped, scopeType, all) {
       type: kids.length ? 'branch' : 'leaf',
       children: kids,
       searchText: label.toLowerCase(),
-      // ── DÒNG TỔ TIÊN KHÔNG BẤM ĐƯỢC ──────────────────────────────────────────────────────────
-      // Nó có mặt để vẽ ra hình cây, không phải để mở. Cho bấm là mời người dùng vào một phòng ban
-      // nằm NGOÀI quyền của họ — trang cấp 2 sẽ mở ra danh sách nhân viên mà họ không được chấm.
-      onClick: inScope ? hpbOpenDeptCall(orgNode.id, scopeType) : undefined,
+      // ── MỌI DÒNG ĐỀU MỞ ĐƯỢC CHI TIẾT, KỂ CẢ DÒNG CHA (chỉ thị 15/09/2026) ───────────────────
+      // Đảo quyết định 14/09/2026 vốn để dòng tổ tiên trơ ra làm ngữ cảnh. Lý do đảo: `Theo dõi chu
+      // kỳ` — màn được lấy làm chuẩn — cho bấm cả dòng nhánh lẫn dòng lá, và người dùng đọc một
+      // dòng có tên phòng ban là một thứ mở được, không phải một nhãn.
+      // Lo ngại cũ (mở ra một phòng ngoài quyền) không mất đi nhưng đã có chỗ xử đúng hơn: trang
+      // cấp 2 tự gác quyền ghi bằng `pbCanWriteDept`, nên vào được là XEM được, không phải sửa được.
+      // `inScope` vẫn giữ trong chữ ký — nó còn nói cho người đọc biết dòng nào thuộc phạm vi thật.
+      onClick: hpbOpenDeptCall(orgNode.id, scopeType),
       cells: {
         cycle: pbUse('cycle-tag', { cycle: cadenceOf(orgNode, d) }),
         // `nameWhenOne:false` — frame vẽ một đĩa trần khi chỉ có một người, không kèm tên; cột này
@@ -50278,16 +50289,19 @@ function hpbDeptTree(scoped, scopeType, all) {
   }
 
   var nodes = collect(typeof DEPARTMENTS !== 'undefined' ? DEPARTMENTS : []);
-  var expanded = [];
-  (function mark(ns) {
-    ns.forEach(function (n) { if (n.children.length) { expanded.push(n.id); mark(n.children); } });
-  })(nodes);
 
   var treeClass = 'hpb-l1-tree-' + scopeType;
   var table = pbUse('tree-table', {
     rootId: 'hpb-l1-' + scopeType,
     rows: nodes,
-    expandedIds: expanded,
+    // ── MỞ MÀN Ở TRẠNG THÁI GẬP (chỉ thị 15/09/2026) ─────────────────────────────────────────
+    // Danh sách rỗng, không phải danh sách mọi nhánh: chỉ các phòng ban cấp cao nhất hiện ở trạng
+    // thái nghỉ, mở sâu hơn là việc của người dùng. Cùng hành vi `Theo dõi chu kỳ` đã chốt
+    // ("in the company structure we only show the first level only"), và cùng lý do — một cây bốn
+    // cấp bung hết là bốn mươi dòng đổ xuống trước khi người đọc kịp biết mình cần nhánh nào.
+    // Chevron vẫn giữ cú bấm riêng: `table.js` R13 nâng mọi control trong dòng lên trên lớp phủ
+    // bấm-cả-dòng, và R21 cho nó trạng thái hover riêng — không cần chặn sự kiện bằng tay.
+    expandedIds: [],
     // KHÔNG `stickyHeader`: bật nó là `tree-table` bọc bảng trong vùng cuộn cao đúng mười hai dòng
     // (luật R4-03 của chính nó). Frame không vẽ thanh cuộn nào trong thẻ — thẻ cao theo nội dung và
     // cả TRANG mới là thứ cuộn. Đo được trước khi sửa: bảng cao 1332 bị cắt còn 480.
@@ -55446,10 +55460,14 @@ function hpbDeptTree(scoped, scopeType, all) {
       type: kids.length ? 'branch' : 'leaf',
       children: kids,
       searchText: label.toLowerCase(),
-      // ── DÒNG TỔ TIÊN KHÔNG BẤM ĐƯỢC ──────────────────────────────────────────────────────────
-      // Nó có mặt để vẽ ra hình cây, không phải để mở. Cho bấm là mời người dùng vào một phòng ban
-      // nằm NGOÀI quyền của họ — trang cấp 2 sẽ mở ra danh sách nhân viên mà họ không được chấm.
-      onClick: inScope ? hpbOpenDeptCall(orgNode.id, scopeType) : undefined,
+      // ── MỌI DÒNG ĐỀU MỞ ĐƯỢC CHI TIẾT, KỂ CẢ DÒNG CHA (chỉ thị 15/09/2026) ───────────────────
+      // Đảo quyết định 14/09/2026 vốn để dòng tổ tiên trơ ra làm ngữ cảnh. Lý do đảo: `Theo dõi chu
+      // kỳ` — màn được lấy làm chuẩn — cho bấm cả dòng nhánh lẫn dòng lá, và người dùng đọc một
+      // dòng có tên phòng ban là một thứ mở được, không phải một nhãn.
+      // Lo ngại cũ (mở ra một phòng ngoài quyền) không mất đi nhưng đã có chỗ xử đúng hơn: trang
+      // cấp 2 tự gác quyền ghi bằng `pbCanWriteDept`, nên vào được là XEM được, không phải sửa được.
+      // `inScope` vẫn giữ trong chữ ký — nó còn nói cho người đọc biết dòng nào thuộc phạm vi thật.
+      onClick: hpbOpenDeptCall(orgNode.id, scopeType),
       cells: {
         cycle: pbUse('cycle-tag', { cycle: cadenceOf(orgNode, d) }),
         // `nameWhenOne:false` — frame vẽ một đĩa trần khi chỉ có một người, không kèm tên; cột này
@@ -55480,16 +55498,19 @@ function hpbDeptTree(scoped, scopeType, all) {
   }
 
   var nodes = collect(typeof DEPARTMENTS !== 'undefined' ? DEPARTMENTS : []);
-  var expanded = [];
-  (function mark(ns) {
-    ns.forEach(function (n) { if (n.children.length) { expanded.push(n.id); mark(n.children); } });
-  })(nodes);
 
   var treeClass = 'hpb-l1-tree-' + scopeType;
   var table = pbUse('tree-table', {
     rootId: 'hpb-l1-' + scopeType,
     rows: nodes,
-    expandedIds: expanded,
+    // ── MỞ MÀN Ở TRẠNG THÁI GẬP (chỉ thị 15/09/2026) ─────────────────────────────────────────
+    // Danh sách rỗng, không phải danh sách mọi nhánh: chỉ các phòng ban cấp cao nhất hiện ở trạng
+    // thái nghỉ, mở sâu hơn là việc của người dùng. Cùng hành vi `Theo dõi chu kỳ` đã chốt
+    // ("in the company structure we only show the first level only"), và cùng lý do — một cây bốn
+    // cấp bung hết là bốn mươi dòng đổ xuống trước khi người đọc kịp biết mình cần nhánh nào.
+    // Chevron vẫn giữ cú bấm riêng: `table.js` R13 nâng mọi control trong dòng lên trên lớp phủ
+    // bấm-cả-dòng, và R21 cho nó trạng thái hover riêng — không cần chặn sự kiện bằng tay.
+    expandedIds: [],
     // KHÔNG `stickyHeader`: bật nó là `tree-table` bọc bảng trong vùng cuộn cao đúng mười hai dòng
     // (luật R4-03 của chính nó). Frame không vẽ thanh cuộn nào trong thẻ — thẻ cao theo nội dung và
     // cả TRANG mới là thứ cuộn. Đo được trước khi sửa: bảng cao 1332 bị cắt còn 480.
