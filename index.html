@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- pb-shell v1.11.0 · rendered 2026-09-15T02:57:35Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-09-15T09:37:59Z -->
 <!--
   ============================================================================
   PRODUCT BUILDER — the rendered prototype shell
@@ -3074,10 +3074,16 @@ var GG_PROBATION_POLICY = { days: 60, setupDay: 3, checkinEvery: 7, reviewDay: 5
 /* ---- Cây phòng ban + nhân sự ------------------------------------------- */
 var GG_DEPTS = [
   { id:"dept-product", name:"Product", parentId:null, cadence:"quarter", fset:"Q-B",
-    titleRules:[],
+    // ── GIẢ LẬP CHU KỲ CHỨC DANH CHO PRODUCT (chỉ thị 15/09/2026) ──────────────────────────────
+    // "Trong scope của prototype, giúp tôi giả lập cho Lê Bá Quý vào xem chu kỳ chức danh chỉ thấy
+    // chức danh Quản lý sản phẩm và Quản lý dự án." Hai luật mới lọc danh sách chức danh theo
+    // `isOverride`, mà Product trước đó KHÔNG có luật chức danh nào — nên tab sẽ rỗng nếu không
+    // thêm hai dòng này. Đây là dữ liệu mô phỏng do chủ sản phẩm yêu cầu, không phải suy diễn.
+    titleRules:[{title:"Quản lý sản phẩm", cycles:[{cadence:"quarter", fset:"Q-B"}]},
+                {title:"Quản lý dự án", cycles:[{cadence:"quarter", fset:"Q-B"}]}],
     employees:[
     {id:"nv-le-ba-quy", name:"Lê Bá Quý", title:"Giám đốc sản phẩm", managerId:null, kind:'official', cycles:[{cadence:"quarter", fset:"Q-B", status:"handoff-pending", statusLabel:"Đang đánh giá"}]},
-    {id:"nv-nguyen-thi-hong-van", name:"Nguyễn Thị Hồng Vân", title:"Quản lý dự án", managerId:"nv-le-ba-quy", kind:'official', cycles:[{cadence:"quarter", fset:"Q-B", status:"handoff-goals-set", statusLabel:"Đã thiết lập"}]},
+    {id:"nv-nguyen-thi-hong-van", name:"Nguyễn Thị Hồng Vân", title:"Quản lý sản phẩm", managerId:"nv-le-ba-quy", kind:'official', cycles:[{cadence:"quarter", fset:"Q-B", status:"handoff-goals-set", statusLabel:"Đã thiết lập"}]},
     {id:"nv-nguyen-van-khoa", name:"Nguyễn Văn Khoa", title:"Quản lý dự án", managerId:"nv-le-ba-quy", kind:'official', cycles:[{cadence:"quarter", fset:"Q-B", status:"handoff-pending", statusLabel:"Đang đánh giá"}]},
     {id:"nv-pham-thi-hai-ngan", name:"Phạm Thị Hải Ngân", title:"Quản lý dự án", managerId:"nv-le-ba-quy", kind:'official', cycles:[{cadence:"quarter", fset:"Q-B", status:"handoff-approved", statusLabel:"Hoàn thành"}]},
     {id:"nv-pham-trong-hung", name:"Phạm Trọng Hưng", title:"Quản lý dự án", managerId:"nv-le-ba-quy", kind:'official', cycles:[{cadence:"quarter", fset:"Q-B", status:"handoff-not-set", statusLabel:"Chưa thiết lập"}]}
@@ -19631,7 +19637,11 @@ function renderCmpTreeTable(props) {
     flush: true,
     stickyHeader: !!props.stickyHeader,
     frozenCols: 1,
-    maxHeight: props.maxHeight
+    maxHeight: props.maxHeight,
+    // `emptyText` chuyển tiếp (thêm 15/09/2026): cây rỗng trước đây rơi về câu mặc định của atom
+    // bảng, "Không có chu kỳ phù hợp." — đúng cho màn theo dõi chu kỳ, sai cho mọi cây khác. Caller
+    // nào không truyền thì vẫn nhận đúng câu cũ, nên đây là phần cộng thêm.
+    emptyText: props.emptyText
   });
 
   return '<style>' + treeStyleRules + '</style>'
@@ -20307,6 +20317,15 @@ pbAppRegisterSeed('feedback', pbAppSeedFeedback);
 //   · mỗi cycle mang `fset` thay cho `selfDur`/`managerDur`.
 function pbAppSeedTitleCycleOverrides() {
   return [
+    // Hai mục Product — giả lập 15/09/2026 theo chỉ thị, khớp `titleRules` của `GG_DEPTS`. Màn
+    // `Cài đặt chu kỳ` đọc bảng này, còn `ggTitleRows` đọc `GG_DEPTS`; để lệch là hai màn nói hai
+    // chuyện về cùng một cấu hình.
+    { deptId:"dept-product", deptName:"Product", title:"Quản lý sản phẩm", cycles:[
+        { cadence:"quarter", fset:"Q-B", selfReminderDays:'3', managerReminderDays:'3' },
+    ]},
+    { deptId:"dept-product", deptName:"Product", title:"Quản lý dự án", cycles:[
+        { cadence:"quarter", fset:"Q-B", selfReminderDays:'3', managerReminderDays:'3' },
+    ]},
     { deptId:"dept-design", deptName:"Design", title:"Quản lý thiết kế", cycles:[
         { cadence:"quarter", fset:"Q-A", selfReminderDays:'3', managerReminderDays:'3' },
         { cadence:"month", fset:"M-A", selfReminderDays:'3', managerReminderDays:'3' },
@@ -21274,6 +21293,27 @@ function pbCanEditSet(set, phaseKey, role) {
   // viên gửi bài — chặn mất `BR-13`.
   if (role === 'manager') { return st === 'manager-review' || st === 'self-review'; }
   return false;
+}
+
+// ══ GIẢ LẬP QUYỀN SỬA — BỎ TIỀN ĐỀ BÀN GIAO, GIỮ CHỐT CUỐI (15/09/2026) ════════════════════════
+// Chỉ thị hai đợt liên tiếp: "giả lập trang phê duyệt Thiết lập mục tiêu sang edit mode" rồi
+// "chuyển hết phần đánh giá thành edit mode. Phần view mode tôi sẽ yêu cầu lại sau."
+//
+// `pbCanEditSet` ngay trên là LUẬT THẬT và không bị sửa một dòng: nó gác theo TRẠNG THÁI BÀN GIAO —
+// pha Thiết lập chỉ mở cho quản lý khi bộ ở `pending-approval`, pha Đánh giá chỉ mở cho nhân viên
+// khi ở `self-review`. Trong prototype chưa có luồng gửi thật, nên phần lớn màn mở ra ở chế độ
+// chỉ-đọc và hình dạng edit không có đường nào xem được.
+//
+// Hàm này bỏ ĐÚNG tiền đề đó và không bỏ gì khác:
+//   · bộ đã `approved` / `closed` VẪN KHOÁ. Hộp thoại của chính hai màn hứa "sau khi chốt, toàn bộ
+//     màn chuyển sang chỉ đọc" — mở luôn trạng thái đó là để sản phẩm tự nói ngược lại mình.
+//   · cổng VAI nằm ở phía người gọi và không đi qua đây: `chi-tiet-nhan-vien` vẫn hỏi `roleCanEdit`
+//     trước, nên HR vào vẫn chỉ đọc.
+// `role` giữ trong chữ ký để chữ ký khớp `pbCanEditSet` — đổi qua lại chỉ là đổi tên hàm, và ngày
+// gỡ giả lập thì thay ngược lại cũng vậy.
+function pbCanEditSetSim(set, phaseKey, role) {
+  var st = (set && set.phase) || null;
+  return !(st === 'closed' || st === 'approved');
 }
 
 // ══ THANG MÀU KẾT QUẢ — MỘT HÀM DUY NHẤT (spec §7.6, 2026-09-10) ═══════════════════════════════
@@ -34406,8 +34446,22 @@ function renderScreenChiTietNhanVien(props) {
   // Khớp với bộ giải quyền đã có: `pbResolveBase` cho `high-level-manager` ra bucket `manager` trên
   // quan hệ trực tiếp, tức nó đã coi vai này là quản lý của những người đó từ trước.
   var HPB_MANAGER_ROLES = ['manager', 'high-level-manager'];
+  // ── VAI NGOÀI DANH SÁCH: MỞ THEO QUAN HỆ QUẢN LÝ, KHÔNG MỞ TOÀN BỘ (siết 15/09/2026) ────────
+  // Bản trước bắc cầu cổng vai bằng một cờ `true` — đúng chữ "tạm không dùng view mode" nhưng rộng
+  // quá: vai `hr` sửa được trang của BẤT KỲ ai trong công ty. Chỉ thị tiếp theo siết lại: "chỉ cho
+  // HR edit người thuộc phòng mình quản lý."
+  //
+  // Nên vế thứ hai không còn là một cờ mà là một PHÉP HỎI THẬT: người đang xem có quản lý người này
+  // không. `ctnvViewerManages` trả lời bằng đúng quan hệ mà bảng nhân viên cấp 2 đang dùng
+  // (`hpbdStaffOf`) — nhân viên của phòng mình làm trưởng, cộng trưởng của các phòng con. Hai chỗ
+  // dùng chung một định nghĩa nên không thể lệch: ai hiện trong bảng của bạn thì bạn chấm được,
+  // ai không hiện thì không.
+  //
+  // `HPB_MANAGER_ROLES` giữ nguyên và vẫn là vế đầu — `manager` / `high-level-manager` không đổi
+  // hành vi so với trước pass này.
   var roleCanEdit = forced ? (forced !== 'view')
-    : (HPB_MANAGER_ROLES.indexOf(typeof pbActiveRole === 'function' ? pbActiveRole() : 'hr') !== -1);
+    : (HPB_MANAGER_ROLES.indexOf(typeof pbActiveRole === 'function' ? pbActiveRole() : 'hr') !== -1
+        || ctnvViewerManages(member && member.id));
   var editable = roleCanEdit;
 
   function fieldValue(text) {
@@ -34486,7 +34540,12 @@ function renderScreenChiTietNhanVien(props) {
   // chỉ đọc vai, nên quản lý chấm được ngay cả khi nhân viên chưa gửi bài, và bước 7 của flow test
   // 2 ("hiển thị đúng điểm nhân viên đã gửi ở Flow 1") không có gì bảo đảm nó đã xảy ra.
   // `PB_CTNV_MODE` vẫn ghi đè được cả hai nửa — nó là cửa hậu để dựng ảnh chụp màn hình.
-  if (!forced) { editable = roleCanEdit && pbCanEditSet(goalSet, phaseKey, 'manager'); }
+  // ── CẢ HAI PHA MỞ THẲNG Ở EDIT MODE (giả lập, chỉ thị 15/09/2026) ───────────────────────────
+  // `pbCanEditSetSim` thay `pbCanEditSet` — xem ghi chú đầy đủ ở app-store.js, cạnh luật thật.
+  // Tóm tắt: bỏ tiền đề bàn giao, giữ nguyên khoá cho bộ đã duyệt / đã chốt. Cổng VAI vẫn ở đây
+  // (`roleCanEdit`), nên HR vào vẫn chỉ đọc.
+  // Gỡ giả lập = đổi tên hàm về `pbCanEditSet`.
+  if (!forced) { editable = roleCanEdit && pbCanEditSetSim(goalSet, phaseKey, 'manager'); }
   // ── BĂNG 2 (bốn ô thống kê) VÀ BĂNG 3 (dải 4 pha) ĐÃ GỠ (2026-09-11, chỉ thị) ───────────────
   // Gỡ hẳn chứ không ẩn, ghi lại vì cả hai từng là khối lớn chiếm giữa trang:
   //   · BĂNG 2 — `stat-tile-row` bốn ô: Trạng thái · Tổng mục tiêu chính · Tổng tỷ trọng · Hạn đánh
@@ -34848,6 +34907,27 @@ function ctnvSetFor(memberId, phaseKey, member) {
 // Hiệu suất phòng ban vào một nhân viên LÁ thì nhánh đầu trả null → `ctnvCtx` trả null → MỌI
 // handler (thêm/xoá/lưu/chốt) im lặng không làm gì, không báo lỗi. Một chỗ giải mã thì không thể
 // lệch được nữa.
+// ── NGƯỜI ĐANG XEM CÓ QUẢN LÝ NGƯỜI NÀY KHÔNG (15/09/2026) ───────────────────────────────────
+// Dùng LẠI `hpbdStaffOf` — bộ nhân sự mà trang chi tiết phòng ban dựng bảng từ đó — chứ không viết
+// một phép đọc thứ hai. Định nghĩa "người tôi quản lý" phải là MỘT: nhân viên của phòng tôi làm
+// trưởng (trừ chính tôi), cộng trưởng của các phòng ban con. Viết lại ở đây là mở đường cho hai
+// câu trả lời khác nhau cho cùng một câu hỏi — bảng liệt kê một người mà trang của họ lại chỉ đọc.
+//
+// Đối chiếu trưởng phòng bằng TÊN vì `lineManager` là một chuỗi tên, không phải khoá ngoại — cùng
+// phép đối chiếu mà `hpbdStaffOf` và `hpbScopeDepts` đã dùng.
+// Một người có thể làm trưởng nhiều phòng, nên quét hết chứ không dừng ở phòng đầu tiên.
+function ctnvViewerManages(memberId) {
+  var me = null;
+  try { me = (PB_ME && PB_ME.name) || null; } catch (e) { me = null; }
+  if (!me || !memberId || typeof hpbdStaffOf !== 'function') { return false; }
+  var hit = false;
+  (pbAppStore().manager || []).forEach(function (d) {
+    if (hit || d.lineManager !== me) { return; }
+    hpbdStaffOf(d).forEach(function (e) { if (e.m && e.m.id === memberId) { hit = true; } });
+  });
+  return hit;
+}
+
 function ctnvTarget() {
   var stash = (typeof window !== 'undefined' && window.PB_CQ_MEMBER_TARGET) || null;
   return cqMemberTarget()
@@ -36171,7 +36251,11 @@ function renderScreenHieuSuatCuaToi(props) {
     // Quyền edit = ROLE + PHASE (spec mục 5). Vai ở đây luôn là 'employee' — đây là màn của chính
     // người đăng nhập — nhưng PHA thì đổi: gửi bài xong là hết lượt sửa, và đó chính là điều mà
     // bước 13 của flow test 1 kiểm ("toàn bộ cột nhân viên chuyển read-only").
-    var canEdit = pbCanEditSet(set, phaseKey, 'employee');
+    // ── PHA ĐÁNH GIÁ MỞ THẲNG Ở EDIT MODE (giả lập, chỉ thị 15/09/2026) ───────────────────────
+    // Chỉ nới pha ĐÁNH GIÁ. Pha Thiết lập giữ luật thật: ở đó `pbCanEditSet` chỉ đòi bộ ở `draft`,
+    // mà dữ liệu demo sinh đúng `draft`, nên nó vốn đã mở — nới thêm chỉ tổ cho nhân viên sửa một
+    // bộ họ đã gửi đi duyệt.
+    var canEdit = hcpCanEdit(set, phaseKey);
 
     // Đếm mục tiêu — hai câu khác nhau theo pha, lấy nguyên văn frame. Pha Đánh giá nói VIỆC CÒN
     // PHẢI LÀM ("cần đánh giá"), pha Thiết lập chỉ nói TRẠNG THÁI ("đang có").
@@ -36338,7 +36422,9 @@ function renderScreenHieuSuatCuaToi(props) {
       statusText: wmsg ? wmsg.text : null,
       onStatusClick: "pbObjJumpToScope('hcp-" + phaseKey + "')",
       cancelTo: 'hieu-suat-cua-toi',
-      hidden: emptyReview || !pbCanEditSet(hcpSetFor(phaseKey), phaseKey, 'employee'),
+      // Cùng phép kiểm với `canEdit` ở trên — hai chỗ lệch nhau nghĩa là form gõ được mà thanh
+      // hành động biến mất, hoặc ngược lại.
+      hidden: emptyReview || !hcpCanEdit(hcpSetFor(phaseKey), phaseKey),
       padding: 'var(--space-md)',
       onSaveDraft: "hcpSave('" + phaseKey + "',this)",
       onSubmit: "hcpSubmit('" + phaseKey + "',this)"
@@ -36974,6 +37060,14 @@ function hcmSubDelete(goalId, rid, sid, inst, btn) {
 // Tiền tố id KHÁC NHAU GIỮA HAI PHA, và đó không phải chuyện thẩm mỹ: `pbKpiReadObjectiveCards`
 // quét theo tiền tố, nên hai pha dùng chung tiền tố thì bộ đọc của pha này sẽ vơ luôn ô của pha kia
 // nếu có lúc nào cả hai cùng nằm trong DOM. Rẻ để tách, đắt để phát hiện khi đã lẫn.
+// Quyền gõ của NỬA NHÂN VIÊN. Một chỗ duy nhất, vì màn này hỏi nó ở hai nơi (form và thanh hành
+// động) và hai nơi đó không được phép trả lời khác nhau.
+function hcpCanEdit(set, phaseKey) {
+  return (phaseKey === 'setup')
+    ? pbCanEditSet(set, phaseKey, 'employee')
+    : pbCanEditSetSim(set, phaseKey, 'employee');
+}
+
 function hcpPrefix(phaseKey) { return 'hcp-' + phaseKey + '-'; }
 
 // PHA ĐANG XEM. Stash chứ không phải trạng thái DOM: mỗi lần ghi store là trang vẽ lại, nên đọc lại
@@ -43363,7 +43457,10 @@ function hpbSeedDepartments() {
       kpiCriteria:[{ criteria:"Tỷ lệ tính năng bàn giao đúng hạn", weight:60 }, { criteria:"Chất lượng tài liệu đặc tả", weight:40 }],
       members:[
         { id:"nv-le-ba-quy", code:"6487205", name:"Lê Bá Quý", title:"Giám đốc sản phẩm", joinedAt:null, finalScore:null, status:"Chưa thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'75%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'80%', status:'completed' }] },
-        { id:"nv-nguyen-thi-hong-van", code:"6453061", name:"Nguyễn Thị Hồng Vân", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Đã thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'80%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'85%', status:'completed' }] },
+        // `Quản lý sản phẩm` — giả lập 15/09/2026 theo chỉ thị, đồng bộ với `GG_DEPTS`. Hai nguồn
+        // phải nói cùng một chức danh: danh sách chức danh đọc `GG_DEPTS`, còn bảng nhân viên đọc
+        // chỗ này, và luật mới giao hai tập đó với nhau.
+        { id:"nv-nguyen-thi-hong-van", code:"6453061", name:"Nguyễn Thị Hồng Vân", title:"Quản lý sản phẩm", joinedAt:null, finalScore:null, status:"Đã thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'80%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'85%', status:'completed' }] },
         { id:"nv-nguyen-van-khoa", code:"6299036", name:"Nguyễn Văn Khoa", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Đang đánh giá", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'85%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'90%', status:'completed' }] },
         { id:"nv-pham-thi-hai-ngan", code:"8393718", name:"Phạm Thị Hải Ngân", title:"Quản lý dự án", joinedAt:null, finalScore:"93%", status:"Hoàn thành", comments:[{ author:"Lê Bá Quý", role:'Quản lý trực tiếp', when:'2 ngày trước', text:"Kết quả đạt kỳ vọng, tiếp tục duy trì trong chu kỳ tới." }], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'90%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'95%', status:'completed' }] },
         { id:"nv-pham-trong-hung", code:"5700389", name:"Phạm Trọng Hưng", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Chưa thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'95%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'74%', status:'completed' }] }
@@ -44122,6 +44219,24 @@ function hpbNextCycleOf(d) {
 // nêu đích danh phạm vi của một persona, đúng phạm vi người dùng đã chốt — ai không có trong bảng
 // thì rơi về hành vi cũ, nên 4 persona còn lại không đổi một pixel.
 var HPB_ACTOR_SCOPES = {
+  // ── Bùi Gia Trí (`hr`, và là ADMIN) — chốt 15/09/2026 ──────────────────────────────────────
+  // Vai admin thấy cả ba tuyến trong sidebar, nhưng trước pass này nó KHÔNG có mục khai báo ở đây
+  // nên rơi vào nhánh dự phòng `d.managementType === scopeType` — tuyến `Trực tiếp quản lý` trả về
+  // 31 phòng ban lá rải khắp công ty, thứ không ai thật sự quản lý trực tiếp.
+  // Chỉ thị 15/09: vai này mô phỏng một HR có phòng của mình. Dữ liệu sẵn đã đỡ: anh là
+  // `lineManager` của `Nhân sự` (260400), nên khai báo dưới đây chỉ nói lại sự thật đã có trong cây
+  // tổ chức, không bịa thêm quan hệ nào.
+  //
+  // `below` KHAI CẢ NĂM phòng con theo cây tổ chức, dù hai phòng cuối chưa có bản ghi hiệu suất
+  // trong store (`Phòng Tuyển Dụng` 260404 và `Phòng Đào Tạo` 260405). Bộ lọc tự bỏ chúng, nên bảng
+  // hiện ba dòng — và ngày nào seed bổ sung hai phòng đó thì chúng hiện ra mà không phải sửa ở đây.
+  // Khai đúng ba phòng đang có sẽ biến một thiếu sót DỮ LIỆU thành một giới hạn được viết cứng.
+  'nv-bui-gia-tri': {
+    directDepts: ['dept-nhan-su'],
+    below: ['dept-c-b', 'dept-total-reward', 'dept-hrbp',
+            'dept-phong-tuyen-dung', 'dept-phong-dao-tao'],
+    delegated: []
+  },
   // Đào Thị Phương Linh (`supervisor`, HRBP) — chốt 13/09/2026.
   // Chỉ có uỷ quyền, không quản lý trực tiếp ai và không có phòng ban bên dưới. Hai tuyến kia đã
   // bị gác ở tầng vai (`roles` của sidebar + registry), nên hai mảng rỗng này là lớp thứ hai — dữ
@@ -44139,14 +44254,20 @@ var HPB_ACTOR_SCOPES = {
     excludeSelf: true,  // trưởng phòng không nằm trong danh sách cấp dưới của chính mình
     splitProbation: true
   },
-  // Lê Bá Quý — chốt 13/09/2026.
+  // Lê Bá Quý — chốt 13/09/2026, sửa tuyến `Trực tiếp quản lý` 15/09/2026.
   'nv-le-ba-quy': {
+    // ── `Trực tiếp quản lý` = PHÒNG ÔNG LÀM TRƯỞNG, không phải các phòng bên dưới ──────────────
+    // Bản 13/09 đọc tuyến này là "trưởng của 5 phòng con" và dựng nó bằng `directIsLeadOfBelow`:
+    // vẫn là 5 phòng con, chỉ thu danh sách người về mỗi trưởng phòng. Chỉ thị 15/09 định nghĩa
+    // lại — tuyến này trả về đúng PHÒNG mà người đó trực tiếp quản lý, tức Product.
+    // `directIsLeadOfBelow` GỠ theo: nó tồn tại chỉ để phục vụ cách đọc cũ, và giữ lại một nhánh
+    // không ai đi là để dành một cái bẫy cho lần sửa sau.
+    directDepts: ['dept-product'],
     // Tuyến `Phòng ban bên dưới`: 5 phòng con của Product.
     below: ['dept-design', 'dept-hr-workforce', 'dept-customer-management',
             'dept-pickup-delivery', 'dept-warehouse-network'],
-    // Tuyến `Trực tiếp quản lý`: trưởng của đúng 5 phòng đó, không phải toàn bộ nhân sự của chúng.
-    directIsLeadOfBelow: true,
-    // Tuyến `Ủy quyền đánh giá`: TẠM THỜI KHÔNG CÓ phòng nào.
+    // Tuyến `Ủy quyền đánh giá`: TẠM THỜI KHÔNG CÓ phòng nào — sidebar đã gác tuyến này ở tầng vai
+    // (`roles: 'supervisor'`), nên mảng rỗng ở đây là lớp thứ hai nói cùng một chuyện.
     delegated: []
   }
 };
@@ -44172,23 +44293,17 @@ function hpbScopeDepts(all, scopeType) {
   if (scopeType === 'truc-tiep' && plan.directDepts) {
     return hpbDirectDepts(all, plan);
   }
+  // ── `directIsLeadOfBelow` GỠ 15/09/2026 ─────────────────────────────────────────────────────
+  // Nhánh cũ ở đây trả về các phòng BÊN DƯỚI cho tuyến `Trực tiếp quản lý`, với `members` thu về
+  // đúng người trưởng phòng. Không persona nào còn khai cờ đó sau khi Lê Bá Quý chuyển sang
+  // `directDepts: ['dept-product']`, nên nhánh này không còn đường tới. Xoá thay vì để lại: một
+  // nhánh chết mang theo cả một phép đọc "trực tiếp quản lý" đã bị thay, đọc lại sẽ gây hiểu nhầm.
   var below = plan.below || [];
-  var chosen = all.filter(function (d) { return below.indexOf(d.id) !== -1; });
-  if (scopeType !== 'truc-tiep') { return chosen; }
-  if (!plan.directIsLeadOfBelow) { return chosen; }
-  // BẢN SAO NÔNG, không sửa bản trong store: chỉ `members` bị thu hẹp về đúng người trưởng phòng.
-  // Đã soát: không chỗ nào trong màn này đột biến `d.members`, và mọi handler ghi dữ liệu đều tra
-  // lại phòng ban từ store theo id chứ không dùng đối tượng đang render.
-  return chosen.map(function (d) {
-    var copy = {};
-    for (var k in d) { if (Object.prototype.hasOwnProperty.call(d, k)) { copy[k] = d[k]; } }
-    copy.members = (d.members || []).filter(function (m) { return m.name === d.lineManager; });
-    return copy;
-  });
+  return all.filter(function (d) { return below.indexOf(d.id) !== -1; });
 }
 
-// Phạm vi "trực tiếp quản lý" dạng CHÍNH PHÒNG CỦA MÌNH — dùng cho trưởng phòng, khác với dạng
-// "trưởng của các phòng bên dưới" mà `directIsLeadOfBelow` lo.
+// Phạm vi "trực tiếp quản lý" = CHÍNH PHÒNG NGƯỜI ĐÓ LÀM TRƯỞNG. Từ 15/09/2026 đây là cách đọc
+// DUY NHẤT của tuyến này, cho cả `manager` lẫn `high-level-manager`.
 //
 // TÁCH THỬ VIỆC THEO CỜ `kind` CỦA TỪNG NGƯỜI, không theo `performanceType` của phòng ban.
 // Bảng "Thử việc" của màn này lọc `d.performanceType === 'probation'`, mà **không phòng ban nào
@@ -45019,11 +45134,6 @@ function hpbOpenDeptCall(deptId, scopeType) {
 function hpbDeptTree(scoped, scopeType, all) {
   var byId = {};
   scoped.forEach(function (d) { byId[d.id] = d; });
-  // Bảng tra TOÀN BỘ phòng ban, không chỉ phòng trong phạm vi: dòng tổ tiên cũng cần nhịp chu kỳ
-  // thật của nó để điền cột `Chu kỳ`, mà nó thì không nằm trong `scoped`.
-  var anyById = {};
-  (all || []).forEach(function (d) { anyById[d.id] = d; });
-
   // Nhịp của một node: ưu tiên store của màn hiệu suất (nhãn `Quý` / `Tháng`), rơi về cấu hình trên
   // cây tổ chức (khoá `quarter` / `month`) cho node mà store không có bản ghi.
   function cadenceOf(orgNode, d) {
@@ -45061,20 +45171,25 @@ function hpbDeptTree(scoped, scopeType, all) {
     };
   }
 
-  // ── GIỮ ĐƯỜNG ĐI TỪ GỐC XUỐNG (chỉ thị 14/09/2026) ──────────────────────────────────────────
-  // Bản trước BỎ dòng của phòng ban ngoài phạm vi và nhấc con nó lên — ra một danh sách phẳng,
-  // đúng thứ chủ sản phẩm chỉ ra. Nay giữ nguyên đường đi, "tương tự tab Theo dõi chu kỳ":
-  //   · phòng trong phạm vi           → dòng bấm được
-  //   · phòng ngoài phạm vi NHƯNG có con cháu trong phạm vi → dòng ngữ cảnh, không bấm được
-  //   · phòng ngoài phạm vi và không có con cháu nào trong phạm vi → bỏ hẳn
-  // Nhánh thứ ba mới là thứ giữ cho cây không phình thành cả cây công ty: số phòng BẤM ĐƯỢC không
-  // đổi một dòng nào so với trước, chỉ thêm các dòng cha để đọc ra cấp bậc.
+  // ── CÂY MỌC TỪ PHẠM VI, KHÔNG TỪ GỐC CÔNG TY (chỉ thị 15/09/2026) ───────────────────────────
+  // Ba bản liên tiếp của hàm này, ghi lại cả ba để lần sau không quay vòng:
+  //   13/09  bỏ phòng ngoài phạm vi, nhấc con lên  → phẳng
+  //   14/09  giữ tổ tiên làm dòng ngữ cảnh         → có cấp bậc, nhưng tổ tiên đứng trên đầu
+  //   15/09  bỏ tổ tiên ngoài phạm vi              → phòng trong phạm vi là hàng cấp cao nhất
+  // Chỉ thị 15/09 nêu đích danh kết quả mong đợi: Bùi Ngọc Phúc Danh "chỉ thấy phòng Design",
+  // Lê Bá Quý ở tuyến bên dưới thấy "5 phòng ban con". Bản 14/09 không cho ra hai kết quả đó —
+  // gập mặc định cộng dòng tổ tiên nghĩa là cả hai người mở màn ra chỉ thấy đúng `260100 - Product`,
+  // một phòng không thuộc tuyến họ đang xem.
+  //
+  // PHÂN CẤP KHÔNG MẤT, chỉ đổi gốc: hai phòng trong CÙNG phạm vi mà có quan hệ cha con thì vẫn
+  // lồng nhau, vẫn chevron, vẫn thụt cấp — `tree-table` không đổi một dòng nào. Cái bỏ đi là dòng
+  // cha được dựng thêm cho một phòng ban KHÔNG thuộc phạm vi người đang xem.
   function collect(orgNodes) {
     var out = [];
     (orgNodes || []).forEach(function (n) {
       var kids = collect(n.children);
       if (byId[n.id]) { out.push(makeNode(n, byId[n.id], kids, true)); }
-      else if (kids.length) { out.push(makeNode(n, anyById[n.id], kids, false)); }
+      else { out = out.concat(kids); }
     });
     return out;
   }
@@ -45093,6 +45208,7 @@ function hpbDeptTree(scoped, scopeType, all) {
     // Chevron vẫn giữ cú bấm riêng: `table.js` R13 nâng mọi control trong dòng lên trên lớp phủ
     // bấm-cả-dòng, và R21 cho nó trạng thái hover riêng — không cần chặn sự kiện bằng tay.
     expandedIds: [],
+    emptyText: 'Bạn chưa được gán phòng ban nào ở mục này.',
     // KHÔNG `stickyHeader`: bật nó là `tree-table` bọc bảng trong vùng cuộn cao đúng mười hai dòng
     // (luật R4-03 của chính nó). Frame không vẽ thanh cuộn nào trong thẻ — thẻ cao theo nội dung và
     // cả TRANG mới là thứ cuộn. Đo được trước khi sửa: bảng cao 1332 bị cắt còn 480.
@@ -48572,7 +48688,10 @@ function hpbSeedDepartments() {
       kpiCriteria:[{ criteria:"Tỷ lệ tính năng bàn giao đúng hạn", weight:60 }, { criteria:"Chất lượng tài liệu đặc tả", weight:40 }],
       members:[
         { id:"nv-le-ba-quy", code:"6487205", name:"Lê Bá Quý", title:"Giám đốc sản phẩm", joinedAt:null, finalScore:null, status:"Chưa thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'75%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'80%', status:'completed' }] },
-        { id:"nv-nguyen-thi-hong-van", code:"6453061", name:"Nguyễn Thị Hồng Vân", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Đã thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'80%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'85%', status:'completed' }] },
+        // `Quản lý sản phẩm` — giả lập 15/09/2026 theo chỉ thị, đồng bộ với `GG_DEPTS`. Hai nguồn
+        // phải nói cùng một chức danh: danh sách chức danh đọc `GG_DEPTS`, còn bảng nhân viên đọc
+        // chỗ này, và luật mới giao hai tập đó với nhau.
+        { id:"nv-nguyen-thi-hong-van", code:"6453061", name:"Nguyễn Thị Hồng Vân", title:"Quản lý sản phẩm", joinedAt:null, finalScore:null, status:"Đã thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'80%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'85%', status:'completed' }] },
         { id:"nv-nguyen-van-khoa", code:"6299036", name:"Nguyễn Văn Khoa", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Đang đánh giá", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'85%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'90%', status:'completed' }] },
         { id:"nv-pham-thi-hai-ngan", code:"8393718", name:"Phạm Thị Hải Ngân", title:"Quản lý dự án", joinedAt:null, finalScore:"93%", status:"Hoàn thành", comments:[{ author:"Lê Bá Quý", role:'Quản lý trực tiếp', when:'2 ngày trước', text:"Kết quả đạt kỳ vọng, tiếp tục duy trì trong chu kỳ tới." }], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'90%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'95%', status:'completed' }] },
         { id:"nv-pham-trong-hung", code:"5700389", name:"Phạm Trọng Hưng", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Chưa thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'95%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'74%', status:'completed' }] }
@@ -49331,6 +49450,24 @@ function hpbNextCycleOf(d) {
 // nêu đích danh phạm vi của một persona, đúng phạm vi người dùng đã chốt — ai không có trong bảng
 // thì rơi về hành vi cũ, nên 4 persona còn lại không đổi một pixel.
 var HPB_ACTOR_SCOPES = {
+  // ── Bùi Gia Trí (`hr`, và là ADMIN) — chốt 15/09/2026 ──────────────────────────────────────
+  // Vai admin thấy cả ba tuyến trong sidebar, nhưng trước pass này nó KHÔNG có mục khai báo ở đây
+  // nên rơi vào nhánh dự phòng `d.managementType === scopeType` — tuyến `Trực tiếp quản lý` trả về
+  // 31 phòng ban lá rải khắp công ty, thứ không ai thật sự quản lý trực tiếp.
+  // Chỉ thị 15/09: vai này mô phỏng một HR có phòng của mình. Dữ liệu sẵn đã đỡ: anh là
+  // `lineManager` của `Nhân sự` (260400), nên khai báo dưới đây chỉ nói lại sự thật đã có trong cây
+  // tổ chức, không bịa thêm quan hệ nào.
+  //
+  // `below` KHAI CẢ NĂM phòng con theo cây tổ chức, dù hai phòng cuối chưa có bản ghi hiệu suất
+  // trong store (`Phòng Tuyển Dụng` 260404 và `Phòng Đào Tạo` 260405). Bộ lọc tự bỏ chúng, nên bảng
+  // hiện ba dòng — và ngày nào seed bổ sung hai phòng đó thì chúng hiện ra mà không phải sửa ở đây.
+  // Khai đúng ba phòng đang có sẽ biến một thiếu sót DỮ LIỆU thành một giới hạn được viết cứng.
+  'nv-bui-gia-tri': {
+    directDepts: ['dept-nhan-su'],
+    below: ['dept-c-b', 'dept-total-reward', 'dept-hrbp',
+            'dept-phong-tuyen-dung', 'dept-phong-dao-tao'],
+    delegated: []
+  },
   // Đào Thị Phương Linh (`supervisor`, HRBP) — chốt 13/09/2026.
   // Chỉ có uỷ quyền, không quản lý trực tiếp ai và không có phòng ban bên dưới. Hai tuyến kia đã
   // bị gác ở tầng vai (`roles` của sidebar + registry), nên hai mảng rỗng này là lớp thứ hai — dữ
@@ -49348,14 +49485,20 @@ var HPB_ACTOR_SCOPES = {
     excludeSelf: true,  // trưởng phòng không nằm trong danh sách cấp dưới của chính mình
     splitProbation: true
   },
-  // Lê Bá Quý — chốt 13/09/2026.
+  // Lê Bá Quý — chốt 13/09/2026, sửa tuyến `Trực tiếp quản lý` 15/09/2026.
   'nv-le-ba-quy': {
+    // ── `Trực tiếp quản lý` = PHÒNG ÔNG LÀM TRƯỞNG, không phải các phòng bên dưới ──────────────
+    // Bản 13/09 đọc tuyến này là "trưởng của 5 phòng con" và dựng nó bằng `directIsLeadOfBelow`:
+    // vẫn là 5 phòng con, chỉ thu danh sách người về mỗi trưởng phòng. Chỉ thị 15/09 định nghĩa
+    // lại — tuyến này trả về đúng PHÒNG mà người đó trực tiếp quản lý, tức Product.
+    // `directIsLeadOfBelow` GỠ theo: nó tồn tại chỉ để phục vụ cách đọc cũ, và giữ lại một nhánh
+    // không ai đi là để dành một cái bẫy cho lần sửa sau.
+    directDepts: ['dept-product'],
     // Tuyến `Phòng ban bên dưới`: 5 phòng con của Product.
     below: ['dept-design', 'dept-hr-workforce', 'dept-customer-management',
             'dept-pickup-delivery', 'dept-warehouse-network'],
-    // Tuyến `Trực tiếp quản lý`: trưởng của đúng 5 phòng đó, không phải toàn bộ nhân sự của chúng.
-    directIsLeadOfBelow: true,
-    // Tuyến `Ủy quyền đánh giá`: TẠM THỜI KHÔNG CÓ phòng nào.
+    // Tuyến `Ủy quyền đánh giá`: TẠM THỜI KHÔNG CÓ phòng nào — sidebar đã gác tuyến này ở tầng vai
+    // (`roles: 'supervisor'`), nên mảng rỗng ở đây là lớp thứ hai nói cùng một chuyện.
     delegated: []
   }
 };
@@ -49381,23 +49524,17 @@ function hpbScopeDepts(all, scopeType) {
   if (scopeType === 'truc-tiep' && plan.directDepts) {
     return hpbDirectDepts(all, plan);
   }
+  // ── `directIsLeadOfBelow` GỠ 15/09/2026 ─────────────────────────────────────────────────────
+  // Nhánh cũ ở đây trả về các phòng BÊN DƯỚI cho tuyến `Trực tiếp quản lý`, với `members` thu về
+  // đúng người trưởng phòng. Không persona nào còn khai cờ đó sau khi Lê Bá Quý chuyển sang
+  // `directDepts: ['dept-product']`, nên nhánh này không còn đường tới. Xoá thay vì để lại: một
+  // nhánh chết mang theo cả một phép đọc "trực tiếp quản lý" đã bị thay, đọc lại sẽ gây hiểu nhầm.
   var below = plan.below || [];
-  var chosen = all.filter(function (d) { return below.indexOf(d.id) !== -1; });
-  if (scopeType !== 'truc-tiep') { return chosen; }
-  if (!plan.directIsLeadOfBelow) { return chosen; }
-  // BẢN SAO NÔNG, không sửa bản trong store: chỉ `members` bị thu hẹp về đúng người trưởng phòng.
-  // Đã soát: không chỗ nào trong màn này đột biến `d.members`, và mọi handler ghi dữ liệu đều tra
-  // lại phòng ban từ store theo id chứ không dùng đối tượng đang render.
-  return chosen.map(function (d) {
-    var copy = {};
-    for (var k in d) { if (Object.prototype.hasOwnProperty.call(d, k)) { copy[k] = d[k]; } }
-    copy.members = (d.members || []).filter(function (m) { return m.name === d.lineManager; });
-    return copy;
-  });
+  return all.filter(function (d) { return below.indexOf(d.id) !== -1; });
 }
 
-// Phạm vi "trực tiếp quản lý" dạng CHÍNH PHÒNG CỦA MÌNH — dùng cho trưởng phòng, khác với dạng
-// "trưởng của các phòng bên dưới" mà `directIsLeadOfBelow` lo.
+// Phạm vi "trực tiếp quản lý" = CHÍNH PHÒNG NGƯỜI ĐÓ LÀM TRƯỞNG. Từ 15/09/2026 đây là cách đọc
+// DUY NHẤT của tuyến này, cho cả `manager` lẫn `high-level-manager`.
 //
 // TÁCH THỬ VIỆC THEO CỜ `kind` CỦA TỪNG NGƯỜI, không theo `performanceType` của phòng ban.
 // Bảng "Thử việc" của màn này lọc `d.performanceType === 'probation'`, mà **không phòng ban nào
@@ -50228,11 +50365,6 @@ function hpbOpenDeptCall(deptId, scopeType) {
 function hpbDeptTree(scoped, scopeType, all) {
   var byId = {};
   scoped.forEach(function (d) { byId[d.id] = d; });
-  // Bảng tra TOÀN BỘ phòng ban, không chỉ phòng trong phạm vi: dòng tổ tiên cũng cần nhịp chu kỳ
-  // thật của nó để điền cột `Chu kỳ`, mà nó thì không nằm trong `scoped`.
-  var anyById = {};
-  (all || []).forEach(function (d) { anyById[d.id] = d; });
-
   // Nhịp của một node: ưu tiên store của màn hiệu suất (nhãn `Quý` / `Tháng`), rơi về cấu hình trên
   // cây tổ chức (khoá `quarter` / `month`) cho node mà store không có bản ghi.
   function cadenceOf(orgNode, d) {
@@ -50270,20 +50402,25 @@ function hpbDeptTree(scoped, scopeType, all) {
     };
   }
 
-  // ── GIỮ ĐƯỜNG ĐI TỪ GỐC XUỐNG (chỉ thị 14/09/2026) ──────────────────────────────────────────
-  // Bản trước BỎ dòng của phòng ban ngoài phạm vi và nhấc con nó lên — ra một danh sách phẳng,
-  // đúng thứ chủ sản phẩm chỉ ra. Nay giữ nguyên đường đi, "tương tự tab Theo dõi chu kỳ":
-  //   · phòng trong phạm vi           → dòng bấm được
-  //   · phòng ngoài phạm vi NHƯNG có con cháu trong phạm vi → dòng ngữ cảnh, không bấm được
-  //   · phòng ngoài phạm vi và không có con cháu nào trong phạm vi → bỏ hẳn
-  // Nhánh thứ ba mới là thứ giữ cho cây không phình thành cả cây công ty: số phòng BẤM ĐƯỢC không
-  // đổi một dòng nào so với trước, chỉ thêm các dòng cha để đọc ra cấp bậc.
+  // ── CÂY MỌC TỪ PHẠM VI, KHÔNG TỪ GỐC CÔNG TY (chỉ thị 15/09/2026) ───────────────────────────
+  // Ba bản liên tiếp của hàm này, ghi lại cả ba để lần sau không quay vòng:
+  //   13/09  bỏ phòng ngoài phạm vi, nhấc con lên  → phẳng
+  //   14/09  giữ tổ tiên làm dòng ngữ cảnh         → có cấp bậc, nhưng tổ tiên đứng trên đầu
+  //   15/09  bỏ tổ tiên ngoài phạm vi              → phòng trong phạm vi là hàng cấp cao nhất
+  // Chỉ thị 15/09 nêu đích danh kết quả mong đợi: Bùi Ngọc Phúc Danh "chỉ thấy phòng Design",
+  // Lê Bá Quý ở tuyến bên dưới thấy "5 phòng ban con". Bản 14/09 không cho ra hai kết quả đó —
+  // gập mặc định cộng dòng tổ tiên nghĩa là cả hai người mở màn ra chỉ thấy đúng `260100 - Product`,
+  // một phòng không thuộc tuyến họ đang xem.
+  //
+  // PHÂN CẤP KHÔNG MẤT, chỉ đổi gốc: hai phòng trong CÙNG phạm vi mà có quan hệ cha con thì vẫn
+  // lồng nhau, vẫn chevron, vẫn thụt cấp — `tree-table` không đổi một dòng nào. Cái bỏ đi là dòng
+  // cha được dựng thêm cho một phòng ban KHÔNG thuộc phạm vi người đang xem.
   function collect(orgNodes) {
     var out = [];
     (orgNodes || []).forEach(function (n) {
       var kids = collect(n.children);
       if (byId[n.id]) { out.push(makeNode(n, byId[n.id], kids, true)); }
-      else if (kids.length) { out.push(makeNode(n, anyById[n.id], kids, false)); }
+      else { out = out.concat(kids); }
     });
     return out;
   }
@@ -50302,6 +50439,7 @@ function hpbDeptTree(scoped, scopeType, all) {
     // Chevron vẫn giữ cú bấm riêng: `table.js` R13 nâng mọi control trong dòng lên trên lớp phủ
     // bấm-cả-dòng, và R21 cho nó trạng thái hover riêng — không cần chặn sự kiện bằng tay.
     expandedIds: [],
+    emptyText: 'Bạn chưa được gán phòng ban nào ở mục này.',
     // KHÔNG `stickyHeader`: bật nó là `tree-table` bọc bảng trong vùng cuộn cao đúng mười hai dòng
     // (luật R4-03 của chính nó). Frame không vẽ thanh cuộn nào trong thẻ — thẻ cao theo nội dung và
     // cả TRANG mới là thứ cuộn. Đo được trước khi sửa: bảng cao 1332 bị cắt còn 480.
@@ -53781,7 +53919,10 @@ function hpbSeedDepartments() {
       kpiCriteria:[{ criteria:"Tỷ lệ tính năng bàn giao đúng hạn", weight:60 }, { criteria:"Chất lượng tài liệu đặc tả", weight:40 }],
       members:[
         { id:"nv-le-ba-quy", code:"6487205", name:"Lê Bá Quý", title:"Giám đốc sản phẩm", joinedAt:null, finalScore:null, status:"Chưa thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'75%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'80%', status:'completed' }] },
-        { id:"nv-nguyen-thi-hong-van", code:"6453061", name:"Nguyễn Thị Hồng Vân", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Đã thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'80%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'85%', status:'completed' }] },
+        // `Quản lý sản phẩm` — giả lập 15/09/2026 theo chỉ thị, đồng bộ với `GG_DEPTS`. Hai nguồn
+        // phải nói cùng một chức danh: danh sách chức danh đọc `GG_DEPTS`, còn bảng nhân viên đọc
+        // chỗ này, và luật mới giao hai tập đó với nhau.
+        { id:"nv-nguyen-thi-hong-van", code:"6453061", name:"Nguyễn Thị Hồng Vân", title:"Quản lý sản phẩm", joinedAt:null, finalScore:null, status:"Đã thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'80%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'85%', status:'completed' }] },
         { id:"nv-nguyen-van-khoa", code:"6299036", name:"Nguyễn Văn Khoa", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Đang đánh giá", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'85%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'90%', status:'completed' }] },
         { id:"nv-pham-thi-hai-ngan", code:"8393718", name:"Phạm Thị Hải Ngân", title:"Quản lý dự án", joinedAt:null, finalScore:"93%", status:"Hoàn thành", comments:[{ author:"Lê Bá Quý", role:'Quản lý trực tiếp', when:'2 ngày trước', text:"Kết quả đạt kỳ vọng, tiếp tục duy trì trong chu kỳ tới." }], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'90%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'95%', status:'completed' }] },
         { id:"nv-pham-trong-hung", code:"5700389", name:"Phạm Trọng Hưng", title:"Quản lý dự án", joinedAt:null, finalScore:null, status:"Chưa thiết lập", comments:[], history:[{ ago:3, cycle:'KPI ' + periodLabel("quarter", -3), type:'kpi', score:'95%', status:'completed' }, { ago:6, cycle:'KPI ' + periodLabel("quarter", -6), type:'kpi', score:'74%', status:'completed' }] }
@@ -54540,6 +54681,24 @@ function hpbNextCycleOf(d) {
 // nêu đích danh phạm vi của một persona, đúng phạm vi người dùng đã chốt — ai không có trong bảng
 // thì rơi về hành vi cũ, nên 4 persona còn lại không đổi một pixel.
 var HPB_ACTOR_SCOPES = {
+  // ── Bùi Gia Trí (`hr`, và là ADMIN) — chốt 15/09/2026 ──────────────────────────────────────
+  // Vai admin thấy cả ba tuyến trong sidebar, nhưng trước pass này nó KHÔNG có mục khai báo ở đây
+  // nên rơi vào nhánh dự phòng `d.managementType === scopeType` — tuyến `Trực tiếp quản lý` trả về
+  // 31 phòng ban lá rải khắp công ty, thứ không ai thật sự quản lý trực tiếp.
+  // Chỉ thị 15/09: vai này mô phỏng một HR có phòng của mình. Dữ liệu sẵn đã đỡ: anh là
+  // `lineManager` của `Nhân sự` (260400), nên khai báo dưới đây chỉ nói lại sự thật đã có trong cây
+  // tổ chức, không bịa thêm quan hệ nào.
+  //
+  // `below` KHAI CẢ NĂM phòng con theo cây tổ chức, dù hai phòng cuối chưa có bản ghi hiệu suất
+  // trong store (`Phòng Tuyển Dụng` 260404 và `Phòng Đào Tạo` 260405). Bộ lọc tự bỏ chúng, nên bảng
+  // hiện ba dòng — và ngày nào seed bổ sung hai phòng đó thì chúng hiện ra mà không phải sửa ở đây.
+  // Khai đúng ba phòng đang có sẽ biến một thiếu sót DỮ LIỆU thành một giới hạn được viết cứng.
+  'nv-bui-gia-tri': {
+    directDepts: ['dept-nhan-su'],
+    below: ['dept-c-b', 'dept-total-reward', 'dept-hrbp',
+            'dept-phong-tuyen-dung', 'dept-phong-dao-tao'],
+    delegated: []
+  },
   // Đào Thị Phương Linh (`supervisor`, HRBP) — chốt 13/09/2026.
   // Chỉ có uỷ quyền, không quản lý trực tiếp ai và không có phòng ban bên dưới. Hai tuyến kia đã
   // bị gác ở tầng vai (`roles` của sidebar + registry), nên hai mảng rỗng này là lớp thứ hai — dữ
@@ -54557,14 +54716,20 @@ var HPB_ACTOR_SCOPES = {
     excludeSelf: true,  // trưởng phòng không nằm trong danh sách cấp dưới của chính mình
     splitProbation: true
   },
-  // Lê Bá Quý — chốt 13/09/2026.
+  // Lê Bá Quý — chốt 13/09/2026, sửa tuyến `Trực tiếp quản lý` 15/09/2026.
   'nv-le-ba-quy': {
+    // ── `Trực tiếp quản lý` = PHÒNG ÔNG LÀM TRƯỞNG, không phải các phòng bên dưới ──────────────
+    // Bản 13/09 đọc tuyến này là "trưởng của 5 phòng con" và dựng nó bằng `directIsLeadOfBelow`:
+    // vẫn là 5 phòng con, chỉ thu danh sách người về mỗi trưởng phòng. Chỉ thị 15/09 định nghĩa
+    // lại — tuyến này trả về đúng PHÒNG mà người đó trực tiếp quản lý, tức Product.
+    // `directIsLeadOfBelow` GỠ theo: nó tồn tại chỉ để phục vụ cách đọc cũ, và giữ lại một nhánh
+    // không ai đi là để dành một cái bẫy cho lần sửa sau.
+    directDepts: ['dept-product'],
     // Tuyến `Phòng ban bên dưới`: 5 phòng con của Product.
     below: ['dept-design', 'dept-hr-workforce', 'dept-customer-management',
             'dept-pickup-delivery', 'dept-warehouse-network'],
-    // Tuyến `Trực tiếp quản lý`: trưởng của đúng 5 phòng đó, không phải toàn bộ nhân sự của chúng.
-    directIsLeadOfBelow: true,
-    // Tuyến `Ủy quyền đánh giá`: TẠM THỜI KHÔNG CÓ phòng nào.
+    // Tuyến `Ủy quyền đánh giá`: TẠM THỜI KHÔNG CÓ phòng nào — sidebar đã gác tuyến này ở tầng vai
+    // (`roles: 'supervisor'`), nên mảng rỗng ở đây là lớp thứ hai nói cùng một chuyện.
     delegated: []
   }
 };
@@ -54590,23 +54755,17 @@ function hpbScopeDepts(all, scopeType) {
   if (scopeType === 'truc-tiep' && plan.directDepts) {
     return hpbDirectDepts(all, plan);
   }
+  // ── `directIsLeadOfBelow` GỠ 15/09/2026 ─────────────────────────────────────────────────────
+  // Nhánh cũ ở đây trả về các phòng BÊN DƯỚI cho tuyến `Trực tiếp quản lý`, với `members` thu về
+  // đúng người trưởng phòng. Không persona nào còn khai cờ đó sau khi Lê Bá Quý chuyển sang
+  // `directDepts: ['dept-product']`, nên nhánh này không còn đường tới. Xoá thay vì để lại: một
+  // nhánh chết mang theo cả một phép đọc "trực tiếp quản lý" đã bị thay, đọc lại sẽ gây hiểu nhầm.
   var below = plan.below || [];
-  var chosen = all.filter(function (d) { return below.indexOf(d.id) !== -1; });
-  if (scopeType !== 'truc-tiep') { return chosen; }
-  if (!plan.directIsLeadOfBelow) { return chosen; }
-  // BẢN SAO NÔNG, không sửa bản trong store: chỉ `members` bị thu hẹp về đúng người trưởng phòng.
-  // Đã soát: không chỗ nào trong màn này đột biến `d.members`, và mọi handler ghi dữ liệu đều tra
-  // lại phòng ban từ store theo id chứ không dùng đối tượng đang render.
-  return chosen.map(function (d) {
-    var copy = {};
-    for (var k in d) { if (Object.prototype.hasOwnProperty.call(d, k)) { copy[k] = d[k]; } }
-    copy.members = (d.members || []).filter(function (m) { return m.name === d.lineManager; });
-    return copy;
-  });
+  return all.filter(function (d) { return below.indexOf(d.id) !== -1; });
 }
 
-// Phạm vi "trực tiếp quản lý" dạng CHÍNH PHÒNG CỦA MÌNH — dùng cho trưởng phòng, khác với dạng
-// "trưởng của các phòng bên dưới" mà `directIsLeadOfBelow` lo.
+// Phạm vi "trực tiếp quản lý" = CHÍNH PHÒNG NGƯỜI ĐÓ LÀM TRƯỞNG. Từ 15/09/2026 đây là cách đọc
+// DUY NHẤT của tuyến này, cho cả `manager` lẫn `high-level-manager`.
 //
 // TÁCH THỬ VIỆC THEO CỜ `kind` CỦA TỪNG NGƯỜI, không theo `performanceType` của phòng ban.
 // Bảng "Thử việc" của màn này lọc `d.performanceType === 'probation'`, mà **không phòng ban nào
@@ -55437,11 +55596,6 @@ function hpbOpenDeptCall(deptId, scopeType) {
 function hpbDeptTree(scoped, scopeType, all) {
   var byId = {};
   scoped.forEach(function (d) { byId[d.id] = d; });
-  // Bảng tra TOÀN BỘ phòng ban, không chỉ phòng trong phạm vi: dòng tổ tiên cũng cần nhịp chu kỳ
-  // thật của nó để điền cột `Chu kỳ`, mà nó thì không nằm trong `scoped`.
-  var anyById = {};
-  (all || []).forEach(function (d) { anyById[d.id] = d; });
-
   // Nhịp của một node: ưu tiên store của màn hiệu suất (nhãn `Quý` / `Tháng`), rơi về cấu hình trên
   // cây tổ chức (khoá `quarter` / `month`) cho node mà store không có bản ghi.
   function cadenceOf(orgNode, d) {
@@ -55479,20 +55633,25 @@ function hpbDeptTree(scoped, scopeType, all) {
     };
   }
 
-  // ── GIỮ ĐƯỜNG ĐI TỪ GỐC XUỐNG (chỉ thị 14/09/2026) ──────────────────────────────────────────
-  // Bản trước BỎ dòng của phòng ban ngoài phạm vi và nhấc con nó lên — ra một danh sách phẳng,
-  // đúng thứ chủ sản phẩm chỉ ra. Nay giữ nguyên đường đi, "tương tự tab Theo dõi chu kỳ":
-  //   · phòng trong phạm vi           → dòng bấm được
-  //   · phòng ngoài phạm vi NHƯNG có con cháu trong phạm vi → dòng ngữ cảnh, không bấm được
-  //   · phòng ngoài phạm vi và không có con cháu nào trong phạm vi → bỏ hẳn
-  // Nhánh thứ ba mới là thứ giữ cho cây không phình thành cả cây công ty: số phòng BẤM ĐƯỢC không
-  // đổi một dòng nào so với trước, chỉ thêm các dòng cha để đọc ra cấp bậc.
+  // ── CÂY MỌC TỪ PHẠM VI, KHÔNG TỪ GỐC CÔNG TY (chỉ thị 15/09/2026) ───────────────────────────
+  // Ba bản liên tiếp của hàm này, ghi lại cả ba để lần sau không quay vòng:
+  //   13/09  bỏ phòng ngoài phạm vi, nhấc con lên  → phẳng
+  //   14/09  giữ tổ tiên làm dòng ngữ cảnh         → có cấp bậc, nhưng tổ tiên đứng trên đầu
+  //   15/09  bỏ tổ tiên ngoài phạm vi              → phòng trong phạm vi là hàng cấp cao nhất
+  // Chỉ thị 15/09 nêu đích danh kết quả mong đợi: Bùi Ngọc Phúc Danh "chỉ thấy phòng Design",
+  // Lê Bá Quý ở tuyến bên dưới thấy "5 phòng ban con". Bản 14/09 không cho ra hai kết quả đó —
+  // gập mặc định cộng dòng tổ tiên nghĩa là cả hai người mở màn ra chỉ thấy đúng `260100 - Product`,
+  // một phòng không thuộc tuyến họ đang xem.
+  //
+  // PHÂN CẤP KHÔNG MẤT, chỉ đổi gốc: hai phòng trong CÙNG phạm vi mà có quan hệ cha con thì vẫn
+  // lồng nhau, vẫn chevron, vẫn thụt cấp — `tree-table` không đổi một dòng nào. Cái bỏ đi là dòng
+  // cha được dựng thêm cho một phòng ban KHÔNG thuộc phạm vi người đang xem.
   function collect(orgNodes) {
     var out = [];
     (orgNodes || []).forEach(function (n) {
       var kids = collect(n.children);
       if (byId[n.id]) { out.push(makeNode(n, byId[n.id], kids, true)); }
-      else if (kids.length) { out.push(makeNode(n, anyById[n.id], kids, false)); }
+      else { out = out.concat(kids); }
     });
     return out;
   }
@@ -55511,6 +55670,7 @@ function hpbDeptTree(scoped, scopeType, all) {
     // Chevron vẫn giữ cú bấm riêng: `table.js` R13 nâng mọi control trong dòng lên trên lớp phủ
     // bấm-cả-dòng, và R21 cho nó trạng thái hover riêng — không cần chặn sự kiện bằng tay.
     expandedIds: [],
+    emptyText: 'Bạn chưa được gán phòng ban nào ở mục này.',
     // KHÔNG `stickyHeader`: bật nó là `tree-table` bọc bảng trong vùng cuộn cao đúng mười hai dòng
     // (luật R4-03 của chính nó). Frame không vẽ thanh cuộn nào trong thẻ — thẻ cao theo nội dung và
     // cả TRANG mới là thứ cuộn. Đo được trước khi sửa: bảng cao 1332 bị cắt còn 480.
@@ -56727,14 +56887,13 @@ function renderScreenHieuSuatPhongBanChiTiet() {
   });
 
   // ── TAB 1 · CHU KỲ PHÒNG BAN ────────────────────────────────────────────────────────────────
-  var deptMembers = (dept.members || []).filter(function (m) { return m.kind !== 'probation'; });
+  var deptMembers = hpbdStaffOf(dept);
   var deptPane = hpbdPeriodBlock({
     key: 'dept',
     cadence: deptCadence,
     members: deptMembers,
     dept: dept,
-    scopeLabel: deptTitle,
-    cycleIds: [hpbCycleId(dept), hpbNextCycleOf(dept).id]
+    scopeLabel: deptTitle
   });
 
   // ── TAB 2 · CHU KỲ CHỨC DANH ────────────────────────────────────────────────────────────────
@@ -56776,6 +56935,57 @@ function hpbdOrgNodeOf(deptId) {
   return found;
 }
 
+// ── AI ĐƯỢC LIỆT KÊ TRONG DANH SÁCH NHÂN VIÊN (chỉ thị 15/09/2026) ───────────────────────────
+// "Khi bấm vào một phòng ban không hiển thị tên người quản lý trong danh sách nhân viên. Danh sách
+// này chỉ show nhân viên được quản lý bởi người quản lý đó."
+// Nên bảng cấp 2 loại TRƯỞNG PHÒNG ra. Trước pass này Bùi Ngọc Phúc Danh đứng ngay dòng đầu bảng
+// của chính phòng Design mà anh quản lý — tức trang hỏi anh tự chấm điểm mình ở màn dành cho việc
+// chấm cấp dưới. Hiệu suất của chính trưởng phòng thuộc về phòng của CẤP TRÊN anh, không thuộc đây.
+//
+// Đối chiếu bằng TÊN vì `members[]` không mang khoá ngoại nào tới trưởng phòng — `lineManager` là
+// một chuỗi tên. Cùng phép đối chiếu mà `hpbScopeDepts` đã dùng từ trước, nên hai chỗ không lệch.
+// Người thử việc cũng không nằm ở bảng này: họ có tab riêng ở cấp 1 (phụ lục C của spec).
+function hpbdStaffOf(dept) {
+  var lead = (dept && dept.lineManager) || null;
+  var out = [];
+  var seen = {};
+  (dept.members || []).forEach(function (m) {
+    if (m.kind === 'probation') { return; }
+    if (lead && m.name === lead) { return; }
+    seen[m.id] = true;
+    out.push({ m: m, dept: dept });
+  });
+
+  // ── CỘNG THÊM TRƯỞNG CÁC PHÒNG BAN CON (chỉ thị 15/09/2026) ─────────────────────────────────
+  // "Lê Bá Quý quản lý tất cả những người quản lý của 5 phòng ban con, trong đó có Bùi Ngọc Phúc
+  // Danh." Đây là vế còn thiếu của chính luật vừa đặt hôm nay: trưởng phòng bị loại khỏi bảng của
+  // phòng MÌNH vì hiệu suất của họ thuộc về cấp trên — nhưng nếu không cộng họ vào bảng của phòng
+  // CHA thì hiệu suất đó rơi khỏi sản phẩm, không ai chấm. Đo được trước khi sửa: bảng Product có
+  // 4 dòng, cả năm trưởng phòng con đều vắng mặt.
+  //
+  // KHÔNG DỰNG NGƯỜI MỚI: mỗi trưởng phòng con đã là một bản ghi `members` có thật trong phòng của
+  // chính họ, mang đủ mã nhân viên, chức danh, điểm chốt và lịch sử. Ở đây chỉ mượn đúng bản ghi đó.
+  //
+  // MỖI DÒNG NHỚ PHÒNG GỐC CỦA MÌNH — đó là lý do hàm trả về cặp `{m, dept}` chứ không phải mảng
+  // người. Bộ mục tiêu khoá theo (nhân viên × chu kỳ), mà chu kỳ của Bùi Ngọc Phúc Danh là
+  // `cyc-design` chứ không phải `cyc-product`; đọc theo chu kỳ của phòng cha sẽ ra một bộ rỗng và
+  // dòng của anh hiện `Chưa thiết lập` dù anh đã có ba mục tiêu. Đường bấm sang trang cá nhân cũng
+  // phải mang phòng gốc, nếu không trang đó tra người trong phòng cha và không thấy.
+  var node = hpbdOrgNodeOf(dept.id);
+  var all = pbAppStore().manager || [];
+  ((node && node.children) || []).forEach(function (child) {
+    var cd = null;
+    all.forEach(function (d) { if (d.id === child.id) { cd = d; } });
+    if (!cd || !cd.lineManager) { return; }
+    (cd.members || []).forEach(function (m) {
+      if (m.name !== cd.lineManager || seen[m.id]) { return; }
+      seen[m.id] = true;
+      out.push({ m: m, dept: cd });
+    });
+  });
+  return out;
+}
+
 function hpbdSetScope(v) { window.PB_HPBD_SCOPE = (v === 'title') ? 'title' : 'dept'; }
 
 function hpbdOpenTitle(deptId, title, cadence) {
@@ -56808,8 +57018,8 @@ function hpbdPeriodBlock(o) {
   var pillName = 'hpbd-period-' + o.key;
   // Kỳ đang chạy trước, kỳ kế tiếp sau. Thứ tự này CHÍNH LÀ luật chế độ, nên đừng đảo.
   var periods = [
-    { value: 'cur', label: hpbPeriodLabel(cadence, 0), mode: 'review', cycleId: o.cycleIds[0] },
-    { value: 'next', label: hpbPeriodLabel(cadence, 1), mode: 'setup', cycleId: o.cycleIds[1] }
+    { value: 'cur', label: hpbPeriodLabel(cadence, 0), mode: 'review', step: 0 },
+    { value: 'next', label: hpbPeriodLabel(cadence, 1), mode: 'setup', step: 1 }
   ];
 
   var pills = pbUse('tabs', {
@@ -56838,8 +57048,13 @@ function hpbdPeriodBlock(o) {
 function hpbdModePane(o, p) {
   var isSetup = p.mode === 'setup';
   var periodWords = hpbdPeriodWords(p.label);
-  var owing = o.members.filter(function (m) {
-    var set = pbKpiSet(m.id, p.cycleId);
+  // Chu kỳ đọc theo PHÒNG GỐC của từng dòng, không theo phòng đang mở — xem `hpbdStaffOf`.
+  var cycleOf = function (e) {
+    return (p.step === 0) ? hpbCycleId(e.dept) : hpbNextCycleOf(e.dept).id;
+  };
+  var owing = o.members.filter(function (e) {
+    var m = e.m;
+    var set = pbKpiSet(m.id, cycleOf(e));
     if (isSetup) { return pbHandoffStateOf(set) !== 'approved'; }
     return !(set && set.phase === 'closed') && m.finalScore == null;
   }).length;
@@ -56897,8 +57112,8 @@ function hpbdModePane(o, p) {
     actions: actions
   });
 
-  var rows = o.members.map(function (m) {
-    return hpbMemberRow(o.dept, m, p.mode, p.cycleId);
+  var rows = o.members.map(function (e) {
+    return hpbMemberRow(e.dept, e.m, p.mode, cycleOf(e));
   });
 
   return '<div style="display:flex;flex-direction:column;gap:var(--space-md)">'
@@ -56954,7 +57169,19 @@ function hpbdRosterFilter(sel) {
 // Gộp thành một dòng thì mất mất một trong hai lộ trình. (Spec phụ lục E câu 2 còn để ngỏ chuyện
 // một người xuất hiện ở cả hai tab — chỗ này chỉ trình bày dữ liệu, không quyết hộ.)
 function hpbdTitleList(dept) {
-  var rows = ((typeof ggTitleRows === 'function') ? ggTitleRows(dept.id) : []).map(function (t) {
+  // ── HAI ĐIỀU KIỆN LỌC (chỉ thị 15/09/2026) ──────────────────────────────────────────────────
+  //   1. Chức danh phải ĐƯỢC CÀI CHU KỲ RIÊNG (`isOverride`). Không có luật riêng nghĩa là người
+  //      mang chức danh đó chạy theo chu kỳ của phòng ban — họ đã nằm ở tab `Chu kỳ phòng ban`, và
+  //      liệt kê lại ở đây là nói cùng một việc hai lần dưới hai cái tên.
+  //   2. Chức danh phải do NGƯỜI XEM QUẢN LÝ, tức có ít nhất một người trong chính bảng nhân viên
+  //      của trang này mang nó. Nhờ vế này mà chức danh của chính người quản lý tự rụng: `hpbdStaffOf`
+  //      đã loại trưởng phòng, nên `Giám đốc sản phẩm` không còn ai mang và không lọt vào danh sách.
+  //      Đây cũng là chỗ chặn một dòng chức danh dẫn tới bảng rỗng — thứ trang này từng có.
+  var managed = {};
+  hpbdStaffOf(dept).forEach(function (e) { if (e.m.title) { managed[e.m.title] = true; } });
+  var rows = ((typeof ggTitleRows === 'function') ? ggTitleRows(dept.id) : [])
+    .filter(function (t) { return t.isOverride && managed[t.title]; })
+    .map(function (t) {
     return {
       rowOnClick: hpbdOpenTitleCall(dept.id, t.title, t.cadence),
       title: t.title,
@@ -56967,7 +57194,7 @@ function hpbdTitleList(dept) {
       { key: 'cycle', label: 'Chu kỳ', width: '30%', bodyWeight: 'body' }
     ],
     rows: rows,
-    emptyText: 'Phòng ban này chưa có cấu hình chu kỳ theo chức danh.'
+    emptyText: 'Không có chức danh nào được cài chu kỳ riêng trong phạm vi bạn quản lý.'
   })));
 }
 
@@ -56975,9 +57202,7 @@ function hpbdTitleList(dept) {
 // Giống hệt tab phòng ban, thêm nút quay lại ở đầu, và NHỊP lấy của chức danh chứ không của phòng
 // — nên phòng chạy Quý mà chức danh chạy Tháng thì dải kỳ ở đây là Tháng (spec mục 5.3).
 function hpbdTitleDetail(dept, t) {
-  var members = (dept.members || []).filter(function (m) {
-    return m.kind !== 'probation' && m.title === t.title;
-  });
+  var members = hpbdStaffOf(dept).filter(function (e) { return e.m.title === t.title; });
   // ── `tertiary`, KHÔNG PHẢI `ghost` (sửa 15/09/2026) ─────────────────────────────────────────
   // Atom `button` nhận đúng năm biến thể: primary · secondary · tertiary · outline-primary ·
   // danger. Tên lạ KHÔNG báo lỗi — nó rơi thẳng về `primary`, nên nút này hiện ra là một khối cam
@@ -56995,14 +57220,13 @@ function hpbdTitleDetail(dept, t) {
     members: members,
     dept: dept,
     scopeLabel: dept.name + ' · ' + t.title,
-    backLink: backLink,
+    backLink: backLink
     // ── BỘ ĐIỂM VẪN LÀ BỘ CỦA PHÒNG BAN ────────────────────────────────────────────────────────
     // Store khoá bộ mục tiêu theo (nhân viên × mã chu kỳ), và chưa có mã chu kỳ nào ở cấp CHỨC DANH.
-    // Hai lựa chọn: sinh một mã riêng — khi ấy mọi ô đều rỗng vì chưa ai từng ghi vào đó; hoặc đọc
-    // đúng bộ của phòng ban, tức số liệu là thật nhưng nhãn kỳ ở trên lại là nhãn của chức danh.
-    // Chọn cách thứ hai để luồng còn bấm được, và ghi vào `open-questions.md` — đây là chỗ cần một
-    // quyết định về mô hình dữ liệu, không phải chỗ tôi tự chọn hộ.
-    cycleIds: [hpbCycleId(dept), hpbNextCycleOf(dept).id]
+    // Từ 15/09/2026 chu kỳ được suy từ PHÒNG GỐC của từng dòng (`hpbdModePane` → `cycleOf`), mà ở
+    // tab này mọi dòng đều thuộc cùng một phòng, nên kết quả không đổi: số liệu là thật, còn nhãn kỳ
+    // phía trên vẫn là nhãn của chức danh. Ghi `open-questions.md` — cần một quyết định về mô hình
+    // dữ liệu, không phải chỗ tôi tự chọn hộ.
   });
 }
 
