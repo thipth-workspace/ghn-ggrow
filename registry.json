@@ -1692,6 +1692,12 @@
       "$value": "2px",
       "$type": "dimension"
     },
+    "space-hairline": {
+      "$value": "1px",
+      "$type": "dimension",
+      "scope": "local",
+      "$description": "Khe một pixel. Chỉ dùng cho khe tiêu đề↔subtitle của `page-header` — `_Page Header` (Figma 7797:5218) khai `gap-px` ở khối Content, và thang khoảng cách của hệ không có nấc nào nhỏ hơn ba pixel. Mượn `--border-width` làm khe là dùng sai loại token, nên khai riêng một nấc và giới hạn phạm vi ở đây."
+    },
     "radius-xl": {
       "$value": "24px",
       "$type": "dimension"
@@ -9853,6 +9859,75 @@
             }
           ]
         }
+      ]
+    },
+    {
+      "id": "employee-cell",
+      "name": "Employee cell",
+      "renderFn": "renderCmpEmployeeCell",
+      "scope": "local",
+      "level": "molecule",
+      "properties": [
+        {
+          "id": "name",
+          "type": "string",
+          "default": "Thái Bảo Duy Lâm"
+        },
+        {
+          "id": "label",
+          "type": "string",
+          "default": "3354408 - Thái Bảo Duy Lâm"
+        },
+        {
+          "id": "meta",
+          "type": "string",
+          "default": "Chuyên viên thiết kế"
+        },
+        {
+          "id": "size",
+          "type": "enum",
+          "default": "md",
+          "options": [
+            {
+              "label": "sm",
+              "value": "sm"
+            },
+            {
+              "label": "md",
+              "value": "md"
+            }
+          ]
+        },
+        {
+          "id": "nameRole",
+          "type": "enum",
+          "default": "subtitle2",
+          "options": [
+            {
+              "label": "subtitle2",
+              "value": "subtitle2"
+            },
+            {
+              "label": "subtitle3",
+              "value": "subtitle3"
+            }
+          ]
+        },
+        {
+          "id": "grow",
+          "type": "boolean",
+          "default": false
+        }
+      ],
+      "code": {
+        "snippet": ""
+      },
+      "renderSrc": "render/components/employee-cell.js",
+      "specSrc": "spec/components/employee-cell.json",
+      "logicNotes": [
+        "Gom từ BẢY bản chép tay của cụm avatar + mã/tên + chức danh (16/09/2026). Trước khi gom, bảy bản đã lệch nhau ở khe dọc, cỡ avatar, cỡ chữ dòng tên, và dòng chức danh thì thiếu line-height/font-weight/letter-spacing nên nhận bất kỳ thứ gì ô bảng áp xuống.",
+        "Dòng chức danh thiếu font-weight là lỗi thật: trong cột ghim, R22 của atom table đẩy mọi giá trị lên emphasis, nên nó hiện ra đậm trong khi Figma (node Tab, frame 9318:98463) nói Regular. Đi qua typography role body3 thì weight thuộc về style.",
+        "Không khai state: cụm không tương tác, dòng bảng mới là thứ bắt click (.tbl-row-click)."
       ]
     }
   ],
