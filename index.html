@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- pb-shell v1.11.0 · rendered 2026-09-16T15:57:49Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-09-17T03:49:50Z -->
 <!--
   ============================================================================
   PRODUCT BUILDER — the rendered prototype shell
@@ -31277,11 +31277,10 @@ function renderScreenQuanLyChuKy(props) {
   //
   // Đọc-rồi-xoá: cờ chỉ sống đúng một lần render. Bất kỳ đường vào nào không set cờ đều được tab
   // chính thức, nên mặc định không thể "dính" như stash cũ.
-  var tdckTab = 'official';
-  if (typeof window !== 'undefined') {
-    if (window.PB_CQ_TAB === 'probation') { tdckTab = 'probation'; }
-    window.PB_CQ_TAB = null;
-  }
+  // ── DẢI TAB DÂN SỐ ẨN (chỉ thị 17/09/2026) ──────────────────────────────────────────────────
+  // `tdckTab` (giá trị tab khởi tạo) BỎ cùng dải tab. Việc đọc-rồi-xoá `PB_CQ_TAB` thì GIỮ: các màn
+  // khác vẫn đặt cờ đó qua `cqGoTab`, không xoá thì cờ sống dai qua nhiều lần render.
+  if (typeof window !== 'undefined') { window.PB_CQ_TAB = null; }
   var header = pbUse('page-header', {
     title: 'Theo dõi chu kỳ',
     // BOTH SUBTITLES ARE NOW THE FRAMES' OWN COPY, verbatim (2026-08-05). The official one already was
@@ -31293,20 +31292,19 @@ function renderScreenQuanLyChuKy(props) {
     // correction as the official half, one tab later.
     subtitleHtml: '<span class="tdck-sub tdck-sub-official">Cập nhật tiến độ, thời hạn hoàn thành chu kì theo phòng ban</span>'
       + '<span class="tdck-sub tdck-sub-probation">Cập nhật thông tin thử việc, thời hạn đánh giá của quản lý</span>',
-    tabs: {
-      name: 'tdck-pop',
-      value: tdckTab,
-      // LABELS to Figma 7811:7919 (2026-08-05, fidelity pass W4). The frame names these tabs by
-      // POPULATION — "Nhân viên chính thức" / "Nhân viên thử việc" — not by cadence. That is also the
-      // more accurate split: the second tab is a roster of probationary PEOPLE, not a different cycle
-      // length, and Cài đặt chu kỳ already used the population wording for the same two groups.
-      // `name` and both `value`s are untouched: they build tdck-pop-official / -probation, the ids the
-      // generated reveal rules select and pbAppRerender restores.
-      options: [
-        { value: 'official', label: 'Nhân viên chính thức' },
-        { value: 'probation', label: 'Nhân viên thử việc' }
-      ]
-    }
+    // ── KHÔNG TRUYỀN `tabs` (chỉ thị 17/09/2026) ────────────────────────────────────────────
+    // Dải "Nhân viên chính thức / Nhân viên thử việc" ẩn khỏi trang này.
+    //
+    // KHÔNG cần sửa luật hiện/ẩn: bộ `:has()` ở đầu file chỉ mô tả nhánh THỬ VIỆC (ẩn sẵn, chỉ hiện
+    // khi `#tdck-pop-probation:checked`). Không còn radio nào thì không gì được check, nên pane và
+    // subtitle chính thức giữ nguyên trạng thái mặc định — đúng cái đang cần.
+    //
+    // Markup pane thử việc VẪN được sinh, nằm `display:none` và không còn cửa mở. Giữ lại vì nó bám
+    // vào seed roster thử việc; muốn dọn hẳn thì gỡ cả pane lẫn luật của nó.
+    // Bày lại: trả về `tabs: { name:'tdck-pop', value: tdckTab, options:[
+    //   {value:'official', label:'Nhân viên chính thức'}, {value:'probation', label:'Nhân viên thử việc'} ]}`
+    // kèm dựng lại `tdckTab` ở trên. Nhãn theo Figma 7811:7919; `name` và hai `value` phải giữ
+    // nguyên vì chúng dựng ra id `tdck-pop-official` / `-probation` mà luật `:has()` đang chọn.
     // NO `actions` SLOT (2026-08-10, direct user instruction — "we already have download excel in
     // the table"). This header used to carry the "Xuất Excel" popover (P1, added 2026-08-09). It was
     // redundant: the filter-toolbar below already has an icon-only download wired to
@@ -36628,10 +36626,10 @@ function renderScreenHieuSuatCuaToi(props) {
   // từ 26 họ × 65 đuôi tên nên trùng tên là chuyện thường).
   var meRec = (typeof ggEmpRecordById === 'function') ? ggEmpRecordById(PB_ME.employeeId) : null;
   var meTitle = (meRec && meRec.emp.title) || '';
-  var meMgr = (typeof ggManagerLabelOf === 'function') ? ggManagerLabelOf(PB_ME.employeeId) : null;
 
-  // ── BỘ BA Ô THEO FRAME MỚI `9478:155713` trong `9162:120389` (đọc 16/09/2026) ────────────────
-  // Frame này xếp đúng ba ô, đúng thứ tự:  Chu kỳ · Quản lý · Chức danh.
+  // ── BỘ Ô THEO FRAME MỚI `9478:155713` trong `9162:120389` (đọc 16/09/2026) ───────────────────
+  // Frame này xếp đúng ba ô, đúng thứ tự:  Chu kỳ · Quản lý · Chức danh. Ô GIỮA (`Quản lý`) đã ẨN
+  // theo chỉ thị 17/09/2026 — xem ghi chú tại chỗ ẩn bên dưới; frame vẫn là căn cứ nếu cần bày lại.
   //
   // `Phòng ban` GỠ — và nói rõ vì nó là một thay đổi có mất mát. Ghi chú cũ ngay đây dẫn hai frame
   // (`9085:53748`, `9153:108352`) đều vẽ ô đó, nên nó vào có căn cứ. Frame mới không còn nó, và chỉ
@@ -36651,8 +36649,17 @@ function renderScreenHieuSuatCuaToi(props) {
   if (meCadence && typeof cycleTag === 'function') {
     meInfo.push({ label: 'Chu kỳ', valueHtml: cycleTag(meCadence === 'quarter' ? 'Quý' : 'Tháng') });
   }
+  // ── ĐỔI Ô THỨ HAI: `Quản lý` ẨN, `Chức danh` BÀY LẠI (chỉ thị 17/09/2026, lần thứ hai) ───────
+  // Sáng nay `Chức danh` bị ẩn và `Quản lý` được giữ; chỉ thị này đảo lại đúng cặp đó. Ghi rõ vì
+  // hai lần đổi cách nhau vài giờ và ghi chú cũ đã nêu một lý do ("người xem hồ sơ của chính mình
+  // không cần được nhắc chức danh của chính mình") mà quyết định mới không theo — lý do đó là của
+  // tôi, không phải của chủ sản phẩm, nên nó không thắng một chỉ thị.
+  //
+  // Ẩn ở ĐÂY chứ không sửa `page-header`: bộ bốn trường bật-tắt vẫn là hợp đồng của component.
+  // Muốn bày lại `Quản lý` thì thêm một dòng `meInfo.push`; `ggManagerLabelOf(PB_ME.employeeId)`
+  // là đường lấy giá trị — cùng lối ghi chú của ô `Phòng ban` đã gỡ bên trên.
+  //
   // `value` chữ thuần — xem ghi chú cùng ngày ở `chi-tiet-phong-ban`.
-  if (meMgr) { meInfo.push({ label: 'Quản lý', value: meMgr }); }
   if (meTitle) { meInfo.push({ label: 'Chức danh', value: meTitle }); }
 
   // ── `Lịch sử đánh giá` ĐÃ GỠ KHỎI MÀN NÀY (2026-09-10, chỉ thị) ──────────────────────────────
@@ -38003,8 +38010,10 @@ function renderScreenCaiDatChuKy(props) {
   // label/toast wording, not the shape. '' for an already-configured leaf (mirrors leafEditDrawer's
   // own guard, inverted).
   // ═══ PROBATION POLICY DRAWER (2026-07-31, direct user instruction — "unify to drawer right-side") ═══
-  // The standalone `cai-dat-chu-ky-thu-viec` PAGE's form, as a drawer. Opened by probationEditCta
+  // The standalone `cai-dat-chu-ky-thu-viec` PAGE's form, as a drawer. Was opened by probationEditCta
   // ("Chỉnh sửa chu kì" on the probation config card below), which used to navigate to that page.
+  // CỬA ĐÓ ĐÃ ĐÓNG 17/09/2026 — nút bị ẩn và drawer này không còn được mount; hàm giữ lại làm đường
+  // bày lại. Xem ghi chú tại chỗ gỡ mount cuối file.
   //
   // ONE INSTANCE, no per-node anything: unlike the team drawers above, the probation policy is a SINGLE
   // standing policy for the whole system (dept-config-form's own `isProbationPolicy` notes), so there is
@@ -38812,10 +38821,13 @@ function renderScreenCaiDatChuKy(props) {
   // Label shortened to "Chỉnh sửa" 2026-08-10 (Figma 8110:31102). It sits in the card header directly
   // beside the title "Thông tin chu kỳ thử việc", which already names its object — repeating "chu kì"
   // in the button made the row read "…thử việc · Chỉnh sửa chu kì".
-  var probationEditCta = pbUse('button', {
-    variant: 'secondary', icon: 'edit', label: 'Chỉnh sửa',
-    tag: 'label', forId: 'cd-prob-policy-toggle'
-  });
+  // ── NÚT `Chỉnh sửa` ẨN (chỉ thị 17/09/2026) ────────────────────────────────────────────────
+  // Cùng lý do đã hạ `normalEditCta` ngày 05/08 và ghi ngay bên dưới: màn này không phải chỗ sửa
+  // chu kỳ. Nay chỉ thị mở rộng sang nốt bản thử việc, nên hai nửa của card lại nói cùng một thứ —
+  // card là panel CHỈ ĐỌC, không còn hành động nào.
+  // Bày lại thì trả `actions: probationEditCta` vào `titled-section` bên dưới và dựng lại biến này:
+  //   pbUse('button', { variant:'secondary', icon:'edit', label:'Chỉnh sửa',
+  //                     tag:'label', forId:'cd-prob-policy-toggle' })
   // ── THE HEADER CTA IS REMOVED (2026-08-05) — THE CAPABILITY DOES NOT EXIST ──────────────────────
   // I added `normalEditCta` on 2026-08-04 (revamp R5-03) so the relocated tháng/quý policy form would
   // have an opener, and logged it then as a deliberate Figma deviation. Both halves of that were wrong:
@@ -38875,7 +38887,6 @@ function renderScreenCaiDatChuKy(props) {
     padding: 'var(--space-md)', radius: 'var(--radius-lg)',
     children: pbUse('titled-section', {
       title: 'Chu kỳ thử việc',
-      actions: probationEditCta,
       // 24 heading-row -> body, per the node's gap-[24] on the card (titled-section's own default is
       // --space-sm/12, which is right for a plain section but too tight under an actions row).
       gap: 'var(--space-lg)',
@@ -39136,18 +39147,18 @@ function renderScreenCaiDatChuKy(props) {
     + '</div>'
     + '</div>'
     + editDrawers
-    // ONE probation policy drawer for the whole screen (2026-07-31) — the standalone
-    // cai-dat-chu-ky-thu-viec page's form, opened by the probation card's "Chỉnh sửa chu kì".
-    + probationPolicyDrawer()
-    // Its official-population twin (2026-08-04, revamp R5-03) — the deleted cai-dat-chu-ky-thang-quy
-    // page's form. IT NOW HAS NO OPENER (2026-08-05): the header CTA that used to open it was removed
-    // because the product has no company-wide cycle-edit capability and Figma draws no header button on
-    // either screen in this group. Kept at the user's request rather than deleted, so a future entry
-    // point can reach it — but as of today nothing can, and `cycleSettings.normal` has no readers either.
-    // Still emitted OUTSIDE both segment wrappers, like
-    // every other drawer here: a drawer inside `.cd-seg-official` would be display:none on the
-    // probation tab, and a `label for=` pointing into a hidden subtree opens nothing, silently.
-    + cdNormalPolicyDrawer()
+    // ── HAI DRAWER SỬA CHU KỲ KHÔNG CÒN ĐƯỢC MOUNT (chỉ thị 17/09/2026) ───────────────────────
+    // `probationPolicyDrawer()` ("Chỉnh sửa chu kì thử việc") và `cdNormalPolicyDrawer()`
+    // ("Chỉnh sửa chu kỳ tháng/quý") đều bị gỡ khỏi cây. Cái thứ nhất mất cửa cùng lúc với nút
+    // `Chỉnh sửa` ở trên; cái thứ hai đã không có cửa nào từ 05/08 — nó nằm đây như markup chết.
+    //
+    // HAI HÀM DỰNG VÀ HAI HÀM LƯU ĐƯỢC GIỮ, không xoá: `cdNormalPolicyDrawer` từng được giữ đúng
+    // theo lựa chọn của người dùng trong lần gỡ trước, nên lần này giữ nguyên nếp đó. Chúng hiện
+    // KHÔNG có ai gọi — bày lại thì nối `+ probationPolicyDrawer()` / `+ cdNormalPolicyDrawer()`
+    // vào đúng chỗ này, bên NGOÀI hai wrapper segment (xem ghi chú dưới về lý do).
+    // Khi bày lại: phải emit BÊN NGOÀI cả hai wrapper segment, như mọi drawer khác ở đây — một
+    // drawer nằm trong `.cd-seg-official` sẽ bị display:none ở tab thử việc, và `label for=` trỏ vào
+    // một nhánh đang ẩn thì bấm không mở gì cả, im lặng.
     // The shared per-employee edit drawer (`cd-emp-toggle`) is NO LONGER EMITTED HERE (2026-07-31): its
     // only opener was a roster row, and the roster left with the detail drawers. It is emitted by
     // `cai-dat-chu-ky-chi-tiet` instead, beside the roster that opens it. Emitting it on both would put
@@ -39624,12 +39635,16 @@ function cdRosterTableHtml(nodeId, page) {
   var titleCell = function (t) {
     return '<span style="font-family:var(--font-family-base);font-weight:var(--font-weight-emphasis);color:var(--text-default)">' + t + '</span>';
   };
-  var clickFor = function (title) {
-    return 'cdOpenTitleEdit(this,&quot;' + node.id + '&quot;,&quot;'
-      + String(title).replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-          .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
-      + '&quot;)';
-  };
+  // ── BẢNG KHÔNG CÒN CLICK MỞ DRAWER SỬA (chỉ thị 17/09/2026) ──────────────────────────────────
+  // `clickFor` từng trả về lời gọi `cdOpenTitleEdit(...)` gắn lên mỗi dòng, mở drawer
+  // "Chỉnh sửa chu kì <chức danh>". Cùng đợt ẩn nút `Chỉnh sửa` ở header trang chi tiết: sửa chu kỳ
+  // không còn là hành động bày trên UI, nên cửa cuối cùng vào drawer đó cũng đóng.
+  //
+  // Gỡ CẢ HAI VẾ, không chỉ drawer: bỏ mỗi drawer thì mọi dòng thành click chết — bấm không ra gì,
+  // im lặng, tệ hơn là để nguyên. `cdOpenTitleEdit`, `cdSaveTitleConfig`, `cdTitleEditDrawer` được
+  // GIỮ (cùng nếp với hai drawer chính sách đã gỡ mount hôm nay) và hiện không ai gọi. Bày lại thì
+  // trả `rowOnClick: clickFor(g.title)` vào hai chỗ dưới, dựng lại hàm này, và mount lại
+  // `cdTitleEditDrawer(node)` ở `cai-dat-chu-ky-chi-tiet` — ba thứ phải đi cùng nhau.
 
   // ── MỘT DÒNG = MỘT CẶP (CHỨC DANH × CHU KỲ) ────────────────────────────────────────────────────
   // Frame vẽ một chức danh `dualCadence` chiếm HAI dòng (Tháng + Quý). Bảng cũ nhồi hai badge vào MỘT
@@ -39644,8 +39659,7 @@ function cdRosterTableHtml(nodeId, page) {
     var res = pbTitleCycleResolve(node, g.title);
     if (!res) {
       rows.push({ title: titleCell(g.title), cycle: rowMuted('Chưa thiết lập'),
-                  ms0: rowMuted('—'), ms1: rowMuted('—'), ms2: rowMuted('—'), ms3: rowMuted('—'),
-                  rowOnClick: clickFor(g.title) });
+                  ms0: rowMuted('—'), ms1: rowMuted('—'), ms2: rowMuted('—'), ms3: rowMuted('—') });
       return;
     }
     // Đọc `cycles` thay vì suy từ cờ `dualCadence` (2026-09-06): chu kỳ kép có thể cùng nhịp
@@ -39665,8 +39679,7 @@ function cdRosterTableHtml(nodeId, page) {
         title: pi === 0 ? titleCell(g.title) : '',
         cycle: cycleTag(period === 'quarter' ? 'Quý' : 'Tháng'),
         ms0: msCell(steps[0]), ms1: msCell(steps[1]), ms2: msCell(steps[2]), ms3: msCell(steps[3]),
-        rowClass: pi > 0 ? 'cd-rowspan-cont' : '',
-        rowOnClick: clickFor(g.title)
+        rowClass: pi > 0 ? 'cd-rowspan-cont' : ''
       });
     });
   });
@@ -40779,7 +40792,12 @@ function hpbRenderScoped(scopeType) {
   // Trực tiếp của ông. Gài theo persona sẽ phải sửa lại mỗi lần đổi người được ủy quyền.
   // `gian-tiep` KHÔNG mở: tuyến đó là danh sách phòng ban bên dưới để theo dõi, người ở đó có
   // trưởng phòng của họ chấm.
-  var hasProbationTab = (scopeType === 'truc-tiep' || scopeType === 'supervisor');
+  // ── DẢI TAB DÂN SỐ ẨN (chỉ thị 17/09/2026) ──────────────────────────────────────────────────
+  // Trước: `(scopeType === 'truc-tiep' || scopeType === 'supervisor')` — tức Trực tiếp quản lý và
+  // Uỷ quyền đánh giá có dải tab, Phòng ban bên dưới thì không. Chỉ thị ẩn dải đó trên đúng hai
+  // tuyến còn lại, nên biểu thức rút về `false` và cả ba tuyến giờ giống nhau.
+  // `probation = []` bên dưới vẫn chạy như cũ: không có tab thì không có danh sách thử việc để bày.
+  var hasProbationTab = false;
   if (!hasProbationTab) { probation = []; }
 
   var tabName = 'hpb-l1-tab';
@@ -46043,7 +46061,12 @@ function hpbRenderScoped(scopeType) {
   // Trực tiếp của ông. Gài theo persona sẽ phải sửa lại mỗi lần đổi người được ủy quyền.
   // `gian-tiep` KHÔNG mở: tuyến đó là danh sách phòng ban bên dưới để theo dõi, người ở đó có
   // trưởng phòng của họ chấm.
-  var hasProbationTab = (scopeType === 'truc-tiep' || scopeType === 'supervisor');
+  // ── DẢI TAB DÂN SỐ ẨN (chỉ thị 17/09/2026) ──────────────────────────────────────────────────
+  // Trước: `(scopeType === 'truc-tiep' || scopeType === 'supervisor')` — tức Trực tiếp quản lý và
+  // Uỷ quyền đánh giá có dải tab, Phòng ban bên dưới thì không. Chỉ thị ẩn dải đó trên đúng hai
+  // tuyến còn lại, nên biểu thức rút về `false` và cả ba tuyến giờ giống nhau.
+  // `probation = []` bên dưới vẫn chạy như cũ: không có tab thì không có danh sách thử việc để bày.
+  var hasProbationTab = false;
   if (!hasProbationTab) { probation = []; }
 
   var tabName = 'hpb-l1-tab';
@@ -51307,7 +51330,12 @@ function hpbRenderScoped(scopeType) {
   // Trực tiếp của ông. Gài theo persona sẽ phải sửa lại mỗi lần đổi người được ủy quyền.
   // `gian-tiep` KHÔNG mở: tuyến đó là danh sách phòng ban bên dưới để theo dõi, người ở đó có
   // trưởng phòng của họ chấm.
-  var hasProbationTab = (scopeType === 'truc-tiep' || scopeType === 'supervisor');
+  // ── DẢI TAB DÂN SỐ ẨN (chỉ thị 17/09/2026) ──────────────────────────────────────────────────
+  // Trước: `(scopeType === 'truc-tiep' || scopeType === 'supervisor')` — tức Trực tiếp quản lý và
+  // Uỷ quyền đánh giá có dải tab, Phòng ban bên dưới thì không. Chỉ thị ẩn dải đó trên đúng hai
+  // tuyến còn lại, nên biểu thức rút về `false` và cả ba tuyến giờ giống nhau.
+  // `probation = []` bên dưới vẫn chạy như cũ: không có tab thì không có danh sách thử việc để bày.
+  var hasProbationTab = false;
   if (!hasProbationTab) { probation = []; }
 
   var tabName = 'hpb-l1-tab';
@@ -56670,7 +56698,7 @@ function renderScreenCaiDatChuKyChiTiet(props) {
   // Only the PAGE gained the affordance; branch ROWS still carry none. That keeps the older instruction
   // ("I don't need the 'thêm' button at the above layer") intact for the list, where it was about not
   // cluttering every tree row — this is the detail surface for one deliberately-opened unit.
-  var editToggleId = 'cd-edit-team-' + node.id;
+  // `editToggleId` ('cd-edit-team-' + node.id) BỎ cùng nút mở nó — xem ghi chú ngay dưới.
   var addToggleId = 'cd-add-team-' + node.id;
   // TWO actions now (2026-08-10, Figma 8110:31099): "Quyền truy cập" (lock) then the cycle action.
   // Access control is offered on a unit with NO cycle too — delegating who may evaluate a team is
@@ -56679,12 +56707,15 @@ function renderScreenCaiDatChuKyChiTiet(props) {
   var accessBtn = pbUse('button', {
     variant: 'secondary', tag: 'label', forId: 'ac-' + node.id, icon: 'user-gear', label: 'Quyền truy cập'
   });
+  // ── NÚT `Chỉnh sửa` ẨN (chỉ thị 17/09/2026) ──────────────────────────────────────────────────
+  // Cùng đợt với việc ẩn nút `Chỉnh sửa` trên `cai-dat-chu-ky`: sửa chu kỳ của một đơn vị đã cấu
+  // hình không còn là hành động bày trên UI. Một đơn vị CHƯA có chu kỳ vẫn giữ `Thêm chu kỳ` —
+  // thêm và sửa là hai việc khác nhau, chỉ thị chỉ nhắc cái sau.
+  // Bày lại thì trả nhánh `node.config ?` cũ:
+  //   pbUse('button', { variant:'secondary', tag:'label', forId:'cd-edit-team-' + node.id,
+  //                     icon:'edit', label:'Chỉnh sửa' })
   var cycleBtn = node.config
-    // "Chỉnh sửa", not "Chỉnh sửa chu kì": the page title already names the unit and the drawer it
-    // opens names the job. Matches the probation card's own CTA, relabelled the same way this pass.
-    ? pbUse('button', {
-        variant: 'secondary', tag: 'label', forId: editToggleId, icon: 'edit', label: 'Chỉnh sửa'
-      })
+    ? ''
     : pbUse('button', {
         variant: 'primary', tag: 'label', forId: addToggleId, icon: 'plus', label: 'Thêm chu kỳ'
       });
@@ -56810,8 +56841,14 @@ function renderScreenCaiDatChuKyChiTiet(props) {
   // The title drawer is NOT leaf-only. A branch's roster lists chức danh across its descendant leaves
   // and those rows are just as clickable, so gating it on `isLeaf` — as the per-employee drawer it
   // replaces was — would make every branch row a dead click.
-  var drawers = (node.config ? cdNodeEditDrawer(node) : cdNodeAddDrawer(node))
-    + cdTitleEditDrawer(node)
+  // `cdNodeEditDrawer(node)` KHÔNG còn được mount khi đơn vị đã có chu kỳ: nút vừa ẩn ở trên là cửa
+  // DUY NHẤT của `cd-edit-team-<id>` trong toàn sản phẩm (xem ghi chú tại chỗ dựng nút), nên giữ lại
+  // drawer chỉ để lại markup không ai mở được. Bày lại thì trả về `node.config ? cdNodeEditDrawer(node)
+  // : cdNodeAddDrawer(node)` cùng lúc với nút — hai thứ phải đi cùng nhau.
+  var drawers = (node.config ? '' : cdNodeAddDrawer(node))
+    // `cdTitleEditDrawer(node)` KHÔNG còn được mount (chỉ thị 17/09/2026) — cửa duy nhất của nó là
+    // click trên dòng bảng "Chu kỳ chức danh trong phòng ban", đã gỡ cùng lượt ở `cai-dat-chu-ky.js`
+    // (xem ghi chú tại `clickFor` ở đó, nơi ghi đủ ba thứ cần trả lại nếu bày lại).
     + pbUse('access-control-drawer', {
         deptId: node.id, deptName: title, toggleId: 'ac-' + node.id,
         candidates: cdCandidates
