@@ -2342,6 +2342,10 @@
             {
               "label": "Outline primary — nền trắng, viền + chữ + icon cùng bậc primary-hover (Figma: nút 'Đính kèm file')",
               "value": "outline-primary"
+            },
+            {
+              "label": "Success — nền xanh lá, dùng cho nút xác nhận một việc đã hoàn tất",
+              "value": "success"
             }
           ]
         },
@@ -6482,6 +6486,20 @@
           "id": "hidden",
           "type": "boolean",
           "default": false
+        },
+        {
+          "id": "showCancel",
+          "label": "Hiện nút Hủy",
+          "type": "boolean",
+          "default": true,
+          "description": "Mặc định còn nút Hủy. Frame 9162:118061 vẽ footer hai nút nên hieu-suat-cua-toi tắt nó."
+        },
+        {
+          "id": "note",
+          "label": "Câu nhắc cạnh CTA",
+          "type": "string",
+          "default": "",
+          "description": "Rỗng = dùng câu mặc định của pha (Đánh giá: Bạn không thể chỉnh sửa sau khi bấm Hoàn tất). false = tắt."
         }
       ],
       "code": {
@@ -8866,6 +8884,13 @@
           "id": "required",
           "type": "boolean",
           "default": false
+        },
+        {
+          "id": "multiline",
+          "label": "Nhiều dòng",
+          "type": "boolean",
+          "default": false,
+          "description": "Ép ô giá trị thành textarea kể cả khi không có droplist đơn vị. Ô có đơn vị tự chuyển khi chọn Tự nhập, không cần prop này."
         }
       ],
       "code": {
