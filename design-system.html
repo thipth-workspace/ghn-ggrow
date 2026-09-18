@@ -1,4 +1,4 @@
-<!-- pb-shell v1.11.0 · rendered 2026-09-18T06:57:20Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-09-18T09:44:09Z -->
 <!doctype html>
 <!-- pb design-system site — a deterministic projection of registry.json (components + tokens).
      render.py inlines the registry + per-component node JSON and injects the shared runtime plus the
@@ -1280,6 +1280,318 @@ function ggTitleRows(deptId) {
   return rows;
 }
 
+// ══ NỘI DUNG GIẢ LẬP CHO PHA THIẾT LẬP (chỉ thị 18/09/2026) ═══════════════════════════════════
+// Chỉ thị: giả lập nội dung Thiết lập tới cấp CHỨC DANH, hình dạng hai mục tiêu chính trong đó
+// mục tiêu chính một có hai mục tiêu phụ, và CHỈ hiện ở chế độ đọc.
+//
+// ── VÌ SAO TÁCH LÀM HAI BẢNG, KHÔNG PHẢI MỘT ───────────────────────────────────────────────
+// Có bốn hai cặp phòng ban × chức danh trong cây tổ chức. Soạn thẳng từng cặp là hơn một nghìn
+// chuỗi, và hai mươi sáu chức danh trải nhiều phòng sẽ phải chép đi chép lại.
+// Tách hai tầng thì khác biệt theo cặp TỰ NẢY SINH từ bốn mươi cộng bốn mươi sáu đầu vào:
+//   · MỤC TIÊU CHÍNH  lấy nguyên `kpiCriteria` THẬT của phòng ban — mỗi phòng đúng hai tiêu chí,
+//     tỷ trọng có sẵn và đã cộng đúng một trăm, nên `BR-04` thoả mà không phải đặt số.
+//   · MỤC TIÊU PHỤ   soạn theo chức danh, hai mục cho mỗi chức danh.
+// Một `Giám sát viên` ở Kho và ở Bưu cục vì vậy nhận mục tiêu chính khác nhau mà chỉ cần một
+// dòng khai duy nhất.
+//
+// ĐƠN VỊ LÀ `NONE` Ở MỌI MỤC: chỉ tiêu ở đây viết thành câu, không phải con số. Gán một đơn vị
+// kiểu số cho một câu chính là lỗi `BR-10` mà `unit-field` đang chặn ở tầng render.
+//
+// ĐÂY LÀ NỘI DUNG SOẠN ĐỂ DEMO, không phải KPI thật của GHN. Tên tiêu chí cấp phòng ban thì lấy
+// từ dữ liệu sẵn có; phần chỉ tiêu và toàn bộ mục tiêu phụ là do dựng ra và đã được chủ sản phẩm
+// duyệt cho mục đích giả lập.
+
+// Chỉ tiêu cho ba mươi tiêu chí phòng ban khác nhau. Khoá là ĐÚNG CHUỖI tên tiêu chí trong
+// `kpiCriteria`, nên thêm một phòng ban mới mà quên khai ở đây thì ô Chỉ tiêu rỗng chứ không vỡ.
+var GG_CRIT_TARGET = {
+  'Tỷ lệ tính năng bàn giao đúng hạn': 'Từ 90% trở lên',
+  'Chất lượng tài liệu đặc tả': 'Không có mục thiếu khi Dev rà soát',
+  'Tỷ lệ màn hình bàn giao đúng Design System': 'Từ 95% trở lên',
+  'Số vòng chỉnh sửa trung bình mỗi màn': 'Dưới 2 vòng mỗi màn',
+  'Số lỗi nghiệp vụ phát hiện sau release': 'Tối đa 2 lỗi mỗi chu kỳ',
+  'Mức hoàn thành mục tiêu khối': 'Từ 90% kế hoạch khối',
+  'Chất lượng báo cáo điều hành': 'Không có báo cáo trễ hạn',
+  'Sản lượng xử lý mỗi ca': 'Đạt định mức ca được giao',
+  'Tỷ lệ hàng hoá thất lạc': 'Dưới 0,1% sản lượng',
+  'Mức hoàn thành sản lượng vùng': 'Từ 95% kế hoạch vùng',
+  'Tỷ lệ bưu cục đạt chỉ tiêu': 'Từ 80% số bưu cục',
+  'Mức hoàn thành sản lượng cụm': 'Từ 95% kế hoạch cụm',
+  'Tỷ lệ giao thành công': 'Từ 97% trở lên',
+  'Thời gian giao trung bình': 'Trong 24 giờ kể từ khi nhận',
+  'Tiến độ hạng mục dự án': 'Đúng mốc từng hạng mục',
+  'Kiểm soát chi phí dự án': 'Không vượt ngân sách đã duyệt',
+  'Tỷ lệ hoàn thành dự án vận hành': 'Từ 90% số đầu việc',
+  'Tỷ lệ tuân thủ quy trình': 'Từ 98% trở lên',
+  'Tỷ lệ lấp đầy nhân sự đúng hạn': 'Từ 90% chỉ tiêu tuyển',
+  'Tỷ lệ nghỉ việc trong 3 tháng đầu': 'Dưới 10%',
+  'Doanh số ký mới': 'Đạt chỉ tiêu doanh số chu kỳ',
+  'Tỷ lệ giữ chân khách hàng': 'Từ 90% trở lên',
+  'Số khách hàng tiềm năng tạo ra': 'Đạt chỉ tiêu chu kỳ',
+  'Chi phí trên mỗi khách hàng tiềm năng': 'Không vượt định mức đã duyệt',
+  'Độ chính xác kỳ lương': 'Không có sai sót phải điều chỉnh',
+  'Thời gian xử lý đề nghị phúc lợi': 'Trong 3 ngày làm việc',
+  'Mức cạnh tranh gói đãi ngộ': 'Đạt mức tham chiếu thị trường',
+  'Tỷ lệ chấp nhận thư mời làm việc': 'Từ 85% trở lên',
+  'Mức hài lòng của đơn vị phụ trách': 'Từ 4 trên 5 điểm',
+  'Thời gian xử lý vụ việc nhân sự': 'Trong 5 ngày làm việc'
+};
+
+// Hai mục tiêu phụ cho mỗi chức danh. Khoá là ĐÚNG CHUỖI `title` trong `GG_DEPTS`.
+// Chức danh chưa khai ở đây thì mục tiêu chính một không có mục tiêu phụ — thẻ vẫn hợp lệ, chỉ
+// là hình dạng khác; xem nhánh dự phòng trong `ggSetupRowsFor`.
+// Tỷ trọng hai mục tiêu phụ cố định sáu mươi / bốn mươi nên `BR-05` thoả theo kiến tạo.
+var GG_TITLE_SUBGOALS = {
+  'Chuyên viên C&B': [
+    { name: 'Chốt bảng lương và các khoản khấu trừ đúng kỳ', target: 'Đúng hạn mọi kỳ' },
+    { name: 'Giải đáp thắc mắc lương và phúc lợi cho nhân viên', target: 'Trong 2 ngày làm việc' }
+  ],
+  'Chuyên viên chăm sóc khách hàng': [
+    { name: 'Xử lý yêu cầu và khiếu nại của khách hàng được giao', target: 'Trong 24 giờ' },
+    { name: 'Gọi chăm sóc định kỳ nhóm khách hàng phụ trách', target: 'Mỗi tháng một lượt' }
+  ],
+  'Chuyên viên dự án': [
+    { name: 'Theo dõi tiến độ hạng mục và cập nhật kế hoạch', target: 'Cập nhật hằng tuần' },
+    { name: 'Tổng hợp hồ sơ nghiệm thu từng hạng mục', target: 'Đủ hồ sơ trước nghiệm thu' }
+  ],
+  'Chuyên viên điều phối': [
+    { name: 'Lập kế hoạch điều phối xe và nhân lực theo ca', target: 'Trước mỗi ca làm việc' },
+    { name: 'Xử lý phát sinh điều phối trong ca', target: 'Trong 30 phút kể từ khi báo' }
+  ],
+  'Chuyên viên HRBP': [
+    { name: 'Nắm bắt nhu cầu nhân sự của đơn vị phụ trách', target: 'Gặp định kỳ mỗi tháng' },
+    { name: 'Hỗ trợ xử lý vụ việc nhân sự phát sinh', target: 'Trong 5 ngày làm việc' }
+  ],
+  'Chuyên viên kiểm thử': [
+    { name: 'Viết và chạy bộ kiểm thử cho tính năng được giao', target: 'Phủ hết luồng chính' },
+    { name: 'Xác minh lại lỗi sau khi Dev sửa', target: 'Trong 1 ngày làm việc' }
+  ],
+  'Chuyên viên kinh doanh': [
+    { name: 'Tiếp cận và chốt hợp đồng khách hàng mới', target: 'Đạt chỉ tiêu ký mới chu kỳ' },
+    { name: 'Duy trì liên hệ với khách hàng đang phục vụ', target: 'Mỗi tháng một lượt' }
+  ],
+  'Chuyên viên nhân sự': [
+    { name: 'Hoàn tất thủ tục tiếp nhận nhân sự mới', target: 'Trong 3 ngày kể từ ngày nhận việc' },
+    { name: 'Cập nhật hồ sơ và dữ liệu nhân sự của đơn vị', target: 'Không sai lệch khi đối soát' }
+  ],
+  'Chuyên viên nội dung': [
+    { name: 'Sản xuất nội dung cho các chiến dịch trong kỳ', target: 'Đủ số bài theo kế hoạch' },
+    { name: 'Biên tập và chuẩn hoá nội dung trước khi đăng', target: 'Đúng bộ nhận diện, không lỗi chính tả' }
+  ],
+  'Chuyên viên phân tích dữ liệu': [
+    { name: 'Xây dựng báo cáo dữ liệu định kỳ cho đơn vị', target: 'Đúng lịch phát hành' },
+    { name: 'Kiểm tra chất lượng nguồn dữ liệu đầu vào', target: 'Rà soát mỗi tháng' }
+  ],
+  'Chuyên viên phân tích nghiệp vụ': [
+    { name: 'Làm rõ yêu cầu và viết tài liệu đặc tả', target: 'Đủ mục trước khi vào phát triển' },
+    { name: 'Rà soát nghiệm thu theo đúng yêu cầu đã chốt', target: 'Trước mỗi lần bàn giao' }
+  ],
+  'Chuyên viên phân tích vận hành': [
+    { name: 'Phân tích số liệu vận hành và chỉ ra điểm nghẽn', target: 'Mỗi tháng một báo cáo' },
+    { name: 'Đề xuất phương án cải tiến cho đơn vị vùng', target: 'Tối thiểu 2 đề xuất mỗi chu kỳ' }
+  ],
+  'Chuyên viên sản phẩm': [
+    { name: 'Mô tả yêu cầu tính năng và tiêu chí nghiệm thu', target: 'Trước khi mở phát triển' },
+    { name: 'Theo dõi phản hồi người dùng sau phát hành', target: 'Tổng hợp sau mỗi lần phát hành' }
+  ],
+  'Chuyên viên thiết kế': [
+    { name: 'Hoàn thành wireframe và bản thiết kế cho luồng được giao', target: 'Đúng lịch bàn giao' },
+    { name: 'Bàn giao design spec cho đội phát triển', target: 'Đủ thông số trước khi dựng' }
+  ],
+  'Chuyên viên tiền lương': [
+    { name: 'Tính lương và các khoản chi trả theo kỳ', target: 'Đúng hạn mọi kỳ' },
+    { name: 'Đối soát dữ liệu chấm công trước khi chốt lương', target: 'Không sai lệch khi chốt' }
+  ],
+  'Chuyên viên tiếp thị': [
+    { name: 'Triển khai chiến dịch tiếp thị theo kế hoạch kỳ', target: 'Đủ số chiến dịch đã duyệt' },
+    { name: 'Theo dõi hiệu quả chiến dịch và điều chỉnh', target: 'Báo cáo sau mỗi chiến dịch' }
+  ],
+  'Chuyên viên Total Reward': [
+    { name: 'Khảo sát và cập nhật dữ liệu đãi ngộ thị trường', target: 'Mỗi chu kỳ một lần' },
+    { name: 'Dựng phương án đãi ngộ cho vị trí tuyển mới', target: 'Trước khi mở tuyển' }
+  ],
+  'Chuyên viên tổng hợp': [
+    { name: 'Tổng hợp số liệu và dựng báo cáo điều hành của khối', target: 'Đúng lịch phát hành' },
+    { name: 'Theo dõi tiến độ đầu việc của các đơn vị trực thuộc', target: 'Cập nhật hằng tuần' }
+  ],
+  'Chuyên viên tuyển dụng': [
+    { name: 'Tìm nguồn và sàng lọc ứng viên cho chỉ tiêu được giao', target: 'Đủ ứng viên cho mỗi vị trí' },
+    { name: 'Tổ chức phỏng vấn và theo dõi đến khi nhận việc', target: 'Đúng hạn từng vị trí' }
+  ],
+  'Chuyên viên vận hành': [
+    { name: 'Giám sát hoạt động vận hành hằng ngày của vùng', target: 'Không bỏ sót ca trực' },
+    { name: 'Xử lý sự cố vận hành phát sinh', target: 'Ngay trong ca phát sinh' }
+  ],
+  'Chuyên viên xử lý bậc 1': [
+    { name: 'Tiếp nhận và xử lý yêu cầu ở mức cơ bản', target: 'Trong 4 giờ làm việc' },
+    { name: 'Chuyển tiếp đúng tuyến các ca vượt thẩm quyền', target: 'Không chuyển sai tuyến' }
+  ],
+  'Chuyên viên xử lý bậc 2': [
+    { name: 'Xử lý các ca phức tạp được chuyển lên', target: 'Trong 1 ngày làm việc' },
+    { name: 'Đúc rút phương án xử lý thành hướng dẫn', target: 'Mỗi tháng một hướng dẫn' }
+  ],
+  'Điều phối viên': [
+    { name: 'Phân tuyến và giao việc cho nhân viên trong ca', target: 'Trước giờ xuất phát' },
+    { name: 'Theo dõi tiến độ tuyến và điều chỉnh khi phát sinh', target: 'Xử lý ngay trong ca' }
+  ],
+  'Giám đốc cụm': [
+    { name: 'Điều hành sản lượng và chất lượng giao nhận của cụm', target: 'Đạt kế hoạch cụm' },
+    { name: 'Kèm cặp đội ngũ trưởng bưu cục trực thuộc', target: 'Mỗi tháng một lượt làm việc' }
+  ],
+  'Giám đốc dự án': [
+    { name: 'Điều phối tiến độ và nguồn lực toàn dự án', target: 'Đúng mốc đã duyệt' },
+    { name: 'Kiểm soát rủi ro và báo cáo cho ban điều hành', target: 'Báo cáo định kỳ hằng tháng' }
+  ],
+  'Giám đốc khối': [
+    { name: 'Dẫn dắt khối đạt mục tiêu chu kỳ', target: 'Đạt kế hoạch khối' },
+    { name: 'Phát triển đội ngũ quản lý kế cận', target: 'Mỗi quý một lượt rà soát' }
+  ],
+  'Giám đốc sản phẩm': [
+    { name: 'Định hướng lộ trình sản phẩm cho chu kỳ', target: 'Chốt lộ trình trước kỳ' },
+    { name: 'Đưa sản phẩm ra thị trường đúng kế hoạch', target: 'Đúng mốc phát hành' }
+  ],
+  'Giám đốc vùng': [
+    { name: 'Điều hành sản lượng và chi phí vận hành của vùng', target: 'Đạt kế hoạch vùng' },
+    { name: 'Giám sát chất lượng dịch vụ các cụm trực thuộc', target: 'Rà soát hằng tháng' }
+  ],
+  'Giám sát viên': [
+    { name: 'Giám sát tuân thủ quy trình tại đơn vị phụ trách', target: 'Kiểm tra mỗi tuần' },
+    { name: 'Kèm cặp và nhắc việc cho nhân viên trong ca', target: 'Không bỏ sót ca trực' }
+  ],
+  'HRBP': [
+    { name: 'Đồng hành cùng quản lý đơn vị về công tác nhân sự', target: 'Gặp định kỳ mỗi tháng' },
+    { name: 'Triển khai chính sách nhân sự xuống đơn vị', target: 'Đúng thời hạn ban hành' }
+  ],
+  'Kỹ sư hiện trường': [
+    { name: 'Giám sát thi công hạng mục tại công trường', target: 'Có mặt đủ theo lịch thi công' },
+    { name: 'Nghiệm thu kỹ thuật trước khi bàn giao hạng mục', target: 'Đủ biên bản trước bàn giao' }
+  ],
+  'Nhân viên giao nhận': [
+    { name: 'Giao và nhận hàng theo tuyến được phân', target: 'Đủ đơn trong ca' },
+    { name: 'Cập nhật trạng thái đơn hàng trên hệ thống', target: 'Ngay khi phát sinh' }
+  ],
+  'Nhân viên kho': [
+    { name: 'Nhập xuất và sắp xếp hàng hoá trong kho', target: 'Đúng định mức ca' },
+    { name: 'Kiểm đếm tồn kho theo lịch', target: 'Không lệch khi đối soát' }
+  ],
+  'Quản lý dự án': [
+    { name: 'Lập và theo dõi kế hoạch triển khai dự án', target: 'Cập nhật hằng tuần' },
+    { name: 'Điều phối các bên liên quan và gỡ vướng', target: 'Xử lý trong 2 ngày làm việc' }
+  ],
+  'Quản lý sản phẩm': [
+    { name: 'Xây dựng và ưu tiên danh sách tính năng theo kỳ', target: 'Chốt trước mỗi kỳ' },
+    { name: 'Phối hợp các bên đưa tính năng ra đúng hạn', target: 'Đúng mốc đã cam kết' }
+  ],
+  'Quản lý thiết kế': [
+    { name: 'Rà soát thiết kế trước khi bàn giao', target: 'Toàn bộ màn hình được rà soát' },
+    { name: 'Chuẩn hoá và mở rộng Design System', target: 'Mỗi chu kỳ một đợt cập nhật' }
+  ],
+  'Trợ lý khối': [
+    { name: 'Hỗ trợ điều phối lịch và tài liệu của khối', target: 'Không sót đầu việc được giao' },
+    { name: 'Tổng hợp thông tin phục vụ họp điều hành', target: 'Trước mỗi kỳ họp' }
+  ],
+  'Trưởng bưu cục': [
+    { name: 'Điều hành hoạt động giao nhận tại bưu cục', target: 'Đạt chỉ tiêu bưu cục' },
+    { name: 'Quản lý và đào tạo nhân sự tại bưu cục', target: 'Mỗi tháng một buổi' }
+  ],
+  'Trưởng kho': [
+    { name: 'Điều hành hoạt động nhập xuất của kho', target: 'Đạt định mức sản lượng' },
+    { name: 'Kiểm soát an toàn và tồn kho', target: 'Không phát sinh mất mát' }
+  ],
+  'Trưởng nhóm C&B': [
+    { name: 'Điều phối công tác lương thưởng của nhóm', target: 'Đúng hạn mọi kỳ' },
+    { name: 'Rà soát chính sách lương thưởng hiện hành', target: 'Mỗi chu kỳ một lượt' }
+  ],
+  'Trưởng nhóm HRBP': [
+    { name: 'Phân công và giám sát địa bàn phụ trách của nhóm', target: 'Phủ hết đơn vị được giao' },
+    { name: 'Xử lý vụ việc vượt thẩm quyền chuyên viên', target: 'Trong 5 ngày làm việc' }
+  ],
+  'Trưởng nhóm Total Reward': [
+    { name: 'Điều phối khảo sát và thiết kế gói đãi ngộ', target: 'Hoàn tất trong chu kỳ' },
+    { name: 'Tư vấn phương án đãi ngộ cho các khối', target: 'Phản hồi trong 3 ngày làm việc' }
+  ],
+  'Trưởng phòng': [
+    { name: 'Điều hành đầu việc của phòng theo kế hoạch kỳ', target: 'Đạt kế hoạch phòng' },
+    { name: 'Đánh giá và phát triển nhân sự trong phòng', target: 'Mỗi chu kỳ một lượt' }
+  ],
+  'Trưởng phòng kinh doanh': [
+    { name: 'Dẫn dắt đội ngũ đạt chỉ tiêu doanh số', target: 'Đạt chỉ tiêu phòng' },
+    { name: 'Mở rộng và giữ quan hệ với khách hàng trọng điểm', target: 'Gặp định kỳ mỗi tháng' }
+  ],
+  'Trưởng phòng nhân sự': [
+    { name: 'Điều hành công tác nhân sự của đơn vị phụ trách', target: 'Đạt kế hoạch nhân sự' },
+    { name: 'Kiểm soát chất lượng tuyển dụng và giữ chân', target: 'Rà soát hằng tháng' }
+  ],
+  'Trưởng phòng tiếp thị': [
+    { name: 'Hoạch định và điều phối các chiến dịch trong kỳ', target: 'Đủ chiến dịch theo kế hoạch' },
+    { name: 'Kiểm soát hiệu quả và chi phí tiếp thị', target: 'Không vượt ngân sách đã duyệt' }
+  ]
+};
+
+// ── CHỈ SỐ TIÊU CHÍ PHÒNG BAN, DỰNG MỘT LẦN ─────────────────────────────────────────────────────
+// `kpiCriteria` nằm trong seed của màn Hiệu suất phòng ban, KHÔNG nằm ở file này. Không đọc qua
+// `pbAppStore().manager` được: hàm này chạy TRONG lúc gieo kho, nên slice kia có thể chưa có.
+// Gọi thẳng hàm gieo — nó thuần tuý, trả về mảng mới mỗi lần — rồi nhớ kết quả, vì nó dựng cả bốn
+// mươi phòng kèm nhân sự và một bản gieo sẽ hỏi nó hai trăm lẻ tám lượt.
+var GG_CRIT_INDEX = null;
+function ggDeptCriteria(deptId) {
+  if (GG_CRIT_INDEX === null) {
+    GG_CRIT_INDEX = {};
+    if (typeof hpbSeedDepartments === 'function') {
+      var ds = hpbSeedDepartments() || [];
+      for (var i = 0; i < ds.length; i++) { GG_CRIT_INDEX[ds[i].id] = ds[i].kpiCriteria || []; }
+    }
+  }
+  return GG_CRIT_INDEX[deptId] || [];
+}
+
+// ── DỰNG BỘ THIẾT LẬP CHO MỘT CẶP PHÒNG BAN × CHỨC DANH ─────────────────────────────────────────
+// Hình dạng chốt theo chỉ thị: ĐÚNG hai mục tiêu chính, mục tiêu chính một có hai mục tiêu phụ,
+// mục tiêu chính hai không có mục tiêu phụ nào.
+//
+// Mục tiêu chính hai không có mục tiêu phụ là CÓ CHỦ ĐÍCH chứ không phải cho gọn: `BR-03` nói mục
+// tiêu không có mục tiêu phụ thì được chấm trực tiếp và chỉ tiêu chính thành bắt buộc. Giữ một mục
+// như vậy trong mọi bộ nghĩa là nhánh bố cục đó luôn có mặt để xem.
+//
+// TỶ TRỌNG KHÔNG DO ĐÂY ĐẶT: lấy nguyên `weight` của hai tiêu chí phòng ban, vốn đã cộng đúng một
+// trăm ở cả bốn mươi phòng. Phòng nào chưa khai tiêu chí thì trả mảng rỗng — đúng trạng thái "chưa
+// thiết lập tiêu chí" mà một phòng đang cố ý demo, không bịa ra một bộ để lấp chỗ.
+function ggSetupRowsFor(deptId, title) {
+  var crit = ggDeptCriteria(deptId);
+  if (crit.length < 2) { return []; }
+  var tg = function (c) { return GG_CRIT_TARGET[c.criteria] || ''; };
+  var subs = GG_TITLE_SUBGOALS[title] || null;
+  var sub = [];
+  if (subs && subs.length === 2) {
+    sub = [
+      pbKpiSubGoal('s1', subs[0].name, subs[0].target, 'NONE', 60),
+      pbKpiSubGoal('s2', subs[1].name, subs[1].target, 'NONE', 40)
+    ];
+  }
+  return [
+    pbKpiRow('k1', crit[0].criteria, crit[0].weight, 'NONE', tg(crit[0]),
+      null, 'Chưa chấm', 0, { subGoals: sub }),
+    pbKpiRow('k2', crit[1].criteria, crit[1].weight, 'NONE', tg(crit[1]),
+      null, 'Chưa chấm', 0)
+  ];
+}
+
+// ── AI ĐƯỢC GIEO BỘ THIẾT LẬP ĐÃ DUYỆT ──────────────────────────────────────────────────────────
+// Trả về danh sách `{employeeId, deptId, title}` của MỌI nhân sự trong cây tổ chức. Người gọi lọc
+// tiếp; ở đây không biết gì về persona.
+function ggAllStaff() {
+  var out = [];
+  for (var i = 0; i < GG_DEPTS.length; i++) {
+    var d = GG_DEPTS[i];
+    var em = d.employees || [];
+    for (var j = 0; j < em.length; j++) {
+      if (em[j] && em[j].id && em[j].title) {
+        out.push({ employeeId: em[j].id, deptId: d.id, title: em[j].title });
+      }
+    }
+  }
+  return out;
+}
+
     window["renderCmpGgrowData"] = renderCmpGgrowData;
 function renderCmpUnitSelect(props) {
   props = props || {};
@@ -1651,15 +1963,19 @@ function renderCmpReviewPanel(props) {
   var id = props.id || ('rvp-' + Math.random().toString(36).slice(2, 8));
   var ro = props.readOnly === true;
   var who = props.editable || 'none';
-  // ── QUẢN LÝ THAO TÁC ĐƯỢC CẢ HAI CỘT (chỉ thị 13/09/2026) ─────────────────────────────────
-  // Đây là cách hiện thực `BR-13` ("quản lý luôn được quyền bỏ qua bước nhân viên tự chấm") mà
-  // không cần thêm một nút "Bỏ qua" và một nhánh trạng thái: nhân viên trễ hạn thì quản lý điền
-  // hộ ngay trên cột của nhân viên rồi chấm tiếp cột của mình.
-  // CỘT SỐNG ≠ CỘT BẮT BUỘC. `BR-11` ràng buộc "người đang gửi", nên cột nhân viên mở cho quản lý
-  // là một TIỆN ÍCH, không phải nghĩa vụ — nếu bắt buộc luôn thì quản lý không chốt điểm được cho
-  // tới khi tự viết hộ phần tự đánh giá, đúng thứ `BR-13` muốn tránh. `actor` dưới đây là thứ
-  // `review-box` dùng để phân biệt hai chuyện đó.
-  var selfLive = !ro && (who === 'employee' || who === 'manager');
+  // ── MỖI VAI CHỈ GÕ ĐƯỢC CỘT CỦA MÌNH (chỉ thị 18/09/2026) ─────────────────────────────────
+  // ĐẢO chỉ thị 13/09 vốn mở cả hai cột cho quản lý. Lập luận cũ là hiện thực `BR-13` ("quản lý
+  // luôn được quyền bỏ qua bước nhân viên tự chấm") bằng cách cho quản lý điền hộ khi nhân viên
+  // trễ hạn — ĐỌC LẠI SPEC thì đó là suy diễn quá tay: mục 247 mô tả thao tác của quản lý là
+  // "nhập kết quả và tỉ lệ hoàn thành Ở CỘT CỦA MÌNH", còn `BR-13` chỉ nói quản lý không bị KẸT
+  // chờ nhân viên. Hai chuyện khác nhau, và bản cũ gộp làm một.
+  //
+  // `BR-13` KHÔNG MẤT: quản lý vẫn vào chấm được khi nhân viên chưa nhập gì, cột nhân viên chỉ là
+  // chữ để đọc đối chiếu. Cái mất là quyền GÕ HỘ — thứ spec chưa bao giờ cấp.
+  //
+  // Dòng này nay khớp `overall-review` (đã là `who === 'employee'` từ trước), nên hai khối không
+  // còn hiểu chữ "cột sống" theo hai kiểu.
+  var selfLive = !ro && who === 'employee';
   var mgrLive = !ro && who === 'manager';
 
   // ── HAI KHỐI NỀN SUBTLE, KHÔNG VỎ BỌC, KHÔNG VẠCH NGĂN (dựng lại 2026-09-11) ───────────────
@@ -1712,7 +2028,7 @@ function renderCmpReviewPanel(props) {
   //
   // NGƯỜI ĐIỀN LÀ NHÂN VIÊN (chỉ thị). Nên ô giữ nguyên id `<id>-result` — CÙNG id mà nửa nhân viên
   // vẫn dùng — và `pbKpiReadObjectiveCards` không phải đổi một dòng nào để tiếp tục đọc đúng chỗ.
-  // Quyền gõ đi theo `selfLive`, tức vẫn giữ `BR-13`: quản lý điền hộ được khi nhân viên trễ hạn.
+  // Quyền gõ đi theo `selfLive`, tức CHỈ nhân viên — xem khối lý do ở đầu hàm.
   //
   // Khối tháng bám theo ô này, không nhân đôi nữa — và chỉ có ở đây nó mới đủ bề ngang để ba ô
   // `Kết quả Tháng` nằm trên một hàng như frame vẽ (trong cột 210 chúng luôn wrap xuống ba dòng).
@@ -1768,7 +2084,7 @@ function renderCmpReviewPanel(props) {
         label: period.resultLabel || 'Kết quả',
         rows: 1,
         required: !ro && selfLive,
-        value: props.selfResult, placeholder: 'Bạn tự đánh giá kết quả như thế nào?',
+        value: props.selfResult, placeholder: PB_RESULT_HINT,
         readOnly: ro, state: (!ro && !selfLive) ? 'disabled' : undefined,
         onBlur: (!ro && selfLive) ? 'pbOverallSync(this)' : undefined
       })
@@ -14417,7 +14733,7 @@ function renderCmpActionFooter(props) {
   return '<div class="pb-actfoot" aria-label="Thao tác" style="position:sticky;bottom:0;z-index:20;'
     // KHÔNG `role="contentinfo"` (mục 14.7): đây là thanh hành động, không phải footer của trang.
     + 'margin-top:var(--space-xs);width:100%;box-sizing:border-box;'
-    + 'padding:' + (props.padding || 'var(--space-md)') + ';'
+    + 'padding:' + (props.padding || 'var(--space-sm)') + ';'
     + 'background:var(--bg-app-base-white);box-shadow:var(--shadow-inverse-md)">'
     + '<style>.pb-actfoot [aria-busy="true"] svg{animation:pb-actfoot-spin .9s linear infinite}'
     + '@keyframes pb-actfoot-spin{to{transform:rotate(360deg)}}</style>'
@@ -19482,6 +19798,59 @@ function pbKpiSetsForDemoPair() {
     if (!rows.length) { continue; }
     out = out.concat(pbKpiDemoPairFor(me.employeeId, rows));
   }
+  return out.concat(pbKpiSetupSetsForStaff(seen));
+}
+
+// ══ BỘ THIẾT LẬP ĐÃ DUYỆT CHO PHẦN CÒN LẠI CỦA CÔNG TY (chỉ thị 18/09/2026) ════════════════════
+// Bốn persona ở trên giữ nguyên: bộ Thiết lập của họ `draft` và RỖNG, để luồng soạn-rồi-gửi vẫn
+// demo được trạng thái empty mà chỉ thị 17/09 đòi. Hai trăm lẻ tư người còn lại nhận một bộ CÓ
+// NỘI DUNG, đóng dấu `approved`.
+//
+// `phase: 'approved'` LÀ CẢ CƠ CHẾ, không phải một nhãn: `pbCanEditSet` chặn `approved` ngay dòng
+// đầu, và `pbCanEditSetSim` — bản nới quyền dựng cho demo — cũng chừa đúng hai trạng thái
+// `approved` / `closed`. Nên nội dung này chỉ có đường hiện ở CHẾ ĐỘ ĐỌC, đúng phạm vi được giao,
+// mà không phải thêm một cờ mới nào cho tầng render.
+//
+// ── GIEO CẢ HAI PHA, KHÔNG CHỈ THIẾT LẬP (sửa 18/09/2026) ──────────────────────────────────────
+// Bản đầu chỉ gieo pha Thiết lập vì tôi đọc "chỉ giả lập nội dung Thiết lập ở view mode" thành
+// "chỉ gieo pha Thiết lập". Đọc đúng thì câu đó giới hạn CHẾ ĐỘ HIỂN THỊ của pha Thiết lập, không
+// giới hạn phạm vi gieo: tab Đánh giá cũng phải có mục tiêu để mà chấm.
+//
+// CÙNG MỘT BỘ MỤC TIÊU cho cả hai pha, hai bản sao SÂU. Đây là cùng một thoả thuận đầu kỳ được
+// mang sang cuối kỳ để chấm, nên hai pha nói hai bộ mục tiêu khác nhau mới là sai.
+//
+// HAI TRẠNG THÁI KHÁC NHAU, và đó là toàn bộ điểm khác biệt:
+//   · Thiết lập → `approved`, khoá cứng, chỉ-đọc (phạm vi được giao)
+//   · Đánh giá  → `self-review`, gõ được, để luồng chấm điểm chạy thật
+//
+// ĐIỂM VÀ NHẬN XÉT ĐỂ RỖNG ở pha Đánh giá. Chỉ thị nói giả lập "nội dung các mục tiêu", không nói
+// điểm; và một con số tự nghĩ ra kèm nhận xét khớp với nó là thứ `CLAUDE.md` cấm thẳng. Chu kỳ
+// đang ở pha nhân viên tự chấm mà chưa ai nhập — một trạng thái thật, không phải chỗ trống bỏ sót.
+function pbKpiSetupSetsForStaff(skip) {
+  var staff = (typeof ggAllStaff === 'function') ? ggAllStaff() : [];
+  var cycSetup = ggCycleIdOf('setup');
+  var cycReview = ggCycleIdOf('review');
+  var out = [];
+  for (var i = 0; i < staff.length; i++) {
+    var p = staff[i];
+    if (skip && skip[p.employeeId]) { continue; }
+    var rows = ggSetupRowsFor(p.deptId, p.title);
+    // Phòng chưa khai tiêu chí thì không có gì để dựng. Bỏ qua hẳn thay vì gieo bản ghi rỗng —
+    // cùng lập luận với nhánh persona ngay trên: một bản ghi rỗng đã đóng dấu `approved` sẽ khoá
+    // luôn cả đường tạo mới, và trang vừa rỗng vừa không sửa được.
+    if (!rows.length) { continue; }
+    var mk = function (cycleId, status, phase, src) {
+      return {
+        employeeId: p.employeeId, cycleId: cycleId, origin: 'employee',
+        status: status, phase: phase,
+        rows: JSON.parse(JSON.stringify(src)),
+        approvedRows: null, lockedBy: null, lastRejection: null, submittedAt: null,
+        selfAssessment: pbAssessmentBlank(), managerAssessment: pbAssessmentBlank()
+      };
+    };
+    out.push(mk(cycSetup, 'approved', 'approved', rows));
+    out.push(mk(cycReview, 'draft', 'self-review', rows));
+  }
   return out;
 }
 
@@ -19653,6 +20022,14 @@ function pbKpiSetEnsure(employeeId, cycleId, origin) {
 // its key and its meaning. `pbAssessmentGet` reads `strengths` as a fallback for `good` so a session
 // store persisted under the old shape (or employee-detail-drawer.js's own evidence.selfAssessment
 // literals, which still use `strengths`) still renders instead of silently blanking.
+// ── CÂU NHẮC CỦA MỌI Ô `Kết quả` (chỉ thị 18/09/2026) ─────────────────────────────────────────
+// Ô `Kết quả` cấp chu kỳ (`review-panel`) và ba ô tháng (`field-result`) nằm sát nhau và đòi CÙNG
+// một thứ. Chú thích của `field-result` từ 15/09 đã dặn đúng điều đó — "hai câu nhắc khác nhau cho
+// cùng một việc làm người đọc tưởng hai ô đòi hai thứ khác nhau" — nhưng câu chữ vẫn nằm ở hai
+// file, nên khi ô cấp chu kỳ đổi câu hôm nay thì ba ô tháng lặng lẽ tụt lại.
+// Một chỗ khai duy nhất thì lần đổi sau không thể lệch nữa.
+var PB_RESULT_HINT = 'Bạn tự đánh giá kết quả như thế nào?';
+
 var PB_ASSESS_TOPICS = [
   // Nhãn đổi 2026-09-10 sang wording của bộ frame "Thiết lập & Đánh giá" (Đã làm tốt / Cần cải
   // thiện / Cần hỗ trợ) — quyết định #9 của người dùng: Figma thắng. KEY GIỮ NGUYÊN, nên toàn bộ dữ
@@ -28174,10 +28551,10 @@ function renderCmpFieldResult(props) {
       // KHÔNG `required`: `BR-24` cho phép để trống, và một dấu sao ở đây sẽ kéo ô tháng vào cổng
       // chặn gửi qua mốc `data-obj-req` mà atom tự gắn kèm khi ô bắt buộc.
       value: m.value,
-      // `Nhập nội dung`, không phải `Nhập kết quả` (chỉ thị 15/09/2026): ô này nằm ngay dưới ô
-      // `Kết quả` cấp chu kỳ vốn đã dùng câu đó. Hai câu nhắc khác nhau cho cùng một việc làm
-      // người đọc tưởng hai ô đòi hai thứ khác nhau.
-      placeholder: 'Nhập nội dung',
+      // CÙNG CÂU với ô `Kết quả` cấp chu kỳ ngay phía trên — lý do giữ nguyên từ 15/09: hai câu
+      // nhắc khác nhau cho cùng một việc làm người đọc tưởng hai ô đòi hai thứ khác nhau. Nay đọc
+      // từ `PB_RESULT_HINT` thay vì chép chuỗi, để hai nơi không thể lệch lần nữa.
+      placeholder: PB_RESULT_HINT,
       state: dis ? 'disabled' : undefined
     });
   }).join('');
@@ -33318,7 +33695,7 @@ function renderScreenChiTietNhanVien(props) {
     // `emptyReview` trong `hcpFooter` ở `hieu-suat-cua-toi.js`. Không có mục tiêu nào thì không có
     // gì để lưu và không gửi được; nút thêm đã nằm trong thẻ rỗng.
     hidden: !editable || !((goalSet.rows || []).length),
-    padding: 'var(--space-md)',
+    padding: 'var(--space-sm)',
     onSaveDraft: "ctnvSave(this)",
     onSubmit: "ctnvSubmit(this)"
   });
@@ -35182,7 +35559,7 @@ function renderScreenHieuSuatCuaToi(props) {
       // Cùng phép kiểm với `canEdit` ở trên — hai chỗ lệch nhau nghĩa là form gõ được mà thanh
       // hành động biến mất, hoặc ngược lại.
       hidden: emptyReview || !hcpCanEdit(hcpSetFor(phaseKey), phaseKey),
-      padding: 'var(--space-md)',
+      padding: 'var(--space-sm)',
       onSaveDraft: "hcpSave('" + phaseKey + "',this)",
       onSubmit: "hcpSubmit('" + phaseKey + "',this)"
     });
