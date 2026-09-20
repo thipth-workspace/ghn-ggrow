@@ -5647,6 +5647,21 @@
           "id": "message",
           "type": "string",
           "default": "Trường này là bắt buộc."
+        },
+        {
+          "id": "kind",
+          "type": "enum",
+          "options": [
+            {
+              "label": "Ô gõ (mặc định)",
+              "value": "input"
+            },
+            {
+              "label": "Ô chọn",
+              "value": "select"
+            }
+          ],
+          "default": "input"
         }
       ],
       "code": {
@@ -10395,29 +10410,14 @@
           "orgId": "tabs"
         },
         {
-          "id": "stats",
-          "label": "Bốn ô thống kê nằm ngang: Trạng thái · Tổng mục tiêu chính · Tổng tỷ trọng · Hạn đánh giá. `stacked` xếp nhãn/giá trị trong TỪNG ô, bốn ô vẫn cạnh nhau.",
-          "orgId": "stat-tile-row"
-        },
-        {
-          "id": "phase-bar",
-          "label": "Dải 4 pha cấp trang (Thiết lập mục tiêu → Nhân viên đánh giá → Quản lý đánh giá → Hiệu chỉnh & Kết quả). Pha suy từ dữ liệu, lấy pha xa nhất mà bất kỳ mục tiêu nào đạt tới.",
-          "orgId": "phase-progress"
-        },
-        {
           "id": "objectives",
-          "label": "Danh sách mục tiêu chính, mỗi cái là một objective-card gập được; thẻ đầu mở sẵn. Mục tiêu phụ lồng bên trong dưới dạng task-card.",
-          "orgId": "objective-card"
-        },
-        {
-          "id": "status-chip",
-          "label": "Chip trạng thái đánh giá, nằm trong ô thống kê đầu tiên.",
-          "orgId": "status-tag"
+          "label": "Danh sách mục tiêu chính qua `objective-list`; component đó dựng từng `objective-card` gập được và mang luôn bộ đếm tỷ trọng R1/R2. Mục tiêu phụ lồng bên trong dưới dạng `task-card`.",
+          "orgId": "objective-list"
         },
         {
           "id": "footer",
           "label": "Thanh hành động dính đáy (Huỷ · Lưu nháp · Tiếp tục) — CHỈ edit mode, ẩn hẳn ở view mode.",
-          "orgId": "drawer-footer"
+          "orgId": "action-footer"
         }
       ],
       "logicNotes": [
@@ -10610,8 +10610,8 @@
         },
         {
           "id": "goal-cards",
-          "label": "Bản mirror phía nhân viên của card mục tiêu ở L3 (2026-08-05): cùng organism `goal-card`, chỉ đổi vai hai nửa — nhân viên sửa nửa của mình, nửa quản lý là text.",
-          "orgId": "goal-card",
+          "label": "Bản mirror phía nhân viên của card mục tiêu: cùng `objective-card` mà màn quản lý dùng, chỉ đổi vai hai nửa — nhân viên gõ được cột của mình, cột quản lý là chữ để đối chiếu. (Trước 09/2026 là `goal-card`; component đó nay chỉ còn caller ở `hieu-suat-phong-ban`.)",
+          "orgId": "objective-card",
           "tokens": [
             "--radius-control",
             "--border-app-default",
