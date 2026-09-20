@@ -1904,6 +1904,12 @@
       "$value": "320px",
       "$type": "dimension",
       "scope": "local"
+    },
+    "size-cadence-panel": {
+      "$value": "160px",
+      "$type": "dimension",
+      "scope": "local",
+      "$description": "Bề rộng ghim của panel chọn nhịp chu kỳ trên màn Quản lý chu kỳ. Chốt 10/08/2026 theo chỉ thị trực tiếp: panel không co theo trigger mà giữ một bề rộng cố định, vì hai nhãn `Theo quý` và `Theo tháng` chênh nhau đủ để mép phải nhảy mỗi lần đổi."
     }
   },
   "components": [
@@ -6945,6 +6951,31 @@
       "specSrc": "spec/components/titled-section.json"
     },
     {
+      "id": "empty-art",
+      "name": "Empty State Art",
+      "renderFn": "renderCmpEmptyArt",
+      "scope": "local",
+      "level": "atom",
+      "dsMatch": null,
+      "renderSrc": "render/components/empty-art.js",
+      "properties": [
+        {
+          "id": "width",
+          "type": "number",
+          "default": 128
+        },
+        {
+          "id": "height",
+          "type": "number",
+          "default": 120
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<svg viewBox=\"0 0 128 120\" width=\"128\" height=\"120\">…</svg>"
+      }
+    },
+    {
       "id": "empty-state",
       "name": "Empty State",
       "renderFn": "renderCmpEmptyState",
@@ -6962,6 +6993,11 @@
           "id": "icon",
           "type": "string",
           "default": ""
+        },
+        {
+          "id": "art",
+          "type": "boolean",
+          "default": false
         },
         {
           "id": "bare",
@@ -12486,6 +12522,47 @@
             "--space-md"
           ],
           "state": "default"
+        }
+      ]
+    },
+    {
+      "id": "thu-nghiem-ty-trong",
+      "name": "Thử nghiệm · Báo lỗi tỷ trọng",
+      "renderFn": "renderScreenThuNghiemTyTrong",
+      "renderSrc": "render/screens/thu-nghiem-ty-trong.js",
+      "level": "page",
+      "roles": [
+        "employee",
+        "manager",
+        "hr"
+      ],
+      "logicNotes": [
+        "R1 tổng tỷ trọng mục tiêu chính = 100; R2 tổng tỷ trọng mục tiêu phụ trong TỪNG mục tiêu chính = 100, áp độc lập; mục tiêu không có mục tiêu phụ thì bỏ qua R2.",
+        "R3 cấp ô: tỷ trọng phải là số, lớn hơn 0 và không quá 100. Ô rỗng không tính vi phạm R3 — đó là việc của bộ đếm trường bắt buộc.",
+        "Ô chỉ tô đỏ khi CHÍNH NÓ vi phạm R3. Lỗi tổng thuộc về nhóm: viền trái nhóm + bộ đếm, không bôi đỏ ô nào.",
+        "Thiếu tỷ trọng khi chưa bấm Gửi không phải lỗi — bộ đếm màu trung tính. Chỉ chuyển đỏ sau lần bấm Gửi đầu tiên.",
+        "Nút Gửi luôn bật. Bấm thì chạy validate, hiện thanh tổng kết và cuộn tới lỗi đầu tiên."
+      ],
+      "layout": {
+        "kind": "page",
+        "maxWidth": "size-content-column"
+      },
+      "elements": [
+        {
+          "name": "Input",
+          "orgId": "input"
+        },
+        {
+          "name": "Button",
+          "orgId": "button"
+        },
+        {
+          "name": "Icon",
+          "orgId": "icon"
+        },
+        {
+          "name": "Typography",
+          "orgId": "typography"
         }
       ]
     }
