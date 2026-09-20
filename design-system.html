@@ -1,4 +1,4 @@
-<!-- pb-shell v1.11.0 · rendered 2026-09-20T14:21:10Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-09-20T14:32:00Z -->
 <!doctype html>
 <!-- pb design-system site — a deterministic projection of registry.json (components + tokens).
      render.py inlines the registry + per-component node JSON and injects the shared runtime plus the
@@ -5269,9 +5269,10 @@ function renderCmpStatusTag(props) {
     // `ongoing` là một entry RIÊNG bên dưới (nhãn "Đang diễn ra", nền secondary) và KHÔNG đổi theo
     // đây. Nhưng `hieu-suat-cua-toi.js` dựng chip của nó bằng `variant: st.variant` kèm label
     // override "Đang đánh giá" khi `st.key === 'ongoing'`. Kết quả: kể từ pass này, chữ
-    // (ĐÃ XỬ LÝ 20/09/2026) Ghi chú cũ ở đây nói "Đang đánh giá" có hai màu và hẹn quyết riêng.
-    // Lượt đó đã tới: cả ba khoá mang nhãn này nay cùng họ `primary` — xem khối lý do ở `ongoing`.
-    'under-review': { bg: 'var(--bg-primary-muted)', color: 'var(--text-primary)', label: 'Đang đánh giá', border: false, icon: 'fa-circle-half-stroke', iconVariant: 'solid', iconColor: 'var(--icon-primary)' },
+    // (ĐÃ XỬ LÝ 20/09/2026, rồi ĐÍNH CHÍNH cùng ngày) Ghi chú cũ nói "Đang đánh giá" có hai màu và
+    // hẹn quyết riêng. Lượt hợp nhất đã tới — nhưng lượt đó chọn NHẦM họ màu; nay là họ `warning`.
+    // Xem khối lý do ở `ongoing`.
+    'under-review': { bg: 'var(--bg-warning-muted)', color: 'var(--text-warning-active)', label: 'Đang đánh giá', border: false, icon: 'fa-circle-half-stroke', iconVariant: 'solid', iconColor: 'var(--icon-warning-active)' },
     // Nền + chữ vốn đã khớp `CycleStatus`. Chỉ ICON lệch: asset frame tô đúng tông của
     // `icon-success-active`, đậm hơn một bậc so với `-hover` mà chỗ này dùng. Đúng lối các chip
     // khác trong frame — glyph luôn đậm hơn nhãn một bậc, không cùng tông với nó.
@@ -5327,12 +5328,12 @@ function renderCmpStatusTag(props) {
     // `lich-su-danh-gia` vẫn đang trỏ `'draft'` và rơi về `neutral` — xem `open-questions.md`,
     // đổi nó sang khoá mới này là việc của lượt sau, không gộp vào đây.
     'handoff-draft':      { bg: 'var(--bg-app-default)', color: 'var(--text-default)',       label: 'Bản nháp',       border: false, icon: 'fa-circle-dashed', iconVariant: 'solid', iconColor: 'var(--icon-default)' },
-    'handoff-waiting':    { bg: 'var(--bg-warning-muted)', color: 'var(--text-warning-active)', label: 'Chờ duyệt',   border: false, icon: 'fa-clock', iconVariant: 'solid', iconColor: 'var(--icon-warning-active)' },
+    'handoff-waiting':    { bg: 'var(--bg-primary-muted)', color: 'var(--text-primary-active)', label: 'Chờ duyệt',   border: false, icon: 'fa-clock', iconVariant: 'solid', iconColor: 'var(--icon-primary-active)' },
     'handoff-goals-set':  { bg: 'var(--bg-info-muted)', color: 'var(--text-secondary)',     label: 'Đã thiết lập',   border: false, icon: 'fa-circle-dot', iconVariant: 'solid', iconColor: 'var(--icon-secondary)' },
-    // ⚠ HỆ QUẢ ĐÃ BIẾT: sau thay đổi này nhãn "Đang đánh giá" có BA màu trên ba khoá —
-    // `handoff-pending` (cam, theo frame), `ongoing` và `under-review` (vàng, không đụng theo
-    // phương án b). Mâu thuẫn vốn đã có hai màu; frame làm nó lộ thêm. Đã báo người dùng.
-    'handoff-pending':    { bg: 'var(--bg-primary-muted)', color: 'var(--text-primary)',     label: 'Đang đánh giá',  border: false, icon: 'fa-circle-half-stroke', iconVariant: 'solid', iconColor: 'var(--icon-primary)' },
+    // (ĐÃ ĐÓNG 20/09/2026) Ghi chú cũ ở đây nói nhãn "Đang đánh giá" có BA màu trên ba khoá và
+    // xếp `handoff-pending` vào họ cam "theo frame". Đọc lại chính node đó thì họ cam KHÔNG thuộc
+    // nhãn này — xem khối đính chính ở `ongoing`. Cả ba khoá nay cùng họ vàng.
+    'handoff-pending':    { bg: 'var(--bg-warning-muted)', color: 'var(--text-warning-active)',     label: 'Đang đánh giá',  border: false, icon: 'fa-circle-half-stroke', iconVariant: 'solid', iconColor: 'var(--icon-warning-active)' },
     // `icon-success-active` (một bậc đậm hơn chữ) theo frame — trùng với `probation-passed` vốn
     // đã dùng bậc đó, nên hai thẻ "xanh" trong cùng một bảng thôi lệch nhau.
     'handoff-approved':   { bg: 'var(--bg-success-muted)',   color: 'var(--text-success-hover)', label: 'Hoàn thành',     border: false, icon: 'fa-circle-check', iconVariant: 'solid', iconColor: 'var(--icon-success-active)' },
@@ -5370,10 +5371,21 @@ function renderCmpStatusTag(props) {
     /* 2026-07-24 (direct user instruction: use the half-circle icon for "Đang diễn ra"). Icon set
        back to circle-half-stroke, overriding the 2026-07-23 split-to-circle-play above. Note: this
        glyph is now shared with 'under-review' ("Đang đánh giá") — the user accepted that collision. */
-    // ── MỘT NHÃN, MỘT MÀU (20/09/2026, chỉ thị người dùng) ──────────────────────────────────
-    // "Đang đánh giá" từng có BA màu trên ba khoá: `handoff-pending` cam (theo `CycleStatus`
-    // 8110:113967), `ongoing` và `under-review` vàng. Nay cả ba về họ `primary` của frame — frame
-    // là bản mới nhất, nên nó thắng hai bậc màu cũ.
+    // ── MỘT NHÃN, MỘT MÀU — VÀ ĐÍNH CHÍNH HỌ MÀU (20/09/2026, hai lượt) ─────────────────────
+    // Lượt 1 hợp nhất ba khoá mang nhãn "Đang đánh giá" (`under-review`, `handoff-pending`,
+    // `ongoing`) về MỘT màu. Việc hợp nhất là đúng và giữ nguyên.
+    //
+    // Lượt 2 SỬA HỌ MÀU, vì lượt 1 đọc sai chính `CycleStatus` 8110:113967. Node đó có hai biến
+    // thể dễ lẫn, và tôi đã gán màu của biến thể này cho biến thể kia:
+    //
+    //     stage=Set    · state=Waiting    -> "Chờ duyệt"     -> họ primary (bậc `active`)
+    //     stage=Review · state=In-review  -> "Đang đánh giá" -> họ warning (bậc `active`)
+    //
+    // Nói cách khác hai thẻ ĐỔI CHỖ cho nhau so với bản trước: `Chờ duyệt` từ vàng sang cam đậm,
+    // `Đang đánh giá` từ cam sang vàng. Chỉ thị người dùng 20/09 lượt 2, và trùng khít node.
+    //
+    // Bậc `active` chứ không phải bậc gốc: node bind `text-primary-active` cho `Chờ duyệt`, đậm
+    // hơn `text-primary` mà lượt 1 dùng. Lấy đúng bậc frame bind, không suy ra.
     // ĐỔI ĐƯỢC VÌ CẢ BA THẬT SỰ CÙNG MỘT NGHĨA. `ongoing` từng đọc "Đang diễn ra" và khi đó màu
     // riêng là đúng; Nguyên tắc 7 sửa đổi lần ba (02/09) đã dời nhãn vào chính atom này và cho nó
     // đọc "Đang đánh giá". Từ lúc đó ba khoá khác màu là một mâu thuẫn còn sót, không phải ba
@@ -5393,7 +5405,7 @@ function renderCmpStatusTag(props) {
     // trả lời hai câu hỏi khác nhau — `ongoing` do `computeConfigStatus` sinh (trạng thái của CHU KỲ),
     // `under-review` thuộc bộ handoff (trạng thái BÀN GIAO của một người). Gộp hai key làm một sẽ phá
     // `STATUS_PRIORITY`, rollup và bộ lọc `#cq-status` vốn đọc key chứ không đọc nhãn.
-    'ongoing': { bg: 'var(--bg-primary-muted)', color: 'var(--text-primary)', label: 'Đang đánh giá', border: false, icon: 'fa-circle-half-stroke', iconVariant: 'solid', iconColor: 'var(--icon-primary)' },
+    'ongoing': { bg: 'var(--bg-warning-muted)', color: 'var(--text-warning-active)', label: 'Đang đánh giá', border: false, icon: 'fa-circle-half-stroke', iconVariant: 'solid', iconColor: 'var(--icon-warning-active)' },
     /* new — 2026-07-27: probation (thử việc) — a SEPARATE status vocabulary for new hires in a
        probation window (default 2 months, length selectable). BỐN trạng thái (2026-09-06 — trước đó
        ba; `probation-not-set` thêm vào cho khớp design), driven by the manager's
