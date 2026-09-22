@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- pb-shell v1.11.0 · rendered 2026-09-22T03:53:47Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-09-22T06:53:08Z -->
 <!--
   ============================================================================
   PRODUCT BUILDER — the rendered prototype shell
@@ -40022,8 +40022,13 @@ function renderScreenHieuSuatCuaToi(props) {
   // màn này. Trang Lịch sử đánh giá nay có hai lối vào, lối thứ hai nằm ở
   // `hieu-suat-phong-ban-truc-tiep` — một screen khác, không lật radio sang đây được. Nên nó phải
   // là screen thật, và nút thành một cú điều hướng.
+  // ── NHÃN → `Lịch sử đánh giá` (chỉ thị 22/09/2026) ───────────────────────────────────────
+  // Nút này gọi `lsdgSetEntry('canhan')`, tức mở đúng trang `Lịch sử đánh giá`. Nhãn cũ
+  // `Xem tất cả chu kỳ` là tên của VIEW DANH SÁCH đã bị gỡ ngày 12/09 — từ đó nó nói tên một thứ
+  // không còn tồn tại, và khác hẳn nút cùng chức năng ở `chi-tiet-nhan-vien` (`Lịch sử đánh giá`).
+  // Nay hai lối vào cùng một trang gọi trang đó bằng cùng một cái tên.
   var seeAllLink = pbUse('button', {
-    variant: 'secondary', icon: 'history', label: 'Xem tất cả chu kỳ',
+    variant: 'secondary', icon: 'history', label: 'Lịch sử đánh giá',
     onClick: "lsdgSetEntry('canhan')"
   });
 
@@ -40112,14 +40117,16 @@ function renderScreenHieuSuatCuaToi(props) {
   // `value` chữ thuần — xem ghi chú cùng ngày ở `chi-tiet-phong-ban`.
   if (meTitle) { meInfo.push({ label: 'Chức danh', value: meTitle }); }
 
-  // ── `Lịch sử đánh giá` ĐÃ GỠ KHỎI MÀN NÀY (2026-09-10, chỉ thị) ──────────────────────────────
-  // Nút + hộp thoại dựng ở GĐ C vì cả 4 frame của bộ spec đều vẽ nút này ở góc phải header. Nhưng
-  // riêng màn nhân viên còn có `Xem tất cả chu kỳ` ngay cạnh, và hai nút TRÙNG CHỨC NĂNG: view danh
-  // sách mà nút kia mở đã chứa sẵn bảng "Lịch sử của tôi" — cùng dữ liệu, cùng
-  // `renderRatingHistoryTable`. Bỏ nút hộp thoại, `Xem tất cả chu kỳ` nhận style của nó.
-  //
-  // `chi-tiet-nhan-vien` VẪN GIỮ nút `Lịch sử đánh giá`: màn đó không có view danh sách nào để dẫn
-  // tới, nên ở đó nó là đường DUY NHẤT vào lịch sử — không trùng với gì cả.
+  // ── MỘT NÚT LỊCH SỬ, ĐI QUA BA CHẶNG ────────────────────────────────────────────────────────
+  // 10/09 — màn này từng có HAI nút trùng chức năng: `Lịch sử đánh giá` (mở hộp thoại, dựng ở GĐ C
+  //         theo 4 frame của bộ spec) và `Xem tất cả chu kỳ` (lật radio sang view danh sách, mà
+  //         view đó đã chứa sẵn bảng lịch sử). Gỡ nút hộp thoại, giữ nút kia và cho nó style ấy.
+  // 12/09 — view danh sách bị gỡ, `lich-su-danh-gia` thành screen thật; nút đổi thành điều hướng.
+  //         Từ mốc này nhãn `Xem tất cả chu kỳ` nói tên một view KHÔNG CÒN TỒN TẠI.
+  // 22/09 — chỉ thị đổi nhãn về `Lịch sử đánh giá`, trùng với nút cùng chức năng ở
+  //         `chi-tiet-nhan-vien`. Hai lối vào một trang nay gọi trang đó bằng một cái tên.
+  // Ghi đủ ba chặng vì lý do gỡ ở chặng đầu ("hai nút trùng chức năng") không còn đúng nữa —
+  // nay chỉ còn MỘT nút, nên cái tên nó mang được tự do chọn theo đích đến.
 
   // ── TIÊU ĐỀ ĐỔI THEO FIGMA (2026-09-10) ─────────────────────────────────────────────────────
   // Trước: "Hiệu suất của tôi" (quyết định 3, chốt 2026-08-04). LÝ DO ghi kèm quyết định đó là
