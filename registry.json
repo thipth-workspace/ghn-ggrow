@@ -1828,10 +1828,10 @@
       "description": "Line-height nhan cua Button size L. Spec muc 14.2 ghi \"text 16/20 semibold, padding 16/12\" — 12+20+12 = 44, dung chieu cao Figma do duoc. Anh em voi line-height-button (18) cua nut mac dinh."
     },
     "size-button-lg": {
-      "$value": "44px",
+      "$value": "40px",
       "$type": "dimension",
       "scope": "local",
-      "description": "Chieu cao nut CO NHAN size L (spec muc 14.2 = 12 + 20 + 12; frame 9162:119571 do 44). Ghim tuong minh chu khong de padding tu suy: nut co vien va nut khong vien se lech nhau 2px, ma ba nut footer phai bang nhau. Khac size-control-lg (48) — do la nac cua o nhap."
+      "description": "Chieu cao nut CO NHAN size L. 40px theo chi thi 22/09/2026 — truoc do 44 (spec muc 14.2 = 12 + 20 + 12; frame 9162:119571 do 44). Chu san pham chot ha ve 40 cho bang moi nut co nhan khac; spec muc 14.2 can cap nhat theo. VAN GHIM TUONG MINH chu khong de padding tu suy: nut co vien va nut khong vien se lech nhau 2px, ma ba nut footer phai bang nhau. Gia tri nay TRUNG size-control (40) nhung khong gop lam mot: size L van khac o kieu chu (font-size-title 16 / line-height-button-lg 20) va la not rieng trong thang size."
     },
     "size-button-md": {
       "$value": "36px",
