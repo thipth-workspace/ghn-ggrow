@@ -607,10 +607,6 @@
       "$value": "8px",
       "$type": "dimension"
     },
-    "space-badge-y": {
-      "$value": "2px",
-      "$type": "dimension"
-    },
     "space-badge-l": {
       "$value": "10px",
       "$type": "dimension"
@@ -629,10 +625,6 @@
     },
     "space-xl": {
       "$value": "32px",
-      "$type": "dimension"
-    },
-    "radius-none": {
-      "$value": "0px",
       "$type": "dimension"
     },
     "radius-md": {
@@ -878,10 +870,6 @@
     },
     "size-search-max-w": {
       "$value": "320px",
-      "$type": "dimension"
-    },
-    "size-stat-tile-min-w": {
-      "$value": "168px",
       "$type": "dimension"
     },
     "size-control-sm": {
@@ -1797,12 +1785,6 @@
       "scope": "local",
       "note": "Bề rộng cố định của droplist đơn vị trong ô Chỉ tiêu — chỉ thị 2026-09-08. Trước đó nó hug theo mã đơn vị nên mỗi dòng một bề ngang khác nhau."
     },
-    "size-footer-h": {
-      "$value": "76px",
-      "$type": "dimension",
-      "scope": "local",
-      "description": "Chieu cao thanh hanh dong sticky (spec muc 14.2). Vung cuon lay so nay lam padding-bottom toi thieu."
-    },
     "space-action-gap": {
       "$value": "6px",
       "$type": "dimension",
@@ -1814,12 +1796,6 @@
       "$type": "shadow",
       "scope": "local",
       "description": "Bong HAT LEN cua thanh hanh dong sticky (spec muc 14.2 \"effect style inverse/md\"). Dao dau truc Y cua shadow-md: bong o day mot thanh neo duoi phai hat len tren de bao hieu con noi dung ben duoi."
-    },
-    "size-segment-option": {
-      "$value": "96px",
-      "$type": "dimension",
-      "scope": "local",
-      "description": "San be ngang mot o cua dai chon ky. Spec muc 15.2 chot dai o 200x42; 2 o x 96 + padding 4 hai ben = 200. Nhan \"Q3/2026\" qua ngan de tu nong ra so do do."
     },
     "line-height-button-lg": {
       "$value": "20px",
@@ -1838,12 +1814,6 @@
       "$type": "dimension",
       "scope": "local",
       "description": "Chieu cao nac M cua Button trong bo frame GGrow (do duoc 36 o nut header 161x36 va nut gap/mo cua Objective 48x36). DS cua project moi co 32 (size-control-md) va 40 (size-control) — 36 la nac con thieu. Hien chi dung cho nut gap/mo Objective; nut mac dinh cua app van 40, doi lai la mot dot rieng."
-    },
-    "size-action-slot": {
-      "$value": "95px",
-      "$type": "dimension",
-      "scope": "local",
-      "description": "Be ngang o hanh dong ben phai dong \"Ket qua thuc dat\" cua Objective/Task. Spec muc 12.6 bat giu slot nay rong cho nut xem log hieu chinh; frame 9162:117007 do Action Container = 95. Giu be ngang that de dong chu khong giat khi nut that xuat hien."
     },
     "font-size-display": {
       "$value": "26px",
@@ -1865,11 +1835,6 @@
       "$type": "dimension",
       "scope": "local"
     },
-    "size-objc-title-min": {
-      "$value": "200px",
-      "$type": "dimension",
-      "scope": "local"
-    },
     "size-aiw-fab": {
       "$value": "56px",
       "$type": "dimension",
@@ -1882,11 +1847,6 @@
     },
     "size-aiw-panel-h": {
       "$value": "360px",
-      "$type": "dimension",
-      "scope": "local"
-    },
-    "size-result-col": {
-      "$value": "200px",
       "$type": "dimension",
       "scope": "local"
     },
@@ -1910,6 +1870,82 @@
       "$type": "dimension",
       "scope": "local",
       "$description": "Bề rộng ghim của panel chọn nhịp chu kỳ trên màn Quản lý chu kỳ. Chốt 10/08/2026 theo chỉ thị trực tiếp: panel không co theo trigger mà giữ một bề rộng cố định, vì hai nhãn `Theo quý` và `Theo tháng` chênh nhau đủ để mép phải nhảy mỗi lần đổi."
+    },
+    "space-page-gutter": {
+      "$value": "{space-2xl}",
+      "$type": "dimension",
+      "description": "Đệm ngang mép trang. Tách khỏi space-2xl để tầng scale thu nhỏ riêng ở tablet/mobile mà không đụng các kích thước cùng dùng space-2xl (vòng tròn avatar, bề rộng cột)."
+    },
+    "size-table-min-w": {
+      "$value": "560px",
+      "$type": "dimension",
+      "description": "Bề ngang tối thiểu của bảng ở mobile, để bảng tràn ra và cuộn ngang thay vì bóp cột. Lấy theo số đo thật ở tablet: cột hẹp nhất của bảng ba cột là 194, ba cột là 582 — ngưỡng này đặt dưới mức đó nên không nới rộng hơn cái tablet đang hiển thị."
+    },
+    "size-bottom-nav": {
+      "$value": "65px",
+      "$type": "dimension",
+      "description": "Cao thanh nav dưới, chỉ mobile. Số đo từ Figma 9977:105917."
+    },
+    "size-topbar-mobile": {
+      "$value": "57px",
+      "$type": "dimension",
+      "description": "Cao thanh đầu trang ở mobile. Figma 9977:105917 vẽ 57, desktop là 53."
+    },
+    "font-size-display-mobile": {
+      "$value": "20px",
+      "$type": "dimension",
+      "description": "Cỡ chữ display ở mobile. Khai riêng chứ không trỏ var(--font-size-heading): trong CÙNG một khối CSS, var() đọc giá trị MỚI của token kia, nên nếu heading cũng bị đè thì cả hai tụt về một cỡ."
+    },
+    "line-height-display-mobile": {
+      "$value": "28px",
+      "$type": "dimension",
+      "description": "Chiều cao dòng đi kèm font-size-display-mobile."
+    },
+    "font-size-heading-mobile": {
+      "$value": "18px",
+      "$type": "dimension",
+      "description": "Cỡ chữ heading ở mobile."
+    },
+    "line-height-heading-mobile": {
+      "$value": "26px",
+      "$type": "dimension",
+      "description": "Chiều cao dòng đi kèm font-size-heading-mobile."
+    },
+    "font-size-subheading-mobile": {
+      "$value": "16px",
+      "$type": "dimension",
+      "description": "Cỡ chữ subheading ở mobile."
+    },
+    "line-height-subheading-mobile": {
+      "$value": "24px",
+      "$type": "dimension",
+      "description": "Chiều cao dòng đi kèm font-size-subheading-mobile."
+    },
+    "size-chip-name-max": {
+      "$value": "180px",
+      "$type": "dimension",
+      "description": "Bề ngang tối đa của tên file trong chip đính kèm, trước khi cắt bằng ellipsis. Đủ cho tên file thường gặp mà không đẩy chip tràn cột hẹp."
+    },
+    "size-tab-min-w": {
+      "$value": "100px",
+      "$type": "dimension",
+      "description": "Bề ngang tối thiểu một tab chu kỳ. Chỉ thị 27/09."
+    },
+    "size-tab-max-w": {
+      "$value": "200px",
+      "$type": "dimension",
+      "description": "Bề ngang tối đa một tab chu kỳ; quá thì tên cắt bằng ellipsis. Chỉ thị 27/09."
+    },
+    "size-tab-more-panel": {
+      "$value": "240px",
+      "$type": "dimension",
+      "description": "Bề ngang bảng thả của nút More trên dải tab chu kỳ. Rộng hơn tab một chút để tên dài đọc được đủ hơn."
+    },
+    "space-list-row-y": {
+      "$type": "dimension",
+      "$value": "6px",
+      "scope": "local",
+      "$description": "Đệm dọc của một dòng trong bảng thả (Figma Parts/selectItem: 6px trên dưới, 16px hai bên). Không dùng lại `space-action-gap` cùng giá trị: tên đó nói về khe giữa hai nút."
     }
   },
   "components": [
@@ -1932,6 +1968,55 @@
       },
       "spec": "Sinh tự động từ file Excel demo data. Không sửa tay.",
       "uiLogic": null
+    },
+    {
+      "id": "heading-cycle",
+      "name": "Heading Cycle",
+      "renderFn": "renderCmpHeadingCycle",
+      "scope": "local",
+      "level": "molecule",
+      "dsMatch": null,
+      "renderSrc": "render/components/heading-cycle.js",
+      "properties": [
+        {
+          "id": "title",
+          "type": "string",
+          "default": "Đánh giá Quý 2/2026"
+        },
+        {
+          "id": "status",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "info",
+          "type": "string",
+          "default": "Hạn đánh giá ngày 03/10/2026"
+        },
+        {
+          "id": "overdue",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "id": "finalResult",
+          "type": "string",
+          "default": ""
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<div class=\"hcyc\">…</div>"
+      },
+      "logicNotes": [
+        "`_HeadingCycle` (Figma 10057:33036). Ba vế phụ (chip trạng thái · cảnh báo quá hạn · kết quả cuối cùng) đều tuỳ chọn, và vắng mặt thì KHÔNG dựng thẻ rỗng — thẻ rỗng vẫn ăn `gap` của hàng cha và đẩy cụm lệch đi.",
+        "Ba hồ sơ dùng, đọc từ ba trang Figma: Thiết lập & Đánh giá (có chip, không kết quả cuối) · Lịch sử (có chip + kết quả cuối, dòng phụ `Chu kỳ đánh giá đã kết thúc`) · Hiệu suất phòng ban (không chip).",
+        "`status` nhận thẳng khoá vòng đời của `pbCycleLifecycleOf` và tự tra sang biến thể `handoff-*`; `statusVariant` để truyền thẳng biến thể khi chỗ gọi đã có.",
+        "`finalResult` kiểm bằng `!= null`, không bằng `||`: điểm 0 là một điểm thật.",
+        "`align-items:flex-end` ở hàng ngoài — khối kết quả cuối nằm ngang DÒNG PHỤ, không ngang tiêu đề."
+      ],
+      "specSrc": "spec/components/heading-cycle.json",
+      "description": "Cụm tiêu đề chu kỳ: tên kỳ + chip trạng thái, dòng hạn, và kết quả cuối cùng bên phải."
     },
     {
       "id": "unit-select",
@@ -2352,6 +2437,10 @@
             {
               "label": "Success — nền xanh lá, dùng cho nút xác nhận một việc đã hoàn tất",
               "value": "success"
+            },
+            {
+              "label": "Grey — nền xám đặc, chữ nghịch (Figma: nút 'Trả lại' của thanh hành động)",
+              "value": "grey"
             }
           ]
         },
@@ -3348,6 +3437,12 @@
           "type": "number",
           "default": null,
           "note": "Per-OPTION (options[].count), underline variant only: an optional trailing badge. `count != null` rather than truthiness, so a genuine 0 still shows — that is exactly the case a reader most wants to see."
+        },
+        {
+          "id": "maxVisible",
+          "type": "number",
+          "default": 5,
+          "description": "Số tab tối đa hiện trực tiếp ở biến thể pill; phần dư vào nút More."
         }
       ],
       "code": {
@@ -3359,6 +3454,64 @@
       "logicNotes": [
         "options[].count added 2026-08-10 (Figma 8110:35213 — \"Đánh giá chu kì  12\"). Rendered through the existing `badge` atom so a tab count and every other count in the app share one chip, and called directly (renderCmpBadge, not pbUse) matching this file's own renderCmpIcon call — `tabs` is an atom and R-LEVEL-ORDER only forbids an atom composing via pbUse(). Every pre-existing caller omits it and emits byte-identical markup."
       ]
+    },
+    {
+      "id": "cycle-tabs",
+      "name": "Cycle Tabs",
+      "renderFn": "renderCmpCycleTabs",
+      "scope": "local",
+      "level": "molecule",
+      "description": "Dải tab chu kỳ: nhãn dạng dài, thứ tự mới→cũ, tối đa 5 tab rồi tràn vào nút More.",
+      "properties": [
+        {
+          "id": "name",
+          "type": "string"
+        },
+        {
+          "id": "value",
+          "type": "string"
+        },
+        {
+          "id": "options",
+          "type": "array"
+        },
+        {
+          "id": "order",
+          "type": "enum",
+          "default": "newest-first",
+          "options": [
+            {
+              "label": "Mới → cũ (mặc định, đảo mảng vào)",
+              "value": "newest-first"
+            },
+            {
+              "label": "Giữ nguyên thứ tự chỗ gọi đưa",
+              "value": "as-given"
+            }
+          ]
+        },
+        {
+          "id": "state",
+          "type": "string",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Overflow (>5 chu kỳ)",
+              "value": "overflow"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<div class=\"segmented segmented--pill\">…</div>"
+      },
+      "renderSrc": "render/components/cycle-tabs.js",
+      "specSrc": "spec/components/cycle-tabs.json"
     },
     {
       "id": "cycle-card",
@@ -3599,6 +3752,42 @@
       "specSrc": "spec/components/sidebar.json"
     },
     {
+      "id": "bottom-nav",
+      "name": "Bottom Nav",
+      "renderFn": "renderCmpBottomNav",
+      "scope": "local",
+      "level": "template",
+      "description": "Thanh điều hướng đáy, chỉ hiện ở mobile. Bốn mục theo bản chốt 23/09; phân vai giao cho runtime qua data-roles.",
+      "properties": [
+        {
+          "id": "activeId",
+          "type": "string",
+          "default": "quan-ly-chu-ky"
+        },
+        {
+          "id": "state",
+          "type": "string",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Active item",
+              "value": "active"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<nav class=\"pb-bottom-nav\">…</nav>"
+      },
+      "renderSrc": "render/components/bottom-nav.js",
+      "specSrc": "spec/components/bottom-nav.json"
+    },
+    {
       "id": "header-footer-app",
       "name": "Header / Footer App",
       "renderFn": "renderCmpHeaderFooterApp",
@@ -3655,6 +3844,11 @@
           "default": "(Tối đa 5 file, mỗi file < 2MB)"
         },
         {
+          "id": "downloadKey",
+          "type": "string",
+          "default": ""
+        },
+        {
           "id": "state",
           "type": "enum",
           "default": "default",
@@ -3666,6 +3860,10 @@
             {
               "label": "Disabled",
               "value": "disabled"
+            },
+            {
+              "label": "Read only",
+              "value": "read-only"
             }
           ]
         }
@@ -3677,7 +3875,9 @@
       "renderSrc": "render/components/file-attachment.js",
       "specSrc": "spec/components/file-attachment.json",
       "logicNotes": [
-        "onChange + fileNames + caption `<inputId>-files` (2026-07-29): pbFileAttachSync ghi tên file đã chọn vào caption và (kèm goalId) vào goal.selfAssessment.fileNames — chỉ TÊN file, nội dung không thể persist phía client."
+        "onChange + fileNames + caption `<inputId>-files` (2026-07-29): pbFileAttachSync ghi tên file đã chọn vào caption và (kèm goalId) vào goal.selfAssessment.fileNames.",
+        "`H-21` (27/09/2026) — `state:'read-only'` (hoặc `readOnly:true`): bỏ nút và ô chọn tệp, chip mất nút X và nhận nút tải. Dùng cho khối Nhận xét chung của một kỳ đã chốt, nơi trước đây cả danh sách file bị ẩn hẳn.",
+        "`H-21` — NỘI DUNG file giữ ngoài store, ở `PB_FA_BLOBS`, khoá bằng `employeeId|cycleId|side` (`downloadKey`). Không nhét vào `pbAppStore()` vì vài đường sao chép sâu bằng JSON sẽ biến một đối tượng tệp thành `{}` và mất byte lặng lẽ. File chỉ có TÊN (dữ liệu gieo) thì `pbFaDownload` nói thẳng bằng toast chứ không sinh nội dung giả."
       ]
     },
     {
@@ -8357,6 +8557,45 @@
       "specSrc": "spec/components/kpi-result-table.json"
     },
     {
+      "id": "proposal-diff",
+      "name": "Proposal Diff",
+      "renderFn": "renderCmpProposalDiff",
+      "scope": "local",
+      "level": "molecule",
+      "description": "Bảng so sánh bộ mục tiêu hiện tại với bản đề xuất sửa, ghép theo rid, tô nền hàng có thay đổi.",
+      "properties": [
+        {
+          "id": "currentRows",
+          "type": "array"
+        },
+        {
+          "id": "proposedRows",
+          "type": "array"
+        },
+        {
+          "id": "state",
+          "type": "string",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Empty",
+              "value": "empty"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<table>…</table>"
+      },
+      "renderSrc": "render/components/proposal-diff.js",
+      "specSrc": "spec/components/proposal-diff.json"
+    },
+    {
       "id": "read-only-detail-body",
       "name": "Read Only Detail Body",
       "renderFn": "renderCmpReadOnlyDetailBody",
@@ -10285,13 +10524,12 @@
         },
         {
           "id": "cdpb-scope-tabs",
-          "orgId": "tabs",
-          "label": "Tab cấp 1 — 'Chu kỳ phòng ban' / 'Chu kỳ chức danh' (Figma 8749:48278). Trục nguồn của chu kỳ: đến từ cấu hình đơn vị, hay từ override theo chức danh.",
+          "label": "Tab cấp 1 — 'Chu kỳ phòng ban' / 'Chu kỳ chức danh' (Figma 8749:48278). Trục nguồn của chu kỳ: đến từ cấu hình đơn vị, hay từ override theo chức danh. — KHÔNG khai `orgId`: dải này do `page-header` dựng (màn chỉ đưa xuống `tabs` object), không phải màn gọi thẳng, nên khai một orgId ở đây là nói sai ai soạn ra nó.",
           "state": "default"
         },
         {
           "id": "cdpb-period-strip",
-          "orgId": "tabs",
+          "orgId": "cycle-tabs",
           "label": "Dải pill cấp 2 — kỳ hiện tại / kỳ kế tiếp. Mục thứ ba 'Lịch sử' bị bỏ 2026-09-06 theo frame 8801:22268; data.pastCycles vẫn còn nhưng trang không còn đường xem.",
           "state": "default"
         },
@@ -10407,7 +10645,7 @@
         {
           "id": "period-strip",
           "label": "Dải kỳ (tabs variant pill) — nhãn đi theo nhịp của chính nhân viên.",
-          "orgId": "tabs"
+          "orgId": "cycle-tabs"
         },
         {
           "id": "objectives",
@@ -10597,7 +10835,7 @@
         {
           "id": "primary-tabs",
           "label": "2 tab của primary view: 'Đánh giá chu kỳ hiện tại' | 'Thiết lập chu kỳ tiếp theo' (tabs variant underline, radio CSS-only + :has()). Mỗi tab có commit riêng, ghi tập field rời nhau.",
-          "orgId": "tabs",
+          "orgId": "cycle-tabs",
           "tokens": [],
           "state": "default"
         },
@@ -12335,54 +12573,6 @@
       ]
     },
     {
-      "id": "lich-su-danh-gia",
-      "name": "Lịch sử đánh giá",
-      "type": "page",
-      "roles": [
-        "hr",
-        "manager",
-        "high-level-manager",
-        "supervisor",
-        "employee"
-      ],
-      "renderFn": "renderScreenLichSuDanhGia",
-      "renderSrc": "render/screens/lich-su-danh-gia.js",
-      "figmaNode": "9242:66611",
-      "elements": [
-        {
-          "id": "header-footer-app",
-          "orgId": "header-footer-app"
-        },
-        {
-          "id": "page-header",
-          "orgId": "page-header"
-        },
-        {
-          "id": "input",
-          "orgId": "input"
-        },
-        {
-          "id": "dropdown-select",
-          "orgId": "dropdown-select"
-        },
-        {
-          "id": "table",
-          "orgId": "table"
-        },
-        {
-          "id": "status-tag",
-          "orgId": "status-tag"
-        }
-      ],
-      "logicNotes": [
-        "Hai lối vào: `canhan` (từ Hiệu suất cá nhân) và `dept` (từ Trực tiếp quản lý → chi tiết nhân viên). Breadcrumb và nút back đổi theo lối vào; chủ thể (employeeId) và tên đi kèm lối vào chứ không suy từ persona.",
-        "Bảng không bịa dữ liệu: hai hàng đầu là hai pha đang chạy trong GG_PHASES (điểm `--`), các hàng sau là chu kỳ trong kpiSets của chính người đó đã chấm xong, điểm do pbKpiWeightedScore tính từ điểm từng mục tiêu.",
-        "pbKpiWeightedScore trả null khi còn mục tiêu chưa có điểm — dùng luôn làm bộ lọc `đã chốt hay chưa`, không cần cờ riêng.",
-        "Bấm hàng: `phase:*` mở đúng tab của màn chi tiết; `goal:*` là chu kỳ đã chốt nên mở ở chế độ chỉ đọc (PB_HCP_OPEN + PB_HCP_VIEWONLY).",
-        "Trạng thái dùng đúng bộ từ vựng 4 nấc của Nguyên tắc 7 — ở đây đọc được 3 nấc: Bản nháp, Đang đánh giá, Hoàn thành."
-      ]
-    },
-    {
       "id": "hieu-suat-phong-ban-chi-tiet",
       "name": "Hiệu suất phòng ban · Chi tiết phòng ban",
       "renderFn": "renderScreenHieuSuatPhongBanChiTiet",
@@ -12441,19 +12631,15 @@
         {
           "id": "period-pills",
           "label": "Two period pills per scope tab — the current cycle (Đánh giá) and the next (Thiết lập), e.g. Q3/2026 | Q4/2026 or T9/2026 | T10/2026. Pill variant. These radios are the reveal source: a `:has()` rule keyed on the checked pill shows its pane, so switching period costs no re-render.",
-          "orgId": "tabs",
+          "orgId": "cycle-tabs",
           "tokens": [],
           "state": "default"
         },
         {
           "id": "pane-heading",
-          "label": "H6 heading of the open period — `Đánh giá hiệu suất <kỳ>` or `Thiết lập mục tiêu <kỳ>` — over a caption counting how many people still owe that action. The count is derived per row from its OWN department's cycle, so a borrowed child-department manager is counted against the right contract.",
-          "orgId": "typography",
-          "tokens": [
-            "--font-size-caption",
-            "--line-height-caption",
-            "--text-muted"
-          ],
+          "label": "Cụm tiêu đề của kỳ đang mở — `_HeadingCycle` (Figma 10057:33036): tên kỳ `Đánh giá <kỳ>` trên một dòng hạn. CHIP TRẠNG THÁI TẮT ở màn này, đúng như frame `Hiệu suất phòng ban` vẽ: bảng ngay dưới đã có cột `Trạng thái` cho từng người, nên một chip ở tiêu đề không biết đang nói về ai. Cũng không có `Kết quả cuối cùng` — đó là con số của MỘT phiếu. Dòng hạn suy theo phòng của từng dòng chứ không theo phòng đang mở, nên một trưởng phòng con mượn sang vẫn được tính đúng hợp đồng của mình.",
+          "orgId": "heading-cycle",
+          "tokens": [],
           "state": "default"
         },
         {
@@ -12667,7 +12853,7 @@
               ],
               "expect": [
                 {
-                  "toast": "Đã thêm 1 mục tiêu phụ."
+                  "toast": "Đã thêm 1 mục tiêu thành phần"
                 },
                 {
                   "toast": "Đã lưu đánh giá"
