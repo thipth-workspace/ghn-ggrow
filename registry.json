@@ -753,8 +753,9 @@
       "$type": "color"
     },
     "size-sidebar": {
-      "$value": "260px",
-      "$type": "dimension"
+      "$value": "240px",
+      "$type": "dimension",
+      "description": "Hạ 260 -> 240 ngày 30/09 theo `Sidebar Menu (New)` (Figma 10114:68599), khung rail rộng 240. Token này chỉ có MỘT chỗ đọc (`.pb-app-sidebar{width}`), và con số 260 chỉ còn nằm trong một câu chú thích ở `config-page-shell` — đã kiểm; ngưỡng `@container` ở đó đo bề rộng THẬT của shell nên tự co theo."
     },
     "size-sidebar-collapsed": {
       "$value": "64px",
@@ -1118,7 +1119,8 @@
     },
     "border-app-elevated": {
       "$value": "#f4f4f5",
-      "$type": "color"
+      "$type": "color",
+      "$description": "Viền ở bậc nhạt nhất của họ `border/app` — nhạt hơn `--border-app-disabled` (#e4e4e7) một nấc. Token có từ trước nhưng KHÔNG chỗ nào dùng cho tới 30/09; chỗ dùng đầu tiên là kẻ đáy thanh đầu trang, theo frame `_Header` (Figma 10117:72451) vốn bind `⛶ border/app/elevated`. Dùng cho đường phân tách giữa hai bề mặt CÙNG màu trắng, nơi một bậc đậm hơn sẽ đọc thành khung viền."
     },
     "border-app-inverse": {
       "$value": "#18181b",
@@ -1695,8 +1697,9 @@
       "$type": "shadow"
     },
     "size-topbar": {
-      "$value": "53px",
-      "$type": "dimension"
+      "$value": "56px",
+      "$type": "dimension",
+      "description": "53 -> 56 ngày 30/09 theo `desktop-layout` (Figma 10114:66047). Con số này KHÔNG chỉ là chiều cao một thanh: frame đặt băng logo của rail cũng đúng 56, và hai khối nằm CẠNH nhau kể từ lượt này — lệch ba là mép dưới của logo và mép dưới của thanh không trùng, thấy rõ ở góc trên bên trái. Băng logo dựng từ đệm 14 + logo 28 + đệm 14; token này phải bằng đúng tổng đó."
     },
     "size-content-column": {
       "$value": "1180px",
@@ -1872,9 +1875,9 @@
       "$description": "Bề rộng ghim của panel chọn nhịp chu kỳ trên màn Quản lý chu kỳ. Chốt 10/08/2026 theo chỉ thị trực tiếp: panel không co theo trigger mà giữ một bề rộng cố định, vì hai nhãn `Theo quý` và `Theo tháng` chênh nhau đủ để mép phải nhảy mỗi lần đổi."
     },
     "space-page-gutter": {
-      "$value": "{space-2xl}",
+      "$value": "{space-header-gutter}",
       "$type": "dimension",
-      "description": "Đệm ngang mép trang. Tách khỏi space-2xl để tầng scale thu nhỏ riêng ở tablet/mobile mà không đụng các kích thước cùng dùng space-2xl (vòng tròn avatar, bề rộng cột)."
+      "description": "Đệm ngang mép trang. Trỏ vào `space-header-gutter` (hai mươi) từ 30/09 — trước đó là `space-2xl` (bốn mươi). Đổi vì header đã theo frame ở hai mươi, và thân trang ở bốn mươi làm tiêu đề lệch hai mươi so với nội dung ngay dưới nó — đo được trên bốn màn. MỘT cần gạt cho cả trang: hai mươi hai chỗ dùng token này cùng đi theo, không phải sửa từng chỗ. Tách khỏi `space-2xl` vì token đó còn gánh KÍCH THƯỚC (vòng avatar, bề rộng cột) — co nó sẽ bóp cả những thứ đó."
     },
     "size-table-min-w": {
       "$value": "560px",
@@ -1946,6 +1949,18 @@
       "$value": "6px",
       "scope": "local",
       "$description": "Đệm dọc của một dòng trong bảng thả (Figma Parts/selectItem: 6px trên dưới, 16px hai bên). Không dùng lại `space-action-gap` cùng giá trị: tên đó nói về khe giữa hai nút."
+    },
+    "space-header-gutter": {
+      "$value": "20px",
+      "$type": "dimension",
+      "scope": "local",
+      "$description": "Đệm ngang mép của `header-page`. Frame `Header page` (Figma 10114:68292) khai `Spacing/S20`, một nấc thang mà hệ chưa nhận: thang khoảng cách nhảy thẳng từ `--space-md` (16) sang `--space-lg` (24). Khai riêng một nấc và giới hạn phạm vi ở đây thay vì làm tròn về 16 hay 24 — làm tròn là lệch mép so với frame ở mọi màn dùng nó. KHÁC `--space-page-gutter` (40) mà `page-header` và `.cps-body` đang dùng."
+    },
+    "space-logo-band-y": {
+      "$value": "14px",
+      "$type": "dimension",
+      "scope": "local",
+      "$description": "Đệm dọc của băng logo ở đầu sidebar. Frame khai `Spacing/S14`, một nấc thang hệ không có (nhảy từ 12 sang 16). Con số này KHÔNG tuỳ tiện: logo cao 28, nên 14 trên + 14 dưới cho băng cao đúng 56 — bằng chiều cao thanh đầu trang, để hai khối thẳng hàng ở mép trên. Làm tròn về 12 hay 16 là phá đúng phép căn đó."
     }
   },
   "components": [
@@ -1970,53 +1985,76 @@
       "uiLogic": null
     },
     {
-      "id": "heading-cycle",
-      "name": "Heading Cycle",
-      "renderFn": "renderCmpHeadingCycle",
+      "id": "cycle-status",
+      "name": "Cycle Status",
+      "renderFn": "renderCmpCycleStatus",
       "scope": "local",
       "level": "molecule",
       "dsMatch": null,
-      "renderSrc": "render/components/heading-cycle.js",
+      "renderSrc": "render/components/cycle-status.js",
       "properties": [
-        {
-          "id": "title",
-          "type": "string",
-          "default": "Quý 2/2026"
-        },
         {
           "id": "status",
           "type": "string",
-          "default": ""
+          "default": "reviewing"
+        },
+        {
+          "id": "statusLabel",
+          "type": "string",
+          "default": "Trạng thái:"
+        },
+        {
+          "id": "deadlineLabel",
+          "type": "string",
+          "default": "Hạn quản lý đánh giá:"
+        },
+        {
+          "id": "deadlineValue",
+          "type": "string",
+          "default": "10/10/2026"
         },
         {
           "id": "info",
           "type": "string",
-          "default": "Hạn đánh giá ngày 03/10/2026"
+          "default": ""
         },
         {
           "id": "overdue",
           "type": "boolean",
-          "default": false
+          "default": true
+        },
+        {
+          "id": "overdueText",
+          "type": "string",
+          "default": "Đã quá hạn"
         },
         {
           "id": "finalResult",
           "type": "string",
-          "default": ""
+          "default": "106%"
+        },
+        {
+          "id": "finalLabel",
+          "type": "string",
+          "default": "Kết quả cuối cùng:"
         }
       ],
       "code": {
         "lang": "html",
-        "snippet": "<div class=\"hcyc\">…</div>"
+        "snippet": "<div class=\"cyst cyst-info\"><span class=\"cyst-status\">…</span><span class=\"cyst-sep\"></span><span class=\"cyst-deadline\">…</span><span class=\"cyst-final\">…</span></div>"
       },
       "logicNotes": [
-        "`_HeadingCycle` (Figma 10057:33036). Ba vế phụ (chip trạng thái · cảnh báo quá hạn · kết quả cuối cùng) đều tuỳ chọn, và vắng mặt thì KHÔNG dựng thẻ rỗng — thẻ rỗng vẫn ăn `gap` của hàng cha và đẩy cụm lệch đi.",
-        "Ba hồ sơ dùng, đọc từ ba trang Figma: Thiết lập & Đánh giá (có chip, không kết quả cuối) · Lịch sử (có chip + kết quả cuối, dòng phụ `Chu kỳ đánh giá đã kết thúc`) · Hiệu suất phòng ban (không chip).",
-        "`status` nhận thẳng khoá vòng đời của `pbCycleLifecycleOf` và tự tra sang biến thể `handoff-*`; `statusVariant` để truyền thẳng biến thể khi chỗ gọi đã có.",
+        "`_CycleStatus` (Figma 10114:68574, 30/09). Hàng trên CHỈ tên kỳ; chip trạng thái đã rời xuống hàng dưới, sau nhãn `Trạng thái:`. Frame mới là symbol độc lập 1120×24 không chứa tên kỳ, tức nó THAY nguyên hàng dưới — chip chỉ xuất hiện một lần.",
+        "Nhãn hạn giữ BA biến thể của code (`Hạn thiết lập ngày ` / `Hạn tự đánh giá: ` / `Hạn quản lý đánh giá: `), cố ý không gộp về `Hạn đánh giá:` như frame vẽ: ba mốc khác nhau trong cùng một chu kỳ, gộp lại là xoá thông tin.",
+        "Đuôi đếm ngày giữ lại khi CHƯA quá hạn, bỏ khi đã quá hạn — hai câu cùng nghĩa cạnh nhau là thừa.",
+        "Vạch ngăn chỉ dựng khi CẢ HAI bên cùng có mặt. Màu `--border-app-hover`, đọc từ chính file SVG frame xuất ra; khác vạch của `header-page` (nhạt hơn) — hai frame dùng hai bậc, không phải một bên sai.",
+        "Hai đường vào cho cụm hạn, loại trừ nhau: cặp `deadlineLabel`+`deadlineValue` là đường chính, `info` là một CÂU cho lúc không có hạn nào để in (kỳ đã đóng, hoặc không tra được bộ công thức).",
+        "Chữ hàng dưới là `--text-default`, không còn `--text-muted`: hàng này nay mang trạng thái và hạn, tức thông tin chính.",
         "`finalResult` kiểm bằng `!= null`, không bằng `||`: điểm 0 là một điểm thật.",
-        "`align-items:flex-end` ở hàng ngoài — khối kết quả cuối nằm ngang DÒNG PHỤ, không ngang tiêu đề."
+        "Vắng mặt thì KHÔNG dựng thẻ rỗng, kể cả cả hàng dưới."
       ],
-      "specSrc": "spec/components/heading-cycle.json",
-      "description": "Cụm tiêu đề chu kỳ: tên kỳ + chip trạng thái, dòng hạn, và kết quả cuối cùng bên phải."
+      "specSrc": "spec/components/cycle-status.json",
+      "description": "Hàng trạng thái chu kỳ (`_CycleStatus`): `Trạng thái` + chip · vạch · hạn · quá hạn, và `Kết quả cuối cùng` dồn phải. KHÔNG còn hàng tiêu đề — gỡ 30/09."
     },
     {
       "id": "unit-select",
@@ -4943,6 +4981,34 @@
       "dsMatch": null
     },
     {
+      "id": "product-brand",
+      "name": "Product Brand",
+      "renderFn": "renderCmpProductBrand",
+      "scope": "local",
+      "level": "atom",
+      "dsMatch": null,
+      "renderSrc": "render/components/product-brand.js",
+      "properties": [
+        {
+          "id": "name",
+          "type": "string",
+          "default": "GGrow - Quản lý hiệu suất"
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<div class=\"pbrand\"><span class=\"pbrand__mark\"><img src=\"data:image/png;base64,…\"/></span><span class=\"pbrand__name\">GGROW - QUẢN LÝ HIỆU SUẤT</span></div>"
+      },
+      "specSrc": "spec/components/product-brand.json",
+      "logicNotes": [
+        "Thương hiệu SẢN PHẨM, khác `ghn-logo-lockup` vốn là thương hiệu CÔNG TY (mark GHN + chữ `GiaoHangNhanh` + tagline). Frame `_Header` (10117:72451) đặt ở chỗ đó logo riêng của GGrow — đã tải ảnh về XEM trước khi quyết, không suy từ tên layer.",
+        "Logo là ảnh RASTER, không phải vector, nên không vẽ lại bằng SVG: vẽ lại là tự chế một logo khác rồi gọi nó là logo của sản phẩm. Nhúng data URI vì `prototype.html` là một file tự chứa và URL của Figma hết hạn sau bảy ngày. Ảnh thu về chín sáu vuông (gấp đôi cỡ hiển thị bốn mươi) trước khi base64 — mười tám ký-lô-byte, khoảng ba phần nghìn trang đã dựng.",
+        "Tên sản phẩm lấy từ prop, IN HOA bằng `text-transform`. Frame in chuỗi hoa sẵn; chép nó vào đây là bản thứ hai của cùng một cái tên, và hai bản luôn trôi khỏi nhau.",
+        "Chuỗi base64 để NGOÀI thân hàm (`PB_BRAND_LOGO_SRC`, cuối file) để thân hàm còn đọc được trong một màn hình."
+      ],
+      "description": "Cụm thương hiệu sản phẩm: logo GGrow + tên sản phẩm in hoa. Dùng ở bay trái của `app-topbar`."
+    },
+    {
       "id": "badge",
       "name": "Badge",
       "renderFn": "renderCmpBadge",
@@ -7131,6 +7197,111 @@
       "logicNotes": [
         "create-variant gap 8px → 24px (2026-07-29, direct user instruction). Sits between the 'Quay lại' back pill and the H4 heading; 8px clustered them too tightly for a heading that size. Only the two 'Sửa chu kỳ' pages pass `backTo`, so in-shell screens keep the 12px default."
       ]
+    },
+    {
+      "id": "header-page",
+      "name": "Header Page",
+      "renderFn": "renderCmpHeaderPage",
+      "scope": "local",
+      "level": "organism",
+      "dsMatch": null,
+      "renderSrc": "render/components/header-page.js",
+      "properties": [
+        {
+          "id": "title",
+          "type": "string",
+          "default": "Tiêu đề trang"
+        },
+        {
+          "id": "description",
+          "type": "string",
+          "default": "Description"
+        },
+        {
+          "id": "backTo",
+          "type": "string",
+          "default": "hieu-suat-phong-ban-truc-tiep"
+        },
+        {
+          "id": "backLabel",
+          "type": "string",
+          "default": "Quay lại"
+        },
+        {
+          "id": "infoItems",
+          "type": "array",
+          "default": [
+            {
+              "label": "Quản lý:",
+              "value": "1438883 - Bùi Ngọc Phúc Danh"
+            },
+            {
+              "label": "Chức danh:",
+              "value": "Chuyên viên thiết kế"
+            },
+            {
+              "label": "Ủy quyền:",
+              "value": "9913898 - Mai Thị Ngọc Yến"
+            }
+          ]
+        },
+        {
+          "id": "tabs",
+          "type": "object",
+          "default": {
+            "name": "hdrp-preview",
+            "value": "a",
+            "options": [
+              {
+                "label": "Tab",
+                "value": "a"
+              },
+              {
+                "label": "Tab",
+                "value": "b"
+              }
+            ]
+          }
+        },
+        {
+          "id": "gutter",
+          "type": "string",
+          "default": "space-header-gutter"
+        },
+        {
+          "id": "size",
+          "type": "enum",
+          "default": "auto",
+          "options": [
+            {
+              "label": "Tự theo bề rộng",
+              "value": "auto"
+            },
+            {
+              "label": "Viewport small",
+              "value": "viewport-small"
+            },
+            {
+              "label": "Viewport large",
+              "value": "viewport-large"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<div class=\"hdrp\"><div class=\"hdrp__bar\"><div class=\"hdrp__lead\">…<div class=\"hdrp__titleblock\"><h1 class=\"hdrp__title\">Tiêu đề trang</h1><p class=\"hdrp__desc\">Description</p></div></div><div class=\"hdrp__info\"><div class=\"hdrp__info-item\">…</div><span class=\"hdrp__sep\"></span></div></div>…</div>"
+      },
+      "specSrc": "spec/components/header-page.json",
+      "logicNotes": [
+        "BỐN ĐIỂM KHÁC `page-header`, và đó là lý do nó đứng riêng (quyết định 30/09): khối thông tin nằm CÙNG HÀNG tiêu đề (bên kia là hàng riêng bên dưới) · máng ngang hai mươi (bên kia bốn mươi) · nút Back chỉ có hình, không chữ (bên kia có chữ `Quay lại`) · không có breadcrumb/actions/accessChip (bên kia có, ba màn đang dùng). Cái giá: hai component cùng nghĩa sẽ trôi khỏi nhau nếu chỉ thị sau này chỉ sửa một bên — thấy lệch thì gộp lại, đừng sửa tiếp một bên.",
+        "HAI BIẾN THỂ, TÊN NGƯỢC TRỰC GIÁC: `viewport-small` xếp nhãn TRÊN giá trị (khối cao hơn), `viewport-large` xếp nhãn CẠNH giá trị trên một dòng. Đúng frame — đã kiểm trên ảnh render của chính frame, không suy từ tên biến thể.",
+        "Đảo bố cục bằng `@container` khai trên CHÍNH header, không `@media` và không mượn `pbshell`: prototype vẽ bên trong một khung thiết bị nên `@media` đọc bề rộng cửa sổ và bắn sai cả hai chiều. Hình lúc nghỉ là biến thể xếp chồng — an toàn ở mọi bề rộng.",
+        "Ba boolean của frame (`departmentManager` / `jobTitle` / `delegator`) trở thành sự vắng mặt của dữ liệu trong `infoItems`. Ba chuỗi nhãn frame vẽ KHÔNG nhúng vào component — đó là nội dung, chỗ gọi truyền vào.",
+        "Vạch ngăn vẽ bằng viền `--border-app-disabled`, không nhúng ảnh: file Figma xuất ra chỉ chứa đúng một thẻ `line` một pixel — đã tải về đọc để lấy màu, không đoán.",
+        "MÁNG NGANG HAI MƯƠI LỆCH VỚI THÂN TRANG `.cps-body` (bốn mươi). Chưa chỗ gọi nào dùng nên chưa lộ ra; màn đầu tiên chuyển sang phải quyết cùng lúc: đổi máng thân trang theo, hay truyền `gutter:'space-page-gutter'` cho header."
+      ],
+      "description": "Đầu trang theo frame `Header page`: nút Back chỉ có hình + tên trang + mô tả, khối thông tin CÙNG HÀNG bên phải, dải tab bên dưới. Không nhầm với `page-header` — bốn điểm khác nhau ghi trong `logicNotes`."
     },
     {
       "id": "titled-section",
@@ -10250,7 +10421,7 @@
         {
           "id": "page-header",
           "label": "Title \"Theo dõi chu kỳ\" + subtitle, now delegated to the shared renderCmpPageHeader molecule (render/components/page-header.js) instead of a hand-built <div><h1>/<p></div> — plain title+subtitle variant only (no backTo/accessChip/actions passed), byte-identical markup/tokens to what it replaces.",
-          "orgId": "page-header",
+          "orgId": "header-page",
           "tokens": [
             "--font-size-title",
             "--text-default",
@@ -10690,7 +10861,7 @@
         {
           "id": "list-header",
           "label": "Page title + subtitle: \"Hiệu suất của tôi\" / \"<persona name> · <unit> — chọn chu kỳ để xem và quản lý mục tiêu\". The subtitle is DERIVED from the active sandbox role via pbPersonaLabel() (2026-07-30) so the page and the top-bar identity always name the same person.",
-          "orgId": "page-header",
+          "orgId": "header-page",
           "tokens": [
             "--font-size-title",
             "--text-muted"
@@ -10852,7 +11023,7 @@
         {
           "id": "cd-page-header",
           "label": "Page header — title 'Cài đặt chu kỳ' + subtitle 'Cài đặt cho các phòng ban, hoặc theo chức vụ', với segment 'Nhân viên chính thức'/'Nhân viên thử việc' trong slot tabs. Không có CTA ở header (Figma 7909:4140 / 8110:31091 đều không vẽ).",
-          "orgId": "page-header",
+          "orgId": "header-page",
           "tokens": [
             "font-family-base",
             "font-size-heading",
@@ -11169,7 +11340,7 @@
         {
           "id": "page-header",
           "label": "Screen title bar — title 'Hiệu suất phòng ban', subtitle 'Đánh giá, thiết lập hiệu suất cho trực thuộc hoặc được ủy quyền', and (2026-08-10, Figma 8110:97360) the four-tab underline strip in page-header's own `tabs` slot. The `actions` slot is now EMPTY: the download icon, the three Excel actions and the 'Xem lại và hoàn tất' primary all left it in the same pass — the toolbar row under the tabs took the first two, the sticky footer bar took the primary. Supersedes the 2026-07-23 'title-only variant' label, which had been false since the subtitle was restored 2026-08-05.",
-          "orgId": "page-header",
+          "orgId": "header-page",
           "tokens": [
             "--font-size-title",
             "--font-weight-title"
@@ -11581,7 +11752,7 @@
         {
           "id": "page-header",
           "label": "Screen title bar — title 'Hiệu suất phòng ban', subtitle 'Đánh giá, thiết lập hiệu suất cho trực thuộc hoặc được ủy quyền', and (2026-08-10, Figma 8110:97360) the four-tab underline strip in page-header's own `tabs` slot. The `actions` slot is now EMPTY: the download icon, the three Excel actions and the 'Xem lại và hoàn tất' primary all left it in the same pass — the toolbar row under the tabs took the first two, the sticky footer bar took the primary. Supersedes the 2026-07-23 'title-only variant' label, which had been false since the subtitle was restored 2026-08-05.",
-          "orgId": "page-header",
+          "orgId": "header-page",
           "tokens": [
             "--font-size-title",
             "--font-weight-title"
@@ -11993,7 +12164,7 @@
         {
           "id": "page-header",
           "label": "Screen title bar — title 'Hiệu suất phòng ban', subtitle 'Đánh giá, thiết lập hiệu suất cho trực thuộc hoặc được ủy quyền', and (2026-08-10, Figma 8110:97360) the four-tab underline strip in page-header's own `tabs` slot. The `actions` slot is now EMPTY: the download icon, the three Excel actions and the 'Xem lại và hoàn tất' primary all left it in the same pass — the toolbar row under the tabs took the first two, the sticky footer bar took the primary. Supersedes the 2026-07-23 'title-only variant' label, which had been false since the subtitle was restored 2026-08-05.",
-          "orgId": "page-header",
+          "orgId": "header-page",
           "tokens": [
             "--font-size-title",
             "--font-weight-title"
@@ -12574,7 +12745,7 @@
         {
           "id": "page-chrome",
           "label": "Three-level breadcrumb (Hiệu suất phòng ban › <tuyến> › <mã - tên phòng>), a back affordance to that tuyến, the department code+name as title, the info strip below, and the two-tab underline strip (Chu kỳ phòng ban / Chu kỳ chức danh) in page-header's own `tabs` slot.",
-          "orgId": "page-header",
+          "orgId": "header-page",
           "tokens": [],
           "state": "default"
         },
@@ -12596,13 +12767,6 @@
           "id": "period-pills",
           "label": "Two period pills per scope tab — the current cycle (Đánh giá) and the next (Thiết lập), e.g. Q3/2026 | Q4/2026 or T9/2026 | T10/2026. Pill variant. These radios are the reveal source: a `:has()` rule keyed on the checked pill shows its pane, so switching period costs no re-render.",
           "orgId": "cycle-tabs",
-          "tokens": [],
-          "state": "default"
-        },
-        {
-          "id": "pane-heading",
-          "label": "Cụm tiêu đề của kỳ đang mở — `_HeadingCycle` (Figma 10057:33036): tên kỳ `Đánh giá <kỳ>` trên một dòng hạn. CHIP TRẠNG THÁI TẮT ở màn này, đúng như frame `Hiệu suất phòng ban` vẽ: bảng ngay dưới đã có cột `Trạng thái` cho từng người, nên một chip ở tiêu đề không biết đang nói về ai. Cũng không có `Kết quả cuối cùng` — đó là con số của MỘT phiếu. Dòng hạn suy theo phòng của từng dòng chứ không theo phòng đang mở, nên một trưởng phòng con mượn sang vẫn được tính đúng hợp đồng của mình.",
-          "orgId": "heading-cycle",
           "tokens": [],
           "state": "default"
         },
