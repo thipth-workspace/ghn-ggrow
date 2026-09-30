@@ -1981,7 +1981,7 @@
         {
           "id": "title",
           "type": "string",
-          "default": "Đánh giá Quý 2/2026"
+          "default": "Quý 2/2026"
         },
         {
           "id": "status",
@@ -2741,7 +2741,10 @@
         "snippet": "<details class=\"pb-dd\"><summary>Tất cả trạng thái</summary><div class=\"pb-dd__panel\"><label>...</label></div></details>"
       },
       "renderSrc": "render/components/dropdown-select.js",
-      "specSrc": "spec/components/dropdown-select.json"
+      "specSrc": "spec/components/dropdown-select.json",
+      "logicNotes": [
+        "DÒNG `Tự nhập` ẨN MẶC ĐỊNH (chỉ thị 30/09). Chỉ cái NÚT trong droplist bị ẩn, qua cờ `customRow` (mặc định tắt, không chỗ gọi nào truyền). Tính năng tự nhập GIỮ NGUYÊN: `allowCustom` vẫn bật `data-dd-free` để `pbDropdownSelectCommit` nhận chuỗi gõ tay làm giá trị, vẫn hiện câu gợi ý \"dùng luôn …\" khi gõ không khớp, và vẫn chèn được một giá trị đã lưu nằm ngoài danh sách."
+      ]
     },
     {
       "id": "datepicker",
