@@ -8557,45 +8557,6 @@
       "specSrc": "spec/components/kpi-result-table.json"
     },
     {
-      "id": "proposal-diff",
-      "name": "Proposal Diff",
-      "renderFn": "renderCmpProposalDiff",
-      "scope": "local",
-      "level": "molecule",
-      "description": "Bảng so sánh bộ mục tiêu hiện tại với bản đề xuất sửa, ghép theo rid, tô nền hàng có thay đổi.",
-      "properties": [
-        {
-          "id": "currentRows",
-          "type": "array"
-        },
-        {
-          "id": "proposedRows",
-          "type": "array"
-        },
-        {
-          "id": "state",
-          "type": "string",
-          "default": "default",
-          "options": [
-            {
-              "label": "Default",
-              "value": "default"
-            },
-            {
-              "label": "Empty",
-              "value": "empty"
-            }
-          ]
-        }
-      ],
-      "code": {
-        "lang": "html",
-        "snippet": "<table>…</table>"
-      },
-      "renderSrc": "render/components/proposal-diff.js",
-      "specSrc": "spec/components/proposal-diff.json"
-    },
-    {
       "id": "read-only-detail-body",
       "name": "Read Only Detail Body",
       "renderFn": "renderCmpReadOnlyDetailBody",
