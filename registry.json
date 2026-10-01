@@ -870,7 +870,7 @@
       "$type": "color"
     },
     "size-search-max-w": {
-      "$value": "320px",
+      "$value": "280px",
       "$type": "dimension"
     },
     "size-control-sm": {
@@ -8342,7 +8342,7 @@
         {
           "id": "empId",
           "type": "string",
-          "default": "Mã NV: 018263"
+          "default": "018263"
         },
         {
           "id": "avatarInitials",
@@ -12802,14 +12802,14 @@
         },
         {
           "id": "bulk-evaluate",
-          "label": "`Đánh giá hàng loạt bằng Excel`, on an Đánh giá period only — the P3 round trip writing Kết quả / Điểm / Nhận xét. Scope is asserted by the host in the same gesture that opens it (`hpbdBulkScope`): this pane's people, and the current cycle.",
+          "label": "`Đánh giá bằng Excel`, on an Đánh giá period only — the P3 round trip writing Kết quả / Điểm / Nhận xét. Scope is asserted by the host in the same gesture that opens it (`hpbdBulkScope`): this pane's people, and the current cycle.",
           "orgId": "bulk-evaluate-action",
           "tokens": [],
           "state": "default"
         },
         {
           "id": "bulk-assign",
-          "label": "`Thiết lập hàng loạt bằng Excel`, on a Thiết lập period only — the P2 round trip writing Mục tiêu / Chỉ tiêu / Tỷ trọng, the mirror of what P3 locks. Same scope hook, but with the period step set to one so the commit lands on the NEXT cycle, which is what this period is about.",
+          "label": "`Thiết lập bằng Excel`, on a Thiết lập period only — the P2 round trip writing Mục tiêu / Chỉ tiêu / Tỷ trọng, the mirror of what P3 locks. Same scope hook, but with the period step set to one so the commit lands on the NEXT cycle, which is what this period is about.",
           "orgId": "bulk-assign-kpi-action",
           "tokens": [],
           "state": "default"
