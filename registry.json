@@ -12745,6 +12745,24 @@
           "state": "default"
         },
         {
+          "id": "cycle-roadmap-card",
+          "label": "Thẻ `Chu kỳ phòng ban` / `Chu kỳ chức danh <tên>` đứng giữa dải kỳ và thẻ bảng, dựng bằng `titled-section` với khe tiêu đề→nội dung 16 theo frame. Chỉ có mặt ở tab Chu kỳ phòng ban và ở CHI TIẾT một chức danh; tab Quản lý cấp dưới không có frame nên không dựng.",
+          "orgId": "titled-section",
+          "tokens": [
+            "space-md"
+          ],
+          "state": "default"
+        },
+        {
+          "id": "cycle-roadmap",
+          "label": "Thanh lộ trình bốn mốc của kỳ đang chọn — `Thiết lập mục tiêu` · `NV tự đánh giá` · `QL đánh giá` · `Kết quả cuối cùng`, mỗi mốc kèm NGÀY DƯƠNG LỊCH suy từ bộ công thức của phòng/chức danh neo vào dải kỳ. Hai mốc đầu tô `bg-secondary` (của nhân viên), hai mốc sau `bg-primary` (của quản lý) — màu đọc thẳng từ trường `phase` mà `ggKpiSteps` trả về. Bề ngang ghim `--size-roadmap-dept`.",
+          "orgId": "notice-period-timeline",
+          "tokens": [
+            "size-roadmap-dept"
+          ],
+          "state": "default"
+        },
+        {
           "id": "roster-toolbar",
           "label": "The row above the roster table: search on the left, the status filter beside it, the two Excel actions right-aligned. `fit:true` so the bar hugs the card rather than stretching.",
           "orgId": "filter-toolbar",
