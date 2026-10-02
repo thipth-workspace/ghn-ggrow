@@ -37,6 +37,11 @@
         "id": "employee",
         "name": "Employee",
         "isAdmin": false
+      },
+      {
+        "id": "probation-employee",
+        "name": "Probation Employee",
+        "isAdmin": false
       }
     ],
     "defaultRole": "hr",
@@ -2479,6 +2484,10 @@
             {
               "label": "Grey — nền xám đặc, chữ nghịch (Figma: nút 'Trả lại' của thanh hành động)",
               "value": "grey"
+            },
+            {
+              "label": "Ghost — không nền, không viền, nhãn text-default (Figma: nút 'Xem chi tiết' của thẻ đào tạo L&D)",
+              "value": "ghost"
             }
           ]
         },
@@ -10379,6 +10388,34 @@
         "Dòng chức danh thiếu font-weight là lỗi thật: trong cột ghim, R22 của atom table đẩy mọi giá trị lên emphasis, nên nó hiện ra đậm trong khi Figma (node Tab, frame 9318:98463) nói Regular. Đi qua typography role body3 thì weight thuộc về style.",
         "Không khai state: cụm không tương tác, dòng bảng mới là thứ bắt click (.tbl-row-click)."
       ]
+    },
+    {
+      "id": "probation-ld-card",
+      "name": "Probation L&D Card",
+      "renderFn": "renderCmpProbationLdCard",
+      "scope": "local",
+      "level": "molecule",
+      "dsMatch": null,
+      "renderSrc": "render/components/probation-ld-card.js",
+      "properties": [
+        {
+          "id": "done",
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "id": "title",
+          "type": "string",
+          "default": "Tham gia khoá học đào tạo L&D"
+        }
+      ],
+      "specSrc": "spec/components/probation-ld-card.json",
+      "logicNotes": [
+        "Khối `Tham gia khoá học đào tạo L&D` đứng cuối danh sách mục tiêu của phiếu thử việc (`TV-07`).",
+        "KHÔNG dùng `info-banner`: frame vẽ một THẺ TRẮNG ngang hàng với thẻ mục tiêu, còn `info-banner` là dải có nền tô theo tông — đặt vào sẽ ra một dải màu giữa hai thẻ trắng.",
+        "`Xem kết quả` không có đích: prototype không có màn kết quả khoá học, và dữ liệu L&D do hệ thống ngoài trả về. Có đích thật thì truyền `onViewResult`."
+      ],
+      "description": "Thẻ trạng thái khoá học L&D trên phiếu nhân viên thử việc. Hai trạng thái: đã / chưa hoàn thành."
     }
   ],
   "screens": [
@@ -10821,7 +10858,8 @@
         "manager",
         "high-level-manager",
         "supervisor",
-        "employee"
+        "employee",
+        "probation-employee"
       ],
       "logicNotes": [
         "REAL-DATA SESSION STORE (2026-07-29, cập nhật 2026-07-31): GOALS đọc từ pbAppStore().myGoals; KPI đọc/ghi ở slice `kpiSets` dùng chung. BỐN writer, chia quyền sở hữu field rõ ràng: hcmSaveReview (COMMIT — pool Tỉ trọng inline qua hcmFlushWeights + 3 chủ đề Nhận xét; có pbWeightGate chặn khi ≠100%) · hcmSaveKpiRow (MỘT dòng, từ dialog — 5 field định nghĩa + selfScore/selfNote; không bị gate) · hcmKpiAddRow (thêm dòng rồi mở luôn dialog của dòng mới) · pbFileAttachSync (tên file đính kèm). hcmCardFilter lọc lưới chu kỳ. QUAN TRỌNG: hcmSaveReview KHÔNG đọc field của từng dòng nữa — mọi dialog đều nằm trong DOM và trong save scope, nên nếu nó đọc thì gõ vào dialog → bấm Hủy → bấm Lưu đánh giá sẽ commit đúng cái vừa bị huỷ. Mọi lần đọc DOM đều scope theo [data-save-scope] (hoặc .dlg-root với dialog) vì màn này render CÙNG một chu kỳ hai lần với id trùng nhau. Nút ghi không dùng data-action=submit.",
@@ -12640,70 +12678,6 @@
           "label": "Trang chi tiết đơn vị",
           "verifiedAt": "2026-09-03",
           "note": "Đã đối chiếu screenshot: breadcrumb 'Cài đặt chu kỳ / Phòng Product', info strip Chu kỳ·Quản lý·Ủy quyền, card 'Chu kỳ phòng ban' + 'Chu kỳ chức danh trong phòng ban'. Thay 8245:39253 (28/08)."
-        }
-      ]
-    },
-    {
-      "id": "theo-doi-thu-viec-chi-tiet",
-      "name": "Chu kỳ thử việc — Chi tiết nhân viên",
-      "renderFn": "renderScreenTheoDoiThuViecChiTiet",
-      "roles": [
-        "hr",
-        "manager",
-        "high-level-manager",
-        "supervisor"
-      ],
-      "layout": {
-        "type": "stack",
-        "gap": 24,
-        "maxWidth": 1440,
-        "padding": 24
-      },
-      "elements": [
-        {
-          "id": "app-shell",
-          "label": "Persistent app shell. `activeScreenId` stays on Theo dõi chu kỳ — this page has no sidebar row of its own, so the list it belongs to stays lit.",
-          "orgId": "header-footer-app",
-          "tokens": [
-            "--size-sidebar"
-          ],
-          "state": "default"
-        },
-        {
-          "id": "page-chrome",
-          "label": "Breadcrumb (Theo dõi chu kỳ › Nhân viên thử việc › <tên>) + the person's name as title. The middle crumb calls `cqGoTabFresh('probation')` rather than a plain nav: both tabs of the host share one screen id, so declarative navigation cannot tell them apart. The third crumb appears only when a person is stashed.",
-          "orgId": "config-page-shell",
-          "tokens": [],
-          "state": "default"
-        },
-        {
-          "id": "design-in-progress",
-          "label": "`Design in-progress` — the whole body while this surface is being designed (15/09/2026 instruction). Every probation person's detail click lands here, so the message is unconditional: no per-person branch, no partial content that would suggest the feature is half-live.",
-          "orgId": "empty-state",
-          "tokens": [],
-          "state": "default"
-        },
-        {
-          "id": "back-to-list",
-          "label": "`Về danh sách nhân viên thử việc` — returns to the probation TAB, not the host's default tab, via the same `cqGoTabFresh` the breadcrumb uses.",
-          "orgId": "button",
-          "tokens": [],
-          "state": "default"
-        }
-      ],
-      "logicNotes": [
-        "15/09/2026 — the body is a `Design in-progress` placeholder by direct instruction; the real detail surface is a separate task. The previous body (three-field info strip, five-milestone probation timeline, employee-detail-drawer in bodyOnly mode) was removed rather than feature-flagged: a disabled body still has to be read and maintained on every pass while describing a design that is being replaced. Git history holds it, and all three pieces are shared components still live on other screens.",
-        "15/09/2026 — `roles` widened from ['hr'] to include manager / high-level-manager / supervisor. The probation tab is now reachable from the Hiệu suất phòng ban routes (Trực tiếp quản lý and Ủy quyền đánh giá), whose roles are exactly those three; without this the shell refuses the screen and the row click opens nothing. Same class of defect as chi-tiet-nhan-vien's missing supervisor role earlier the same day.",
-        "15/09/2026 — this page is now the SINGLE destination for every probation person. The Hiệu suất phòng ban probation rows used to route to chi-tiet-nhan-vien via ctnvOpenMember; hpbProbationPane now overrides rowOnClick to tdtvOpenPersonPage, which keys by name on the same PB_TDTV_TARGET stash the quan-ly-chu-ky roster already writes."
-      ],
-      "renderSrc": "render/screens/theo-doi-thu-viec-chi-tiet.js",
-      "level": "page",
-      "figmaNodes": [
-        {
-          "node": "8801:28766",
-          "label": "Chi tiết nhân viên thử việc",
-          "verifiedAt": "2026-09-03",
-          "note": "Thay 8245:39197 (2026-08-28)."
         }
       ]
     },
