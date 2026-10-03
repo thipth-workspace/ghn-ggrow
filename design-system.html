@@ -1,4 +1,4 @@
-<!-- pb-shell v1.11.0 · rendered 2026-10-02T09:45:19Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-10-03T06:04:01Z -->
 <!doctype html>
 <!-- pb design-system site — a deterministic projection of registry.json (components + tokens).
      render.py inlines the registry + per-component node JSON and injects the shared runtime plus the
@@ -16357,7 +16357,11 @@ function pbObjSubMsg(total, objLabel) {
   // Bản trước cắt chữ "tỷ" làm đôi (`' — t'` / `'T'`) để đổi hoa-thường theo nhánh — gọn nhưng
   // đọc ra không biết câu đầy đủ là gì. Nay ghép cả cụm tiền tố, chữ `Tỷ` viết hoa ở cả hai nhánh.
   return { title: (objLabel ? 'Mục tiêu ' + objLabel + ' - ' : '')
-                  + 'Tỷ trọng phụ đang là ' + total + '%.',
+                  // BỎ CHỮ `phụ` (chỉ thị 03/10): tiền tố `Mục tiêu ‹1.2› - ` đã nói tỷ trọng
+                  // CỦA AI, nên `phụ` thêm một từ mà không thêm thông tin — và nó là từ vựng cũ,
+                  // spec chốt `mục tiêu thành phần`. Vẫn phân biệt được với câu của nhóm cha
+                  // (`Tổng tỷ trọng đang là …`) nhờ chính tiền tố đó.
+                  + 'Tỷ trọng đang là ' + total + '%.',
            text: 'Vui lòng điều chỉnh về 100%' };
 }
 
@@ -16947,37 +16951,19 @@ function pbObjCheckDialog(scopeKey) {
   });
 }
 
-// ══ TRẦN TỔNG KẾT QUẢ 130% (chỉ thị 22/09/2026) ═══════════════════════════════════════════════
-// Không cho `Gửi quản lý đánh giá` (nhân viên) và `Hoàn thành` (quản lý) đi tiếp khi TỔNG KẾT QUẢ
-// vượt 130%. Chỉnh về <= 130 thì qua.
-//
-// VÌ SAO LUẬT NÀY CÓ ĐẤT SỐNG: ô `Tỷ lệ hoàn thành` chỉ có câu nhắc `0 - 100`, KHÔNG có thuộc tính
-// max và không cổng nào chặn — đo 22/09: đặt 180 cho mọi mục thì tổng ra đúng 180. Nên trần này là
-// lớp chặn DUY NHẤT, không phải lớp thứ hai.
-//
-// TRẦN ĐẶT Ở TỔNG, KHÔNG Ở TỪNG MỤC: một mục vượt chỉ tiêu là chuyện bình thường và `R-30` cho
-// phép; cái cần chặn là khi cộng có trọng số lại thì cả chu kỳ đọc ra một con số vô lý.
-//
-// MỘT HÀM CHO CẢ HAI VAI: `side` quyết định đọc cột nào (`self` cho nhân viên, `manager` cho quản
-// lý). Hai bản chép sẽ trôi lệch — đúng lớp lỗi mà `pbRejectCommit` đã gom một lần.
-var PB_TOTAL_MAX = 130;
-function pbTotalCapGate(set, side) {
-  if (typeof pbKpiWeightedScore !== 'function') { return true; }
-  var t = pbKpiWeightedScore(set, side);
-  // `null` = còn mục chưa chấm. Ca đó do cổng bắt buộc bắt, không phải việc của trần này.
-  if (t == null || t <= PB_TOTAL_MAX) { return true; }
-  pbInform({
-    title: 'Chưa thể tiếp tục',
-    // Chỉ thị 22/09 lượt 2: bỏ vế "cho tới khi tổng kết quả không quá 130%" — nó lặp lại đúng con
-    // số vừa nêu ở câu trước. Câu sau chỉ cần nói VIỆC PHẢI LÀM.
-    // `<br>` bỏ theo: câu đã đủ ngắn để tự xuống dòng.
-    message: 'Tổng kết quả đang là <strong>' + pbFmtNumber(t) + '%</strong>, vượt mức tối đa '
-      + PB_TOTAL_MAX + '%. Vui lòng chỉnh lại tỉ lệ hoàn thành của các mục tiêu.',
-    // Nút cam như `pbObjCheckDialog` — đây cũng là hộp CHẶN, không phải hộp báo xong.
-    ctaVariant: 'primary'
-  });
-  return false;
-}
+/* ══ TRẦN TỔNG KẾT QUẢ — ĐÃ GỠ 03/10/2026 (bảng wording, mục 13) ═══════════════════════════
+   Ở đây từng có `pbTotalCapGate` + hằng trần, dựng theo chỉ thị hai mươi hai tháng chín: không
+   cho `Gửi đánh giá` (nhân viên) và `Hoàn thành` (quản lý) đi tiếp khi tổng kết quả vượt trần.
+   Bảng wording chốt bỏ hộp `Chưa thể tiếp tục` của luật này, nên luật đi theo — giữ cổng mà bỏ
+   hộp thì nút im lặng không phản hồi gì.
+
+   HỆ QUẢ CẦN BIẾT, KHÔNG PHẢI LỖI: ô `Tỷ lệ hoàn thành` chỉ có câu nhắc `0 - 100`, KHÔNG có
+   thuộc tính max và không cổng nào khác đọc tổng. Trần này là lớp chặn DUY NHẤT của luật đó, nên
+   gỡ nó là tổng kết quả nay không còn bị chặn ở mức nào cả. Nếu sau này muốn chặn, chỗ đúng là
+   ngay tại ô nhập chứ không phải lúc bấm gửi.
+
+   `pbKpiWeightedScore` GIỮ NGUYÊN — nó là công thức tính điểm dùng chung, hai chục chỗ đang gọi.
+   Ghi chú trong `design-spec/open-questions.md` đã cập nhật theo. */
 
 function pbObjRequiredGate(btn, scopeKey) {
   var scope = (scopeKey && document.querySelector('[data-save-scope="' + scopeKey + '"]'))
@@ -18303,6 +18289,12 @@ function renderCmpActionFooter(props) {
 // những ô vừa được thêm sau đó. So sánh store với DOM thì phải chạy lại toàn bộ bộ đọc mỗi phím.
 var PB_FOOT_DIRTY = {};
 function pbFootMarkDirty(key) { PB_FOOT_DIRTY[key || 'default'] = true; }
+/* [03/10] KHÔNG CÒN CHỖ GỌI kể từ khi hộp `Thoát mà không lưu?` bị gỡ — chỗ duy nhất đọc nó.
+   GIỮ LẠI, khác với mấy hàm mồ côi đã xoá trong hai ngày qua: chúng tồn tại CHỈ để nuôi một thứ
+   vừa bị bỏ, còn hàm này là phép đọc theo-khoá của bộ cờ dùng chung — bốn hàm anh em
+   (`pbFootMarkDirty` · `pbFootClearDirty` · `pbFootAnyDirty` · `pbFootClearAll`) đều còn chạy, và
+   gỡ đúng cái đọc-một-khoá sẽ để lại một bộ API khuyết. Ghi ở đây để người sau không phải grep
+   mới biết nó đang rỗng chỗ gọi. */
 function pbFootIsDirty(key) { return PB_FOOT_DIRTY[key || 'default'] === true; }
 function pbFootClearDirty(key) { delete PB_FOOT_DIRTY[key || 'default']; }
 function pbFootClearAll() { PB_FOOT_DIRTY = {}; }
@@ -18335,13 +18327,15 @@ function pbFootCancel(key, screenId) {
     if (screenId && typeof pbGoFresh === 'function') { pbGoFresh(screenId); }
     else if (typeof pbAppRerender === 'function') { pbAppRerender(); }
   };
-  if (!pbFootIsDirty(key)) { go(); return; }
-  pbConfirm({
-    title: 'Thoát mà không lưu?',
-    message: 'Bạn có thay đổi chưa lưu. Thoát bây giờ sẽ mất toàn bộ phần vừa nhập.',
-    confirmLabel: 'Thoát, không lưu',
-    onConfirm: go
-  });
+  /* [GỠ 03/10/2026 — chỉ thị] Hộp `Thoát mà không lưu?` bỏ hẳn: nút `Huỷ` nay thoát NGAY.
+
+     Bỏ luôn phép hỏi `pbFootIsDirty` đứng trước nó, và đó là phép rút gọn chứ không phải bỏ sót:
+     một khi không còn hộp thoại ở giữa, hai nhánh của nó cùng kết thúc bằng `go()` — "chưa có
+     thay đổi thì đi" và "có thay đổi, người dùng đã xác nhận, thì đi" nay là một.
+
+     NGƯỜI DÙNG KHÔNG MẤT LỚP CHẶN NÀO: rời trang vẫn hỏi qua cổng điều hướng ngay dưới. Thứ vừa
+     bỏ là lớp hỏi THỨ HAI cho cùng một hệ quả, đặt trên chính nút mang nghĩa "tôi muốn thoát". */
+  go();
 }
 
 // ── CHẶN ĐIỀU HƯỚNG KHI CÒN THAY ĐỔI CHƯA LƯU (mục 14.5) ─────────────────────────────────────
@@ -18366,11 +18360,11 @@ function pbFootInstallNavGuard() {
     // thoại mà người dùng học cách bấm bừa qua — cùng lập luận mục 14.5 đã dùng cho nút `Hủy`.
     // Nhân thể dọn luôn cờ mồ côi: chúng thuộc về những scope không còn trên trang nữa.
     /* ── LỜI NHẮC `Rời trang mà không lưu?` ĐÃ TẮT (chỉ thị 02/10/2026) ──────────────────────
-       Trước đây chỗ này bật `pbConfirm` khi còn cờ bẩn. Nay rời trang đi thẳng, không hỏi.
+       [LỊCH SỬ] Hộp này bị TẮT 02/10 rồi BẬT LẠI cùng ngày; phần dưới ghi cả hai lượt.
 
        CỔNG VẪN ĐỨNG NGUYÊN, chỉ bỏ phần HỎI — và đó là điểm cần giữ đúng: việc thật mà cổng này
        làm là `pbFootClearAll()` ở mỗi lần đổi màn. Gỡ hẳn cổng thì cờ bẩn của màn vừa rời sẽ sống
-       tiếp sang màn sau, và nút `Hủy` của thanh hành động — thứ còn đọc `pbFootIsDirty` — sẽ hỏi
+       tiếp sang màn sau, và nút `Huỷ` của thanh hành động — hồi đó còn hỏi — sẽ hỏi
        về những thay đổi thuộc một trang người dùng đã rời khỏi.
 
        Spec hiện hành KHÔNG có quy tắc nào về thay đổi chưa lưu; `mục 14.5` mà chú thích trên trích
@@ -18403,7 +18397,7 @@ function pbFootInstallNavGuard() {
 
     pbConfirm({
       title: 'Rời trang mà chưa lưu?',
-      message: 'Bạn có thay đổi chưa lưu trên trang này. Rời đi bây giờ sẽ mất phần vừa nhập.',
+      message: 'Bạn có thay đổi chưa lưu. Rời trang sẽ mất phần vừa nhập.',
       confirmLabel: 'Rời trang',
       onConfirm: function () { pbFootClearAll(); orig.apply(self, args); }
     });
@@ -22907,7 +22901,13 @@ function pbConfirm(opts) {
     b.innerHTML = window['renderCmpButton']({ variant: variant, label: label });
     return b;
   };
-  var no = mk(opts.cancelLabel || 'Hủy', 'secondary');
+  /* MẶC ĐỊNH `Huỷ`, KHÔNG PHẢI `Hủy` (03/10/2026, chỉ thị đồng bộ chính tả).
+     Sửa ở MẶC ĐỊNH chứ không ở hai chỗ gọi mà chỉ thị nêu: quét cả `render/` thì KHÔNG chỗ gọi
+     `pbConfirm` nào truyền `'Hủy'` — cả mười chỗ khai tường minh đều dùng `'Huỷ'`. Tức mặc định
+     này là chỗ DUY NHẤT còn lệch, và nó lệch với mọi lựa chọn có chủ ý trong dự án.
+     Vá hai chỗ gọi sẽ để lại đúng cái lệch đó cho mọi hộp thoại khác dùng mặc định — kể cả hai
+     hộp `Phiếu đã thay đổi` và `Quản lý đã giao mục tiêu` nằm ngay trong cùng tính năng. */
+  var no = mk(opts.cancelLabel || 'Huỷ', 'secondary');
   var yes = mk(opts.confirmLabel || 'Xác nhận', opts.danger === false ? 'primary' : 'danger');
   no.addEventListener('click', m.close);
   yes.addEventListener('click', function () {
@@ -27182,7 +27182,19 @@ function renderCmpProbationMonitorPane(props) {
       rowOnClick: tdtvOpenPersonPageCall(m.name),
       rowLabel: 'Xem chi tiết ' + m.name,
       employee: filterMarker + personCell(m),
-      manager: ggEmpNameLabel(m.manager) || muted('—'),
+      /* CỘT `Quản lý`: MÃ + TÊN + CHỨC DANH, KHÔNG AVATAR (chỉ thị 03/10).
+         Bản cũ chỉ in `ggEmpNameLabel` — một dòng `<mã> - <tên>`, thiếu chức danh. Dùng lại
+         `employee-cell` ở chế độ `noAvatar` để hai cột người trong bảng có CÙNG kiểu chữ và
+         cùng cách xuống dòng phụ; chỉ cột nhân viên giữ avatar làm mỏ neo của dòng.
+
+         Tra bản ghi theo TÊN vì seed roster thử việc lưu quản lý bằng tên (`manager:"..."`),
+         không lưu id. Không tra được thì rơi về chính chuỗi tên — thà in tên trần còn hơn in
+         một dấu gạch cho một người có thật. */
+      manager: (function () {
+        var q = m.manager ? ggEmpByName(m.manager) : null;
+        if (!q) { return m.manager ? String(m.manager) : muted('—'); }
+        return pbUse('employee-cell', { noAvatar: true, name: q.name, emp: q, meta: q.title || '' });
+      })(),
       // ── CỘT "Phòng ban" (2026-08-28, Figma 8284:60656) ──────────────────────────────────────
       // Frame vẽ sáu cột: Nhân viên · Trạng thái · Phòng ban · Quản lý · Ngày đánh giá · Thời gian
       // thử việc. `m.team` đã tồn tại và vốn được stamp vào `data-tdtv-dept` của filterMarker, nên
@@ -34636,10 +34648,22 @@ function renderCmpEmployeeCell(props) {
 
   // Khe ngang `--space-sm`, khe dọc KHÔNG CÓ: hai dòng trong frame cao đúng bằng `line-height` của
   // chúng và chồng khít nhau, nhịp thở đã nằm sẵn trong `line-height`. Thêm khe dọc là cộng hai lần.
+  /* `noAvatar` (03/10/2026) — BỎ ẢNH, GIỮ HAI DÒNG CHỮ. Cột `Quản lý` của bảng nhân viên thử
+     việc cần đúng cụm `<mã> - <tên>` + chức danh mà cell này đã dựng, nhưng KHÔNG có avatar:
+     một bảng hai cột người, mỗi cột một ảnh tròn, thì hai ảnh đó cạnh tranh nhau và không ảnh
+     nào còn là mỏ neo của dòng.
+
+     Dùng lại cell thay vì dựng tay hai dòng ở chỗ gọi: kiểu chữ, màu dòng phụ và cách cắt chữ
+     dài đã nằm sẵn ở đây. Dựng tay là chép ba quyết định đó sang một chỗ sẽ trôi lệch.
+
+     Bỏ trống thì không đổi một byte — mọi chỗ gọi hiện có đều có avatar. Khe `--space-sm` cũng
+     rụng theo ảnh: không còn gì để cách. */
+  var noAvatar = props.noAvatar === true;
   return '<span class="pb-employee-cell" '
-    + 'style="display:inline-flex;align-items:center;gap:var(--space-sm);min-width:0'
+    + 'style="display:inline-flex;align-items:center;min-width:0'
+    + (noAvatar ? '' : ';gap:var(--space-sm)')
     + (grow ? ';width:100%' : '') + '">'
-    + pbUse('avatar', { name: name, size: props.size || 'md' })
+    + (noAvatar ? '' : pbUse('avatar', { name: name, size: props.size || 'md' }))
     + '<span class="pb-employee-cell__text" style="' + colStyle + '">' + lineOne + lineTwo + '</span>'
     + '</span>';
 }
@@ -39801,13 +39825,13 @@ function renderScreenChiTietNhanVien(props) {
        được.) */
     var st = goalSet.phase;
     var msg = (st === 'approved' || st === 'closed')
-      ? 'Đã hoàn thành đánh giá. Bạn chỉ được quyền xem nội dung.'
+      ? 'Đã hoàn thành đánh giá. Bạn chỉ có thể xem nội dung.'
       : (isReview
-          ? (ctnvTenNV() + ' chưa hoàn thành tự đánh giá. Bạn sẽ chấm được sau khi nhân viên nộp.')
+          ? (ctnvTenNV() + ' chưa hoàn thành tự đánh giá. Bạn có thể chấm sau khi nhân viên hoàn thành.')
           // Câu nói thẳng AI đã giao và NÓI VỚI NGƯỜI ĐANG ĐỌC (chỉ thị 28/09). Bản trước
           // (`Mục tiêu đã được giao và chốt. Nội dung chỉ còn để xem lại.`) viết ở thể bị động,
           // không cho biết ai khoá và cũng không nói người đọc còn làm được gì.
-          : 'Bộ mục tiêu đã chốt, bạn chỉ còn xem');
+          : 'Bộ mục tiêu đã chốt, bạn chỉ có thể xem');
     // Bản đề xuất đang mở thì câu "đã chốt, chỉ để xem" là SAI: lúc đó quản lý vừa sửa được vừa
     // phải quyết. Cổng `roleCanEdit && !editable` ở trên nay cũng không còn đúng trong ca đó
     // (xem `pbCanEditSetSim`), nên băng tự tắt; giữ điều kiện tường minh để lần sau đọc ra ngay.
@@ -40014,7 +40038,7 @@ function renderScreenChiTietNhanVien(props) {
     ctnvRjBanner = pbUse('info-banner', {
       tone: 'warning', icon: true,
       title: 'Đã trả lại cho ' + ctnvTenNV(),
-      text: 'Bạn sẽ chấm được sau khi nhân viên nộp lại.',
+      text: 'Bạn sẽ đánh giá được sau khi nhân viên nộp lại.',
       actionLabel: 'Xem lý do',
       onClick: "var c=document.getElementById('" + ctnvRsnTid + "');if(c){c.checked=true;}"
     })
@@ -40906,7 +40930,7 @@ function ctnvSave(btn) {
   pbDraftSave(t.member.id, ggCycleIdOf(ctnvPhase()), 'mgr', live, snap);
   pbFootClearDirty('ctnv');
   // KHÔNG vẽ lại — vẽ lại dựng ô từ kho dùng chung, sẽ xoá thứ người dùng vừa gõ.
-  pbToast('Đã lưu nháp trên thiết bị này - chưa gửi lên hệ thống');
+  pbToast('Đã lưu nháp trên thiết bị này - Chưa gửi lên hệ thống');
 }
 
 // `Chốt điểm` / `Đồng ý & Phê duyệt`.
@@ -40953,7 +40977,7 @@ function ctnvRejectSet(btn) {
        hứa. Không có nút `Huỷ` vì không có lựa chọn thứ hai — trạng thái cũ đã không còn. */
     pbConfirm({
       title: 'Phiếu đã thay đổi',
-      message: 'Người khác vừa cập nhật phiếu này. Tải lại để xem trạng thái mới nhất.',
+      message: 'Tải lại để xem trạng thái mới nhất.',
       confirmLabel: 'Tải lại',
       onConfirm: function () { pbAppRerender(); }
     });
@@ -40993,7 +41017,7 @@ function ctnvPropose(btn) {
     pbNotify(ctx.set.employeeId, 'GOAL_SUBMITTED', 'CYCLE_EMPLOYEE', ctx.set.employeeId, {});
   }
   pbAppRerender();
-  pbToast('Đã lưu mục tiêu đề xuất - nhân viên sẽ thấy ngay thay đổi');
+  pbToast('Đã lưu mục tiêu đề xuất - Nhân viên sẽ thấy ngay thay đổi');
 }
 
 function ctnvSubmit(btn) {
@@ -41083,9 +41107,9 @@ function ctnvSubmit(btn) {
   // KHÔNG mất lớp chặn nào: `R-25` (`pbStateGuard`) và hai cổng validate vẫn chạy ở đầu hàm.
   var c = ctnvCtx(null, null);
   if (!c) { return; }
-  // Trần tổng 130% — cùng hàm với nửa nhân viên, chỉ khác cột đọc. Đặt SAU `ctnvCtx` vì hàm đó
-  // vừa đổ những gì đang gõ vào kho; chặn trước nó sẽ chấm trên số liệu cũ.
-  if (typeof pbTotalCapGate === 'function' && !pbTotalCapGate(c.set, 'manager')) { return; }
+  /* [GỠ 03/10/2026 — bảng wording, mục 13] Trần tổng kết quả bỏ hẳn: `Hoàn thành` nay đi thẳng
+     dù tổng vượt bao nhiêu. Gỡ CẢ cổng chứ không riêng hộp thoại — giữ cổng mà bỏ hộp thì nút
+     im lặng không làm gì, tệ hơn hẳn. Nửa nhân viên (`hcpSubmit`) gỡ cùng lượt. */
   /* ── HỎI LẠI TRƯỚC KHI CHỐT (chỉ thị 30/09/2026) — DỰNG LẠI HỘP ĐÃ GỠ 22/09 ─────────
      Khối ghi chú ngay trên còn đúng về LỊCH SỬ, giữ lại cả hai để thấy đường đi: 22/09 hộp bị gỡ
      vì nó lặp lại y hệt câu nhắc dưới footer và vì frame `dialog-complete` không vẽ nó. 30/09 chủ
@@ -43343,7 +43367,9 @@ function hcmSaveSetupToServer(goalId, btn) {
   var firstSave = hcmCommitSetup(set, goalId);
 
   pbAppRerender(hcmCurrentNav());   // vẽ lại TRƯỚC — xem ghi chú cùng chủ đề ở `hcpSubmit`
-  if (firstSave) { hcmInformSetupSaved('setup'); } else { pbToast('Đã lưu bộ mục tiêu'); }
+  // Hai nhánh phải nói CÙNG một câu (sót từ lượt áp review mục 21: tôi đổi `hcmInformSetupSaved`
+  // mà quên nhánh `else`, nên lần lưu đầu và lần sau báo hai thứ khác nhau cho cùng một việc).
+  if (firstSave) { hcmInformSetupSaved('setup'); } else { pbToast('Đã gửi đề xuất cho quản lý'); }
 }
 
 function hcmSaveGoals(goalId, btn) {
@@ -43740,7 +43766,7 @@ function hcpSave(phaseKey, btn) {
   pbDraftSave(PB_ME.employeeId, pbCycleIdFor(PB_ME.employeeId, phaseKey), 'self', live, snap);
   pbFootClearDirty('hcp-' + phaseKey);   // đã cất đi thì không còn gì "chưa lưu"
   // `R-06` đòi UI NÓI RÕ nháp là cục bộ. Câu "Đã lưu nháp." cũ không nói gì về chỗ lưu.
-  pbToast('Đã lưu nháp trên thiết bị này - chưa gửi lên hệ thống');
+  pbToast('Đã lưu nháp trên thiết bị này - Chưa gửi lên hệ thống');
 }
 
 // Nút chính. Chưa gắn kiểm tra hợp lệ và hộp xác nhận — đó là GĐ E; ở đây nó ghi dữ liệu thật rồi
@@ -43779,11 +43805,8 @@ function hcpSubmit(phaseKey, btn) {
     pbObjCheckDialog('hcp-' + phaseKey); return;   // `dialog-check`
   }
   var ctx = hcpCtx(phaseKey, null, btn);
-  // Trần tổng 130% — CHẶN SAU khi thu số liệu (`hcpCtx` vừa đổ DOM vào kho) và TRƯỚC
-  // `pbFootClearDirty`: bỏ cờ "chưa lưu" rồi mới chặn thì người dùng mất lời nhắc rời trang trong
-  // khi dữ liệu vẫn chưa gửi đi đâu cả.
-  if (ggPhaseHasReview(phaseKey) && typeof pbTotalCapGate === 'function'
-      && !pbTotalCapGate(ctx.set, 'self')) { return; }
+  /* [GỠ 03/10/2026 — bảng wording, mục 13] Trần tổng kết quả bỏ hẳn, xem `ctnvFinishReview`
+     bên nửa quản lý. Cổng bắt buộc `R-15` ngay trên KHÔNG đụng tới — nó chặn chuyện khác. */
   /* ── HỎI LẠI TRƯỚC KHI GỬI (chỉ thị 30/09/2026) ──────────────────────────
      Hộp đặt SAU mọi cổng validate, không trước. Hỏi rồi mới phát hiện thiếu trường là bắt người
      dùng xác nhận một việc không xảy ra được.
@@ -43826,7 +43849,7 @@ function hcpSubmit(phaseKey, btn) {
     // `pbConfirm` dành cho xoá và trả phiếu; dùng ở đây là báo sai mức độ.
     pbConfirm({
       title: 'Gửi đánh giá?',
-      message: 'Sau khi gửi, bạn không thể chỉnh sửa. Quản lý sẽ chấm và báo kết quả đến bạn.',
+      message: 'Sau khi gửi, bạn không thể chỉnh sửa. Quản lý sẽ chấm và thông báo kết quả đến bạn.',
       confirmLabel: 'Gửi đánh giá',
       cancelLabel: 'Huỷ',
       danger: false,
@@ -43846,7 +43869,7 @@ function hcpSubmit(phaseKey, btn) {
      Dùng `pbSetupSavedMessage(..., true)` để câu đó và câu báo sau cùng đọc một mốc hạn. */
   pbConfirm({
     title: 'Gửi đề xuất cho quản lý?',
-    message: 'Sau khi gửi, bạn không được chỉnh sửa cho tới khi quản lý phản hồi.',
+    message: 'Sau khi gửi, bạn không thể chỉnh sửa cho tới khi quản lý phản hồi.',
     confirmLabel: 'Gửi đề xuất',
     cancelLabel: 'Huỷ',
     danger: false,
@@ -52103,16 +52126,35 @@ function hpbL1Filter(el, sel) {
 // ── BẢNG NHÂN VIÊN — MỘT ĐỊNH NGHĨA, BA CHỖ DÙNG ─────────────────────────────────────────────
 // Tab `Nhân viên thử việc` ở cấp 1, tab `Chu kỳ phòng ban` và tab `Chu kỳ chức danh` ở cấp 2 đều
 // vẽ đúng bảng này (spec mục 5.2 / 5.3 / phụ lục C). Ba bản sao là ba chỗ để trôi lệch nhau.
-function hpbMemberColumns() {
+/* `opts.deptColumn` (03/10/2026, chỉ thị) — CỘT `Phòng ban` CHÈN NGAY SAU `Trạng thái`.
+   Chỉ bảng `Quản lý cấp dưới` bật nó: ở đó mỗi dòng là một TRƯỞNG phòng con, nên "phòng ban của
+   người này" là một dữ kiện có thật và khác nhau từng dòng. Hai tab còn lại liệt kê nhân sự của
+   CÙNG một phòng — thêm cột ở đó là một cột lặp lại tiêu đề trang ở mọi dòng.
+
+   Tuỳ chọn chứ không mặc định, nên chỗ gọi kia ra byte y hệt.
+
+   NĂM CỘT CŨ PHẢI HẸP LẠI KHI CÓ CỘT THỨ SÁU — bản đầu tôi chỉ chèn cột rồi để cột tên tự co.
+   Đo ra: tên còn 146 và mỗi dòng cao 129 vì họ tên xuống BA dòng. Cột tên là cột duy nhất co
+   giãn, nên mười sáu phần trăm của cột mới rút thẳng từ nó.
+   CHỈ BA CỘT ĐIỂM HẸP LẠI, cột `Trạng thái` GIỮ NGUYÊN. Bản thứ hai tôi bóp nó xuống mười bốn
+   phần trăm và chip `Chưa thiết lập` TRÀN SANG cột bên cạnh — đo được: chip dài 116, ô còn 100,
+   tràn 29. Chip không co được (`white-space:nowrap`), nên cột chứa nó là cột duy nhất KHÔNG có
+   chỗ để nhường. Ba cột điểm thì có: chúng chỉ chứa `90%` hoặc một dấu gạch.
+   Chỉ áp khi cột `Phòng ban` có mặt — bảng năm cột giữ nguyên từng con số. */
+function hpbMemberColumns(opts) {
+  var coDept = !!(opts && opts.deptColumn === true);
+  var deptCol = coDept
+    ? [{ key: 'dept', label: 'Phòng ban', width: '15%', sortIcon: true }] : [];
   return [
     { key: 'name', label: 'Tên nhân viên', flex: true, sortIcon: true },
-    { key: 'status', label: 'Trạng thái', width: '18%', sortIcon: true },
+    { key: 'status', label: 'Trạng thái', width: '18%', sortIcon: true }
+  ].concat(deptCol).concat([
     // Ba cột điểm CĂN PHẢI (spec mục 5.2). Hai cột nguồn ở bậc chữ thường, `Kết quả cuối cùng` giữ
     // bậc nhấn mặc định của atom — đó là cách frame tách kết quả khỏi hai con số sinh ra nó.
-    { key: 'self', label: 'NV đánh giá', width: '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
-    { key: 'mgr', label: 'QL đánh giá', width: '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
-    { key: 'result', label: 'Kết quả cuối cùng', width: '17%', align: 'right', sortIcon: true }
-  ];
+    { key: 'self', label: 'NV đánh giá', width: coDept ? '11%' : '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
+    { key: 'mgr', label: 'QL đánh giá', width: coDept ? '11%' : '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
+    { key: 'result', label: 'Kết quả cuối cùng', width: coDept ? '13%' : '17%', align: 'right', sortIcon: true }
+  ]);
 }
 
 // Chưa có giá trị thì `-`, KHÔNG phải `0%` (spec mục 07). Hai thứ đó nói hai chuyện khác hẳn nhau.
@@ -57510,16 +57552,35 @@ function hpbL1Filter(el, sel) {
 // ── BẢNG NHÂN VIÊN — MỘT ĐỊNH NGHĨA, BA CHỖ DÙNG ─────────────────────────────────────────────
 // Tab `Nhân viên thử việc` ở cấp 1, tab `Chu kỳ phòng ban` và tab `Chu kỳ chức danh` ở cấp 2 đều
 // vẽ đúng bảng này (spec mục 5.2 / 5.3 / phụ lục C). Ba bản sao là ba chỗ để trôi lệch nhau.
-function hpbMemberColumns() {
+/* `opts.deptColumn` (03/10/2026, chỉ thị) — CỘT `Phòng ban` CHÈN NGAY SAU `Trạng thái`.
+   Chỉ bảng `Quản lý cấp dưới` bật nó: ở đó mỗi dòng là một TRƯỞNG phòng con, nên "phòng ban của
+   người này" là một dữ kiện có thật và khác nhau từng dòng. Hai tab còn lại liệt kê nhân sự của
+   CÙNG một phòng — thêm cột ở đó là một cột lặp lại tiêu đề trang ở mọi dòng.
+
+   Tuỳ chọn chứ không mặc định, nên chỗ gọi kia ra byte y hệt.
+
+   NĂM CỘT CŨ PHẢI HẸP LẠI KHI CÓ CỘT THỨ SÁU — bản đầu tôi chỉ chèn cột rồi để cột tên tự co.
+   Đo ra: tên còn 146 và mỗi dòng cao 129 vì họ tên xuống BA dòng. Cột tên là cột duy nhất co
+   giãn, nên mười sáu phần trăm của cột mới rút thẳng từ nó.
+   CHỈ BA CỘT ĐIỂM HẸP LẠI, cột `Trạng thái` GIỮ NGUYÊN. Bản thứ hai tôi bóp nó xuống mười bốn
+   phần trăm và chip `Chưa thiết lập` TRÀN SANG cột bên cạnh — đo được: chip dài 116, ô còn 100,
+   tràn 29. Chip không co được (`white-space:nowrap`), nên cột chứa nó là cột duy nhất KHÔNG có
+   chỗ để nhường. Ba cột điểm thì có: chúng chỉ chứa `90%` hoặc một dấu gạch.
+   Chỉ áp khi cột `Phòng ban` có mặt — bảng năm cột giữ nguyên từng con số. */
+function hpbMemberColumns(opts) {
+  var coDept = !!(opts && opts.deptColumn === true);
+  var deptCol = coDept
+    ? [{ key: 'dept', label: 'Phòng ban', width: '15%', sortIcon: true }] : [];
   return [
     { key: 'name', label: 'Tên nhân viên', flex: true, sortIcon: true },
-    { key: 'status', label: 'Trạng thái', width: '18%', sortIcon: true },
+    { key: 'status', label: 'Trạng thái', width: '18%', sortIcon: true }
+  ].concat(deptCol).concat([
     // Ba cột điểm CĂN PHẢI (spec mục 5.2). Hai cột nguồn ở bậc chữ thường, `Kết quả cuối cùng` giữ
     // bậc nhấn mặc định của atom — đó là cách frame tách kết quả khỏi hai con số sinh ra nó.
-    { key: 'self', label: 'NV đánh giá', width: '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
-    { key: 'mgr', label: 'QL đánh giá', width: '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
-    { key: 'result', label: 'Kết quả cuối cùng', width: '17%', align: 'right', sortIcon: true }
-  ];
+    { key: 'self', label: 'NV đánh giá', width: coDept ? '11%' : '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
+    { key: 'mgr', label: 'QL đánh giá', width: coDept ? '11%' : '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
+    { key: 'result', label: 'Kết quả cuối cùng', width: coDept ? '13%' : '17%', align: 'right', sortIcon: true }
+  ]);
 }
 
 // Chưa có giá trị thì `-`, KHÔNG phải `0%` (spec mục 07). Hai thứ đó nói hai chuyện khác hẳn nhau.
@@ -62917,16 +62978,35 @@ function hpbL1Filter(el, sel) {
 // ── BẢNG NHÂN VIÊN — MỘT ĐỊNH NGHĨA, BA CHỖ DÙNG ─────────────────────────────────────────────
 // Tab `Nhân viên thử việc` ở cấp 1, tab `Chu kỳ phòng ban` và tab `Chu kỳ chức danh` ở cấp 2 đều
 // vẽ đúng bảng này (spec mục 5.2 / 5.3 / phụ lục C). Ba bản sao là ba chỗ để trôi lệch nhau.
-function hpbMemberColumns() {
+/* `opts.deptColumn` (03/10/2026, chỉ thị) — CỘT `Phòng ban` CHÈN NGAY SAU `Trạng thái`.
+   Chỉ bảng `Quản lý cấp dưới` bật nó: ở đó mỗi dòng là một TRƯỞNG phòng con, nên "phòng ban của
+   người này" là một dữ kiện có thật và khác nhau từng dòng. Hai tab còn lại liệt kê nhân sự của
+   CÙNG một phòng — thêm cột ở đó là một cột lặp lại tiêu đề trang ở mọi dòng.
+
+   Tuỳ chọn chứ không mặc định, nên chỗ gọi kia ra byte y hệt.
+
+   NĂM CỘT CŨ PHẢI HẸP LẠI KHI CÓ CỘT THỨ SÁU — bản đầu tôi chỉ chèn cột rồi để cột tên tự co.
+   Đo ra: tên còn 146 và mỗi dòng cao 129 vì họ tên xuống BA dòng. Cột tên là cột duy nhất co
+   giãn, nên mười sáu phần trăm của cột mới rút thẳng từ nó.
+   CHỈ BA CỘT ĐIỂM HẸP LẠI, cột `Trạng thái` GIỮ NGUYÊN. Bản thứ hai tôi bóp nó xuống mười bốn
+   phần trăm và chip `Chưa thiết lập` TRÀN SANG cột bên cạnh — đo được: chip dài 116, ô còn 100,
+   tràn 29. Chip không co được (`white-space:nowrap`), nên cột chứa nó là cột duy nhất KHÔNG có
+   chỗ để nhường. Ba cột điểm thì có: chúng chỉ chứa `90%` hoặc một dấu gạch.
+   Chỉ áp khi cột `Phòng ban` có mặt — bảng năm cột giữ nguyên từng con số. */
+function hpbMemberColumns(opts) {
+  var coDept = !!(opts && opts.deptColumn === true);
+  var deptCol = coDept
+    ? [{ key: 'dept', label: 'Phòng ban', width: '15%', sortIcon: true }] : [];
   return [
     { key: 'name', label: 'Tên nhân viên', flex: true, sortIcon: true },
-    { key: 'status', label: 'Trạng thái', width: '18%', sortIcon: true },
+    { key: 'status', label: 'Trạng thái', width: '18%', sortIcon: true }
+  ].concat(deptCol).concat([
     // Ba cột điểm CĂN PHẢI (spec mục 5.2). Hai cột nguồn ở bậc chữ thường, `Kết quả cuối cùng` giữ
     // bậc nhấn mặc định của atom — đó là cách frame tách kết quả khỏi hai con số sinh ra nó.
-    { key: 'self', label: 'NV đánh giá', width: '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
-    { key: 'mgr', label: 'QL đánh giá', width: '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
-    { key: 'result', label: 'Kết quả cuối cùng', width: '17%', align: 'right', sortIcon: true }
-  ];
+    { key: 'self', label: 'NV đánh giá', width: coDept ? '11%' : '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
+    { key: 'mgr', label: 'QL đánh giá', width: coDept ? '11%' : '14%', align: 'right', sortIcon: true, bodyWeight: 'body' },
+    { key: 'result', label: 'Kết quả cuối cùng', width: coDept ? '13%' : '17%', align: 'right', sortIcon: true }
+  ]);
 }
 
 // Chưa có giá trị thì `-`, KHÔNG phải `0%` (spec mục 07). Hai thứ đó nói hai chuyện khác hẳn nhau.
@@ -64278,8 +64358,15 @@ function hpbdModePane(o, p) {
     actions: actions
   });
 
+  // Cột `Phòng ban` chỉ có ở bảng `Quản lý cấp dưới` — xem `hpbMemberColumns`.
+  var coCotPhongBan = (o.key === 'subs');
   var rows = o.members.map(function (e) {
     var row = hpbMemberRow(e.dept, e.m, p.mode, cycleOf(e));
+    /* TÊN PHÒNG CON, lấy từ chính `e.dept` mà dòng đã mang sẵn — không tra lại cây tổ chức.
+       Mỗi dòng của `hpbdSubLeadsOf` là cặp `{m, dept}` với `dept` là phòng NGƯỜI ĐÓ QUẢN, đúng
+       thứ cột này cần. Tra lại từ `m.id` sẽ ra phòng người đó THUỘC VỀ — với trưởng phòng thì
+       hai thứ trùng nhau, nhưng trùng vì may chứ không vì đúng. */
+    if (coCotPhongBan) { row.dept = (e.dept && e.dept.name) || '—'; }
     /* Spec mục 4.1: *"Bấm vào một dòng → mở Chi tiết nhân viên của ĐÚNG KỲ ĐANG CHỌN."*
        `hpbMemberRow` gắn sẵn `ctnvOpenMember`, và hàm đó mở người ở kỳ ĐANG CHẠY — đúng cho hai
        tab đầu, sai cho một kỳ đã đóng. Ghi đè ở đây chứ không thêm tham số cho `hpbMemberRow`:
@@ -64299,7 +64386,7 @@ function hpbdModePane(o, p) {
         + '<div class="' + tableClass + '" data-q="hpbd-q-' + o.key + '-' + p.value
         + '" data-st="' + statusId + '">'
         + pbUse('table', {
-            columns: hpbMemberColumns(), rows: rows,
+            columns: hpbMemberColumns({ deptColumn: coCotPhongBan }), rows: rows,
             emptyText: 'Chưa có nhân viên nào trong kỳ này.'
           })
         + '</div>')
