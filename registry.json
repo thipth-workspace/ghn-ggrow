@@ -878,6 +878,11 @@
       "$value": "280px",
       "$type": "dimension"
     },
+    "size-search-mobile-w": {
+      "$value": "128px",
+      "$type": "dimension",
+      "description": "Bề ngang ô tìm kiếm trên thanh công cụ ở dải mobile. Figma 10260:50450 — ô rút còn 128 để nhường chỗ cho nút lọc và hai nút hành động trên CÙNG MỘT hàng. Bậc desktop là `size-search-max-w` (280)."
+    },
     "size-control-sm": {
       "$value": "28px",
       "$type": "dimension"
@@ -1771,6 +1776,11 @@
       "$type": "dimension",
       "scope": "local"
     },
+    "size-nav-popover-w": {
+      "$value": "223px",
+      "$type": "dimension",
+      "description": "Bề ngang bảng chọn nổi trên thanh nav đáy. Figma 10260:49384 — tấm 223, dòng bên trong 207 cộng hai lần đệm tám. Khai thành token vì bảng tự co theo nội dung sẽ hẹp hơn hẳn frame: ba nhãn đều ngắn."
+    },
     "shadow-xl": {
       "$value": "0px 10px 15px -3px rgba(0,0,0,0.10), 0px 4px 6px -4px rgba(16,24,40,0.10)",
       "$type": "shadow",
@@ -1890,9 +1900,9 @@
       "description": "Bề ngang tối thiểu của bảng ở mobile, để bảng tràn ra và cuộn ngang thay vì bóp cột. Lấy theo số đo thật ở tablet: cột hẹp nhất của bảng ba cột là 194, ba cột là 582 — ngưỡng này đặt dưới mức đó nên không nới rộng hơn cái tablet đang hiển thị."
     },
     "size-bottom-nav": {
-      "$value": "65px",
+      "$value": "79px",
       "$type": "dimension",
-      "description": "Cao thanh nav dưới, chỉ mobile. Số đo từ Figma 9977:105917."
+      "description": "Cao thanh nav dưới, chỉ mobile. Figma 10247:47757 (04/10/2026) — dựng theo cấu tạo chứ không đo bằng mắt: hai viền chỉ báo cộng mười trên cộng hai mươi biểu tượng cộng tám khe cộng hai dòng nhãn mười sáu cộng sáu dưới, cộng một viền trên của chính thanh (thanh khai box-sizing:border-box nên viền ăn vào trong, không cộng thêm thì ô con bị ép hụt đúng một). Bản trước là sáu mươi lăm, hợp với nhãn một dòng viết tắt."
     },
     "size-topbar-mobile": {
       "$value": "57px",
@@ -7856,6 +7866,56 @@
       },
       "renderSrc": "render/components/nav-item.js",
       "specSrc": "spec/components/nav-item.json"
+    },
+    {
+      "id": "nav-popover",
+      "name": "Nav Popover",
+      "renderFn": "renderCmpNavPopover",
+      "scope": "local",
+      "level": "molecule",
+      "description": "Bảng chọn nổi bung LÊN từ một ô của thanh nav đáy mobile, mũi nhọn chỉ xuống ô đó. Mở bằng cú bấm vào ô, đóng khi bấm ra ngoài hoặc khi chọn một dòng. Dòng dựng bằng `menu-item-button`, phân vai qua `data-roles` như submenu thanh bên.",
+      "properties": [
+        {
+          "id": "id",
+          "type": "string",
+          "default": "navpop"
+        },
+        {
+          "id": "trigger",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "items",
+          "type": "array",
+          "default": []
+        },
+        {
+          "id": "state",
+          "type": "string",
+          "default": "default",
+          "options": [
+            {
+              "label": "Closed",
+              "value": "default"
+            },
+            {
+              "label": "Open",
+              "value": "open"
+            },
+            {
+              "label": "Active row",
+              "value": "active"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<div class=\"pb-navpop\">…</div>"
+      },
+      "renderSrc": "render/components/nav-popover.js",
+      "specSrc": "spec/components/nav-popover.json"
     },
     {
       "id": "collapse-toggle",
