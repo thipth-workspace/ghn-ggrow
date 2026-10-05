@@ -1766,7 +1766,7 @@
       "$type": "dimension",
       "scope": "local"
     },
-    "size-roadmap-dept": {
+    "size-timeline-max": {
       "$value": "800px",
       "$type": "dimension",
       "scope": "local"
@@ -12905,10 +12905,10 @@
         },
         {
           "id": "cycle-roadmap",
-          "label": "Thanh lộ trình bốn mốc của kỳ đang chọn — `Thiết lập mục tiêu` · `NV tự đánh giá` · `QL đánh giá` · `Kết quả cuối cùng`, mỗi mốc kèm NGÀY DƯƠNG LỊCH suy từ bộ công thức của phòng/chức danh neo vào dải kỳ. Hai mốc đầu tô `bg-secondary` (của nhân viên), hai mốc sau `bg-primary` (của quản lý) — màu đọc thẳng từ trường `phase` mà `ggKpiSteps` trả về. Bề ngang ghim `--size-roadmap-dept`.",
+          "label": "Thanh lộ trình bốn mốc của kỳ đang chọn — `Thiết lập mục tiêu` · `NV tự đánh giá` · `QL đánh giá` · `Kết quả cuối cùng`, mỗi mốc kèm NGÀY DƯƠNG LỊCH suy từ bộ công thức của phòng/chức danh neo vào dải kỳ. Hai mốc đầu tô `bg-secondary` (của nhân viên), hai mốc sau `bg-primary` (của quản lý) — màu đọc thẳng từ trường `phase` mà `ggKpiSteps` trả về. Bề ngang ghim `--size-timeline-max`.",
           "orgId": "notice-period-timeline",
           "tokens": [
-            "size-roadmap-dept"
+            "size-timeline-max"
           ],
           "state": "default"
         },
