@@ -1976,6 +1976,54 @@
       "$type": "dimension",
       "scope": "local",
       "$description": "Đệm dọc của băng logo ở đầu sidebar. Frame khai `Spacing/S14`, một nấc thang hệ không có (nhảy từ 12 sang 16). Con số này KHÔNG tuỳ tiện: logo cao 28, nên 14 trên + 14 dưới cho băng cao đúng 56 — bằng chiều cao thanh đầu trang, để hai khối thẳng hàng ở mép trên. Làm tròn về 12 hay 16 là phá đúng phép căn đó."
+    },
+    "border-tag-warning": {
+      "$value": "#f3c584",
+      "$type": "color",
+      "scope": "local",
+      "$description": "Viền tag trạng thái vàng (`Chờ quản lý đánh giá`) — Figma 10287:55444 dùng mã hex trần, DS chưa có token."
+    },
+    "border-tag-success": {
+      "$value": "#9fe6d2",
+      "$type": "color",
+      "scope": "local",
+      "$description": "Viền tag trạng thái xanh lá (`Hoàn thành`, `Đạt thử việc`) — Figma 10287:55444 dùng mã hex trần, DS chưa có token. KHÁC `border-success-muted-hover` (#a7f3d0)."
+    },
+    "bg-tag-cyan": {
+      "$value": "#ecfeff",
+      "$type": "color",
+      "scope": "local",
+      "$description": "Nền tag `Quản lý đã đánh giá` (cyan/50) — Figma 10287:55383, DS chưa có token cyan."
+    },
+    "border-tag-cyan": {
+      "$value": "#22d3ee",
+      "$type": "color",
+      "scope": "local",
+      "$description": "Viền tag `Quản lý đã đánh giá` (cyan/400) — Figma 10287:55383, DS chưa có token cyan."
+    },
+    "text-tag-cyan": {
+      "$value": "#0891b2",
+      "$type": "color",
+      "scope": "local",
+      "$description": "Chữ và icon tag `Quản lý đã đánh giá` (cyan/600) — Figma 10287:55383, DS chưa có token cyan."
+    },
+    "size-col-status-w": {
+      "$value": "184px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang cột Trạng thái của bảng nhân viên — chip dài nhất (`Chờ quản lý đánh giá`) cộng hai bên đệm ô. 06/10/2026."
+    },
+    "size-col-score-w": {
+      "$value": "112px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang hai cột NV / QL đánh giá — tiêu đề kèm icon sort, cộng đệm ô. 06/10/2026."
+    },
+    "size-col-result-w": {
+      "$value": "148px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang cột Kết quả cuối cùng — tiêu đề kèm icon sort, cộng đệm ô. 06/10/2026."
     }
   },
   "components": [
@@ -2584,6 +2632,30 @@
               "value": "dashed"
             }
           ]
+        },
+        {
+          "id": "join",
+          "type": "enum",
+          "default": "",
+          "options": [
+            {
+              "label": "Không nối",
+              "value": ""
+            },
+            {
+              "label": "Nửa đầu (bo trái)",
+              "value": "start"
+            },
+            {
+              "label": "Nửa cuối (bo phải)",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "id": "padX",
+          "type": "string",
+          "default": ""
         }
       ],
       "code": {
@@ -2605,6 +2677,86 @@
       "logicNotes": [
         "shape:'outline-round' CÓ CALLER THẬT từ 2026-07-31: nút icon edit của mỗi dòng trong bảng Tiêu chí KPI ở CẢ HAI màn review. Trước đó nó được build 2026-07-30 rồi mồ côi 0 caller. Dùng nó (chứ không phải idiom truyền renderCmpIcon vào `label`) vì nó phát aria-label + title từ `label`, còn idiom kia không có accessible name."
       ]
+    },
+    {
+      "id": "split-button",
+      "name": "Split Button",
+      "renderFn": "renderCmpSplitButton",
+      "scope": "local",
+      "level": "molecule",
+      "description": "Nút hai nửa, hai vùng bấm: nửa trái chạy hành động chính, nửa phải mở bảng chọn thả xuống. Mỗi hành động mở một ngăn/hộp thoại mà trang đã mount (qua `forId`). Đối chiếu DS gốc `ds.component.split-button@1.0.0` — bản clone DS của prototype chưa có component này.",
+      "properties": [
+        {
+          "id": "id",
+          "type": "string",
+          "default": "splitbtn"
+        },
+        {
+          "id": "label",
+          "type": "string",
+          "default": "Thao tác hàng loạt"
+        },
+        {
+          "id": "icon",
+          "type": "string",
+          "default": "table"
+        },
+        {
+          "id": "variant",
+          "type": "enum",
+          "default": "secondary",
+          "options": [
+            {
+              "label": "Secondary",
+              "value": "secondary"
+            },
+            {
+              "label": "Primary",
+              "value": "primary"
+            }
+          ]
+        },
+        {
+          "id": "primary",
+          "type": "object",
+          "default": {}
+        },
+        {
+          "id": "items",
+          "type": "array",
+          "default": "[{label:'Thiết lập bằng Excel'},{label:'Đánh giá bằng Excel'}]"
+        },
+        {
+          "id": "triggerTitle",
+          "type": "string",
+          "default": "Mở danh sách thao tác"
+        },
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Open droplist",
+              "value": "open"
+            },
+            {
+              "label": "Disabled",
+              "value": "disabled"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<span class=\"pb-splitbtn\">…</span>"
+      },
+      "renderSrc": "render/components/split-button.js",
+      "specSrc": "spec/components/split-button.json"
     },
     {
       "id": "input",
@@ -3120,6 +3272,22 @@
             {
               "label": "Không đạt thử việc",
               "value": "probation-failed"
+            },
+            {
+              "label": "Quản lý đã đánh giá",
+              "value": "handoff-reviewed"
+            },
+            {
+              "label": "Đã hiệu chỉnh",
+              "value": "handoff-calibrated"
+            },
+            {
+              "label": "Chờ quản lý đánh giá",
+              "value": "handoff-awaiting"
+            },
+            {
+              "label": "Chờ quản lý đánh giá (thử việc)",
+              "value": "probation-awaiting"
             }
           ]
         },
@@ -9754,6 +9922,11 @@
               "value": "disabled"
             }
           ]
+        },
+        {
+          "id": "hideTrigger",
+          "type": "boolean",
+          "default": false
         }
       ],
       "code": {
@@ -9802,6 +9975,11 @@
               "value": "disabled"
             }
           ]
+        },
+        {
+          "id": "hideTrigger",
+          "type": "boolean",
+          "default": false
         }
       ],
       "code": {
@@ -12978,6 +13156,11 @@
             "--space-md"
           ],
           "state": "default"
+        },
+        {
+          "id": "subs-bulk-split",
+          "orgId": "split-button",
+          "label": "Tab `Quản lý cấp dưới`: split button `Đánh giá hàng loạt` thay nút `Thiết lập bằng Excel`. Nửa trái mở ngăn Đánh giá hàng loạt; danh sách có `Đánh giá hàng loạt` và `Thiết lập hàng loạt`, mỗi mục mở ngăn tương ứng (mount với `hideTrigger`). Ngoại lệ có chủ ý với `HS-01`, chủ sản phẩm chốt 05/10/2026."
         }
       ]
     },
