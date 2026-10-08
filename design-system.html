@@ -1,4 +1,4 @@
-<!-- pb-shell v1.11.0 · rendered 2026-10-08T04:43:20Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-10-08T06:54:03Z -->
 <!doctype html>
 <!-- pb design-system site — a deterministic projection of registry.json (components + tokens).
      render.py inlines the registry + per-component node JSON and injects the shared runtime plus the
@@ -1779,6 +1779,11 @@ function renderCmpCycleStatus(props) {
       +   (props.deadlineValue
             ? T('body2', props.deadlineValue, null,
                 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap') : '')
+      // `deadlineTail` (08/10/2026, mobile đợt 1): phần đếm ngược `· còn N ngày` thành phần tử riêng
+      // để bản mobile ẩn được (Figma mobile chỉ in ngày). Desktop đọc liền như trước — cùng một dòng.
+      +   (props.deadlineTail
+            ? '<span class="cyst-tail" style="white-space:nowrap">' + T('body2', props.deadlineTail) + '</span>'
+            : '')
       + '</span>'
       + quaHan
       + '</span>';
@@ -1832,12 +1837,24 @@ function renderCmpCycleStatus(props) {
      tử thừa hẳn, vẫn ăn `gap` của khối cha trên màn. Trả chuỗi rỗng là câu trả lời đúng. */
   if (!cumTrangThai && !cumHan && !ketQua) { return ''; }
 
-  return '<div class="cyst cyst-info" style="display:flex;align-items:center;'
+  /* ── BẢN MOBILE (08/10/2026, đợt 1 — Figma `10247:44446` / `10247:44423`) ───────────────────
+     Dưới ngưỡng mobile: MỘT CỘT, khe `--space-2xs` — dòng trạng thái, dòng hạn, rồi kết quả cuối cùng
+     (nếu có). Bỏ vạch ngăn và phần đếm ngược (`.cyst-tail`) — frame mobile chỉ in ngày. Chỉ đổi BỐ
+     CỤC; dữ liệu vẫn một nguồn. `!important` vì các khối khai `display`/`gap` nội tuyến. */
+  var mobileCss = (typeof pbShellContainerName === 'function' && typeof PB_BP_MOBILE !== 'undefined')
+    ? '<style>@container ' + pbShellContainerName() + ' (max-width:' + (PB_BP_MOBILE - 1) + 'px){'
+      + '.cyst{flex-direction:column!important;align-items:flex-start!important;gap:var(--space-2xs)!important}'
+      + '.cyst-main{flex-direction:column!important;align-items:flex-start!important;gap:var(--space-2xs)!important;flex:0 0 auto!important}'
+      + '.cyst-sep,.cyst-tail{display:none!important}'
+      + '}</style>'
+    : '';
+
+  return mobileCss + '<div class="cyst cyst-info" style="display:flex;align-items:center;'
     + 'gap:var(--space-md);min-height:var(--line-height-body);min-width:0">'
     // `.cyst` và `.cyst-info` cùng nằm trên MỘT thẻ: trước đây là hai cấp (khối ngoài và hàng
     // dưới), nay chỉ còn một. Giữ cả hai lớp neo để spec, Figma hand-off và mọi phép đo đã viết
     // theo tên cũ vẫn bám được — bỏ một trong hai là lặng lẽ làm hỏng chúng.
-    + '<span style="flex:1 1 0;min-width:0;display:inline-flex;align-items:center;'
+    + '<span class="cyst-main" style="flex:1 1 0;min-width:0;display:inline-flex;align-items:center;'
     +   'gap:var(--space-md)">' + cumTrangThai + vach + cumHan + '</span>'
     + ketQua
     + '</div>';
@@ -2953,7 +2970,7 @@ function renderCmpTaskCard(props) {
 
   var body = reviewPhase
     ? pbGoalSummary({
-        name: props.name, weight: props.weight, target: props.target,
+        badge: props.badge, name: props.name, weight: props.weight, target: props.target,
         unit: props.unit, actual: props.actual
       })
       + ((props.showReview === false) ? '' : window['renderCmpReviewPanel']({
@@ -3073,11 +3090,18 @@ function pbGoalRow(o) {
   });
   // MÁNG PHẢI LUÔN CÓ MẶT, kể cả khi không có nút — xem số đo ở đầu hàm. Đây là chỗ bản
   // 12/09 đọc ngược: nút bị ẩn không có nghĩa là chỗ của nó bị thu hồi.
-  return '<div style="display:flex;align-items:center;gap:var(--space-xs)">'
-    + '<span style="' + gutterL + '">' + badge + '</span>'
+  // ── MÁNG RỖNG BỊ GỠ TRÊN MOBILE (đợt 3 mobile, 08/10/2026) ─────────────────────────────────
+  // Lý do giữ máng rỗng ở trên là để thẳng hàng với khung desktop rộng. Khung mobile
+  // `10048:149111` không có máng trái (thẻ bắt đầu sát lề) và chỉ chừa máng phải khi có nút xoá.
+  // Hai lớp `--empty` để khối CSS trong `pbGoalFormMobileCss` gỡ đúng máng không chứa gì;
+  // desktop không đọc lớp nào trong số đó.
+  return '<div class="pb-goalrow" style="display:flex;align-items:center;gap:var(--space-xs)">'
+    + '<span class="pb-goalrow__lead' + (badge ? '' : ' pb-goalrow__lead--empty') + '" style="'
+    + gutterL + '">' + badge + '</span>'
     + '<div style="flex:1 1 0;min-width:0">' + o.card + '</div>'
-    + '<span style="' + gutterR + '">' + action + '</span>'
-    + '</div>';
+    + '<span class="pb-goalrow__act' + (action ? '' : ' pb-goalrow__act--empty') + '" style="'
+    + gutterR + '">' + action + '</span>'
+    + '</div>' + pbGoalFormMobileCss();
 }
 
 // PHA ĐÁNH GIÁ — phần định nghĩa đã chốt, nên nó là CHỮ, không phải ô nhập.
@@ -3089,13 +3113,13 @@ function pbGoalRow(o) {
 // mục tiêu khi thu gọn) — hai chỗ vẽ cùng một khối `Final result`/`Capacity` của frame, nên viết một
 // bản. `width` truyền vào là chuỗi `var(--token)`, không phải số.
 function pbGoalStatCol(width, label, value, ink, attr) {
-  return '<span style="flex:0 0 ' + width + ';width:' + width + ';display:inline-flex;'
+  return '<span class="pb-goalstat" style="flex:0 0 ' + width + ';width:' + width + ';display:inline-flex;'
     + 'flex-direction:column;text-align:right;white-space:nowrap">'
-    + '<span style="font-family:var(--font-family-base);font-size:var(--font-size-caption);'
+    + '<span class="pb-goalstat__label" style="font-family:var(--font-family-base);font-size:var(--font-size-caption);'
     +   'line-height:var(--line-height-caption);font-weight:var(--font-weight-emphasis);'
     +   'text-transform:uppercase;color:var(--text-placeholder);overflow:hidden;'
     +   'text-overflow:ellipsis">' + label + '</span>'
-    + '<span ' + (attr || '') + ' style="font-family:var(--font-family-base);'
+    + '<span class="pb-goalstat__value" ' + (attr || '') + ' style="font-family:var(--font-family-base);'
     // Giá trị cột (`TỶ TRỌNG 60%`) là `Sub Title/Subtitle 1` 16/24 **w600**, không phải `Title 1`
     // w700 — đo `_Task Review & Rate · View only` 9242:36695. Cùng lệch một bậc đậm mà
     // `objective-card` đã sửa hôm qua; đây là nửa còn lại, ở thẻ mục tiêu phụ.
@@ -3128,16 +3152,21 @@ function pbGoalSummary(o) {
     ? (esc(o.target) + ((o.unit && window['pbUnitLabel'] && o.unit === 'PERCENT') ? '%' : ''))
     : '—';
   // `has` / `tone` BỎ cùng cột `Kết quả thực đạt` — xem ghi chú ở `review-panel`.
-  return '<div style="display:flex;align-items:center;gap:var(--space-md)">'
-    + '<span style="flex:1 1 0;min-width:0;display:inline-flex;flex-direction:column;'
+  // ── SỐ HIỆU TRONG TÊN, CHỈ TRÊN MOBILE (đợt 4 mobile, 08/10/2026 — `9996:107783`) ───────────
+  // Desktop in số hiệu ở máng trái (`pbGoalRow`). Khung mobile gỡ máng đó và ghép số vào đầu tên
+  // ("1.1. Hoàn thành…"). Cùng một chuỗi `badge`, chỉ đổi chỗ in — span ẩn trên desktop.
+  var num = o.badge
+    ? '<span class="pb-goalsum__num" style="display:none">' + esc(o.badge) + '. </span>' : '';
+  return '<div class="pb-goalsum" style="display:flex;align-items:center;gap:var(--space-md)">'
+    + '<span class="pb-goalsum__text" style="flex:1 1 0;min-width:0;display:inline-flex;flex-direction:column;'
     +   'gap:var(--space-3xs);justify-content:center">'
-    +   '<span style="font-family:var(--font-family-base);font-size:var(--font-size-title);'
+    +   '<span class="pb-goalsum__line" style="font-family:var(--font-family-base);font-size:var(--font-size-title);'
     +     'line-height:var(--line-height-title);font-weight:var(--font-weight-emphasis);'
     +     'color:var(--text-default);overflow:hidden;text-overflow:ellipsis;'
-    +     'white-space:nowrap">' + esc(o.name) + '</span>'
+    +     'white-space:nowrap">' + num + esc(o.name) + '</span>'
     // `Chỉ tiêu` là Body 2 (14/24) màu `--text-default`, KHÔNG phải caption 12 màu muted như bản
     // trước — cùng một dòng chữ trong frame, đọc thẳng từ node `Target` 9179:39951.
-    +   '<span style="font-family:var(--font-family-base);font-size:var(--font-size-body);'
+    +   '<span class="pb-goalsum__line" style="font-family:var(--font-family-base);font-size:var(--font-size-body);'
     +     'line-height:var(--line-height-body);color:var(--text-default);overflow:hidden;'
     +     'text-overflow:ellipsis;white-space:nowrap">Chỉ tiêu: ' + target + '</span>'
     + '</span>'
@@ -3285,11 +3314,56 @@ function pbGoalForm(o) {
   //     rồi tới ngay `Tỷ trọng (%)`, hai khối chữ dính vào nhau và mắt không tách được cột.
   // Nên khe là thứ DUY NHẤT tách cột ở chế độ đọc, và nó phải rộng gấp đôi.
   var colGap = ro ? 'var(--space-md)' : 'var(--space-xs)';
-  return '<div style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);'
+  return '<div class="pb-goalf" style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);'
     + 'column-gap:' + colGap + ';row-gap:var(--space-sm);align-items:start">'
     + cell(1, nameF) + cell(2, weightF)
     + cell(1, targetF) + cell(2, unitF)
     + '</div>';
+}
+
+function pbGoalFormMobileCss() {
+  /* ── MOBILE · MỘT CỘT (đợt 3 mobile, 08/10/2026 — khung `10048:149111`) ─────────────────────
+     Lưới ba-một ở trên ép bốn ô vào hai cột; ở bề rộng điện thoại cột hai còn chưa tới một phần
+     tư thẻ nên ô `Tỷ trọng (%)` và `Đơn vị chỉ tiêu` tràn ra ngoài. Khung mobile xếp bốn ô thành
+     MỘT CỘT theo thứ tự đọc Tên → Tỷ trọng → Chỉ tiêu → Đơn vị, khe dọc `--space-xs`.
+
+     Thứ tự DOM đã đúng thứ tự đó (tên, tỷ trọng, chỉ tiêu, đơn vị), nên chỉ cần thả mọi ô về cột
+     một — không phải đổi `order`. Chỉ áp trong container `pbshell` hẹp; desktop không đổi. */
+  if (typeof pbShellContainerName !== 'function' || typeof PB_BP_MOBILE === 'undefined') { return ''; }
+  return '<style>@container ' + pbShellContainerName() + ' (max-width:' + (PB_BP_MOBILE - 1) + 'px){'
+    + '.pb-goalf{grid-template-columns:minmax(0,1fr)!important;row-gap:var(--space-xs)!important}'
+    + '.pb-goalf>div{grid-column:1!important}'
+    + '.pb-goalrow__act--empty{display:none!important}'
+    // Đợt 4: máng số hiệu gỡ HẲN, kể cả khi có số — khung mobile của thẻ task (`10048:150377`,
+    // `9996:107783`) đặt thẻ thẳng mép thẻ mục tiêu chính. Pha Đánh giá đưa số vào đầu tên
+    // (`.pb-goalsum__num`); pha Thiết lập khung không in số.
+    + '.pb-goalrow__lead{display:none!important}'
+    // Hàng tóm tắt pha Đánh giá: ba cột → một cột. Tên và chỉ tiêu được xuống dòng thay vì cắt
+    // `…`; `TỶ TRỌNG / 60%` hai tầng canh phải thành một dòng "Tỷ trọng: 60%" cỡ body — cùng cách
+    // đợt 2 đã làm với đầu thẻ mục tiêu.
+    + '.pb-goalsum{flex-direction:column!important;align-items:flex-start!important;gap:var(--space-3xs)!important}'
+    + '.pb-goalsum__text{width:100%}'
+    + '.pb-goalsum__line{white-space:normal!important;overflow:visible!important}'
+    + '.pb-goalsum__num{display:inline!important}'
+    + '.pb-goalsum .pb-goalstat{flex:0 0 auto!important;width:auto!important;flex-direction:row!important;'
+    +   'text-align:left!important;gap:var(--space-2xs)}'
+    + '.pb-goalsum .pb-goalstat__label{text-transform:none!important;font-size:var(--font-size-body)!important;'
+    +   'line-height:var(--line-height-body)!important;font-weight:var(--font-weight-body)!important;'
+    +   'color:var(--text-default)!important;overflow:visible!important}'
+    + '.pb-goalsum .pb-goalstat__label::after{content:":"}'
+    + '.pb-goalsum .pb-goalstat__value{font-size:var(--font-size-body)!important;'
+    +   'line-height:var(--line-height-body)!important;font-weight:var(--font-weight-body)!important}'
+    // Ô `Loại mục tiêu` ngồi trong khe trái của ô tên (`leadHtml`). Khung mobile không vẽ nó,
+    // nhưng nó là trường BẮT BUỘC nên không gỡ được — gỡ là phiếu không bao giờ gửi được. Thay vào
+    // đó cho nó MỘT DÒNG RIÊNG ở đầu vỏ, ô nhập tên xuống dòng dưới, đủ bề ngang để đọc lại.
+    + '.pb-goalf .pb-unit-field__shell:has(>.pb-unit-field__lead){flex-wrap:wrap}'
+    + '.pb-goalf .pb-unit-field__lead{flex:1 0 100%!important}'
+    // Số dòng mở sẵn của textarea (`freeRows` ở `unit-field`) ước theo bề ngang DESKTOP — khoảng bốn
+    // mươi tám ký tự một dòng. Ở bề ngang điện thoại một dòng chứa chưa tới một nửa số đó, nên ô mở
+    // ra cắt mất nửa câu. `field-sizing:content` cho ô tự cao theo chữ thật; trình duyệt chưa hỗ trợ
+    // thì rơi về hành vi cũ (ô cuộn), không vỡ gì.
+    + '.pb-goalf textarea.field__input{field-sizing:content}'
+    + '}</style>';
 }
 
     window["renderCmpTaskCard"] = renderCmpTaskCard;
@@ -3425,10 +3499,11 @@ function renderCmpObjectiveCard(props) {
   // ba cột của `task-card` nhưng sai cho lưới mới — ở đây bề rộng do lưới chia, và cột `Loại mục
   // tiêu` canh TRÁI. Giữ nguyên bậc chữ hai dòng mà hàm đó đặt: nhãn 12/20 hoa, giá trị 16/24 đậm.
   function objHeadCol(align, label, valueHtml, cls) {
-    return '<span' + (cls ? ' class="' + cls + '"' : '') + ' style="display:flex;'
+    // `pb-objc__hcol` / `pb-objc__hlabel` (08/10/2026): móc cho bản mobile — xem `mobileCss` cuối hàm.
+    return '<span class="pb-objc__hcol' + (cls ? ' ' + cls : '') + '" style="display:flex;'
       + 'flex-direction:column;justify-content:center;gap:var(--space-3xs);min-width:0;'
       + 'text-align:' + align + ';align-items:' + (align === 'right' ? 'flex-end' : 'flex-start') + '">'
-      + '<span style="font-family:var(--font-family-base);font-size:var(--font-size-caption);'
+      + '<span class="pb-objc__hlabel" style="font-family:var(--font-family-base);font-size:var(--font-size-caption);'
       +   'line-height:var(--line-height-caption);font-weight:var(--font-weight-emphasis);'
       +   'letter-spacing:var(--tracking-tight);text-transform:uppercase;'
       +   'color:var(--text-placeholder);max-width:100%;overflow:hidden;'
@@ -3438,7 +3513,7 @@ function renderCmpObjectiveCard(props) {
   }
   // Con số cột phải: `Sub Title/Subtitle 1` 16/24 w600 theo frame, không phải w700.
   function objHeadNum(value, ink, attr) {
-    return '<span ' + (attr || '') + ' style="font-family:var(--font-family-base);'
+    return '<span class="pb-objc__hnum" ' + (attr || '') + ' style="font-family:var(--font-family-base);'
       + 'font-size:var(--font-size-title);line-height:var(--line-height-title);'
       + 'font-weight:var(--font-weight-emphasis);color:' + ink + ';max-width:100%;'
       + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + value + '</span>';
@@ -3475,7 +3550,7 @@ function renderCmpObjectiveCard(props) {
     // thẩm mỹ: với flex, bốn khối không co được ép tên mục tiêu về 0 và phải chống bằng sàn
     // `min-width` cộng `flex-wrap`; với `fr` thì mọi cột co theo cùng một tỉ lệ và cái tên không bao
     // giờ là nạn nhân duy nhất.
-    + '<span style="flex:1 1 0;min-width:0;display:grid;gap:var(--space-md);align-items:center;'
+    + '<span class="pb-objc__grid" style="flex:1 1 0;min-width:0;display:grid;gap:var(--space-md);align-items:center;'
     +   'grid-template-columns:minmax(0,5fr) minmax(0,1fr) minmax(0,1fr)">'
     // CỘT 1 — tên + chỉ tiêu. `Chỉ tiêu` NAY HIỆN CẢ KHI BUNG: frame vẽ nó trong lưới đầu thẻ ở mọi
     // variant, không còn là một dòng chỉ-khi-thu-gọn.
@@ -3484,7 +3559,7 @@ function renderCmpObjectiveCard(props) {
     // số 2: hàng tiêu đề cao 82 thay vì 84 của frame, lệch đúng hai.
     // CHỈ ĐỔI CỘT NÀY: `objHeadCol` ở trên cũng dùng `--space-3xs` cho cặp nhãn/giá trị `Tỷ trọng`,
     // nhưng tôi KHÔNG có số đo frame cho cột đó — đổi nó là đoán.
-    +   '<span style="display:flex;flex-direction:column;justify-content:center;'
+    +   '<span class="pb-objc__namecol" style="display:flex;flex-direction:column;justify-content:center;'
     +     'gap:var(--space-2xs);min-width:0;padding-inline-end:var(--space-md)">'
     // Tên mục tiêu là `Sub Title/Subtitle 1` 16/24 **w600**, không phải `Title 1` w700 (đo cùng
     // node). Cùng cỡ chữ, khác một bậc đậm — và bậc đó là thứ phân biệt tên mục tiêu với con số
@@ -3752,7 +3827,7 @@ function renderCmpObjectiveCard(props) {
         label: 'Thêm mục tiêu thành phần', onClick: props.onAddTask })
     + '</span>';
 
-  var addTask = (!r2Count && !addBtn) ? '' : '<div style="display:flex;align-items:center;'
+  var addTask = (!r2Count && !addBtn) ? '' : '<div class="pb-objc__addrow" style="display:flex;align-items:center;'
     + 'gap:var(--space-md);padding-left:var(--size-control-lg);'
     + 'padding-right:calc(var(--size-control-lg) + var(--space-xs))">'
     + r2Count + addBtn
@@ -3790,7 +3865,8 @@ function renderCmpObjectiveCard(props) {
     // Ba lớp `__meta` / `__cap` / `__sub` GIỮ LẠI làm mốc cho người đọc và cho lần đổi sau, chỉ
     // không còn luật nào nhắm vào chúng.
     + '.pb-objc:has(#' + id + '-open:checked) .pb-objc__chevico-' + id + '{transform:rotate(180deg)}'
-    + '</style>';
+    + '</style>'
+    + mobileHeadCss();
 
   return style
     // ── KHÔNG VIỀN (sửa 2026-09-12) ────────────────────────────────────────────────────────
@@ -3904,6 +3980,36 @@ function pbObjHeadType(el) {
 // ở chip trên đầu thẻ, và chip dựng bằng `kpi-type-tag` chứ không qua hàm này. Đã kiểm `render/`
 // không còn chỗ gọi nào. Gỡ chứ không để lại: một hàm tra nhãn không ai gọi là lời mời cho người
 // sau dựng lại đúng ô vừa bị frame bỏ đi.
+
+/* ── BẢN MOBILE CỦA ĐẦU THẺ MỤC TIÊU (08/10/2026, đợt 2 — Figma `10048:149092` / `9996:107741`) ──────
+   Dưới ngưỡng mobile, lưới ba cột (tên · `Loại mục tiêu` · `Tỷ trọng`) thành MỘT CỘT, khe `--space-2xs`:
+     tên mục tiêu → `Chỉ tiêu: …` → `Loại mục tiêu: [chip]` → `Tỷ trọng: N%`
+   Hai cột phải đổi từ "nhãn hoa ở trên, số đậm ở dưới" sang "Nhãn: giá trị" trên một dòng, chữ thường
+   `--font-size-body` — đúng frame. Dấu hai chấm do CSS thêm (`::after`), chữ nhãn vẫn một nguồn.
+   Đệm đầu thẻ `--space-sm` `--space-md` (trước `--space-md` bốn phía). Chỉ đổi bố cục; desktop không
+   chạm. Mỗi thẻ phát lại khối này — trùng lặp vô hại, cùng lý do khối `style` theo id ở trên. */
+function mobileHeadCss() {
+  if (typeof pbShellContainerName !== 'function' || typeof PB_BP_MOBILE === 'undefined') { return ''; }
+  return '<style>@container ' + pbShellContainerName() + ' (max-width:' + (PB_BP_MOBILE - 1) + 'px){'
+    + '.pb-objc__head{padding:var(--space-sm) var(--space-md)!important}'
+    + '.pb-objc__grid{display:flex!important;flex-direction:column;align-items:flex-start!important;'
+    +   'gap:var(--space-2xs)!important}'
+    + '.pb-objc__namecol{padding-inline-end:0!important;width:100%}'
+    + '.pb-objc__hcol{flex-direction:row!important;align-items:center!important;text-align:left!important;'
+    +   'gap:calc(var(--space-2xs) + var(--space-3xs))!important}'
+    + '.pb-objc__hlabel{text-transform:none!important;font-size:var(--font-size-body)!important;'
+    +   'line-height:var(--line-height-body)!important;font-weight:var(--font-weight-body)!important;'
+    +   'color:var(--text-default)!important;overflow:visible!important}'
+    + '.pb-objc__hlabel::after{content:":"}'
+    + '.pb-objc__hnum{font-size:var(--font-size-body)!important;line-height:var(--line-height-body)!important;'
+    +   'font-weight:var(--font-weight-body)!important}'
+    // Hàng `Thêm mục tiêu thành phần` (đợt 3): lề trái bằng máng số hiệu, mà trên mobile máng đó
+    // bị gỡ (`pbGoalFormMobileCss`), nên lề trái về 0 để nút không bị đẩy ra ngoài thẻ.
+    // `flex-end`: khi bộ đếm và nút phải xuống hai dòng thì nút vẫn bám mép phải thẻ như khung
+    // (`10048:149125` — nút kết thúc thẳng mép phải thẻ Detail), không trôi về mép trái.
+    + '.pb-objc__addrow{padding-left:0!important;flex-wrap:wrap;justify-content:flex-end}'
+    + '}</style>';
+}
 
     window["renderCmpObjectiveCard"] = renderCmpObjectiveCard;
 function renderCmpObjectiveList(props) {
@@ -8168,6 +8274,30 @@ function renderCmpTabs(props) {
     + '.segmented__more-check{visibility:hidden}'
     + '.pb-toggle:checked + .segmented__more-opt .segmented__more-check{visibility:visible}'
     + '.segmented__more *:focus-visible,.segmented__more>summary:focus-visible{outline:calc(var(--border-width) * 2) solid var(--border-app-focus-ring);outline-offset:calc(var(--border-width) * -2)}'
+    + ((typeof pbShellContainerName === 'function' && typeof PB_BP_MOBILE !== 'undefined')
+        ? ('@container ' + pbShellContainerName() + ' (max-width:' + (PB_BP_MOBILE - 1) + 'px){'
+      /* ── DẢI CHU KỲ `pill` CŨNG CUỘN NGANG (chỉ thị 08/10/2026) ───────────────────────
+        Trên mobile năm ô chia đều 343 — mỗi ô còn chưa tới bảy mươi, nhãn "Quý 1/2027"
+        bị cắt `…` rồi đè lên nhau. Chỉ thị: cuộn ngang, KHÔNG cắt chữ. Lưới chia đều đổi
+        thành hàng flex, mỗi ô rộng theo nhãn, dải tự cuộn trong bề ngang của nó.
+
+        NÚT `⋮` DÍNH MÉP PHẢI (`sticky`): nó là lối vào các kỳ cũ hơn, để nó trôi ra cuối
+        dải thì phải cuộn hết mới thấy. Bảng thả của nó chuyển sang `fixed` — một khung
+        cuộn cắt mọi con `absolute` thò ra ngoài, nên bảng thả `absolute` sẽ bị cắt mất;
+        toạ độ do `pbTabsMorePlace` đặt lúc mở. */
+      + '.segmented--pill{display:flex!important;max-width:100%;box-sizing:border-box;'
+      +   'overflow-x:auto;scrollbar-width:none}'
+      + '.segmented--pill::-webkit-scrollbar{display:none}'
+      + '.segmented--pill .segmented__option{flex:0 0 auto!important;overflow:visible!important}'
+      + '.segmented--pill .segmented__option>span{overflow:visible!important;text-overflow:clip!important}'
+      // Nền trắng của track: nút dính mép thì các ô cuộn chui QUA DƯỚI nó — thiếu nền là chữ ô bên
+      // dưới lộ ra hai bên dấu ba chấm. Nút dính ở mép NỘI DUNG, còn dải đệm `--space-2xs` bên phải
+      // track vẫn để lộ chữ — bóng đặc cùng màu, lệch phải đúng một bậc đệm, che nốt khe đó.
+      + '.segmented--pill .segmented__more{flex:0 0 auto;position:sticky!important;right:0;'
+      +   'background:var(--bg-app-base-white);box-shadow:var(--space-2xs) 0 0 0 var(--bg-app-base-white)}'
+      + '.segmented--pill .segmented__more-panel{position:fixed!important;margin-top:var(--space-2xs)}'
+      + '}')
+        : '')
     + '</style>';
   // Container fill. Mặc định giữ `--bg-app-subtle`.
   // PILL SANG NỀN TRẮNG (2026-09-06, master 8903:82776 khai `◪ bg/app/basewhite`). Trước là
@@ -8388,7 +8518,7 @@ function renderCmpTabs(props) {
     // atom khác (R-LEVEL-ORDER) — soạn atom `icon` ở đây là lỗi lint chặn cổng.
     // (Và đừng viết tên lời gọi đó ra dưới dạng mã trong comment: lint quét cả comment, tôi đã
     // dính đúng chỗ này một lần khi viết khối chú thích trên.)
-    html += '<details class="segmented__more" id="' + moreId + '"'
+    html += '<details class="segmented__more" id="' + moreId + '" ontoggle="pbTabsMorePlace(this)"'
       + ' style="position:relative;display:inline-flex;align-items:stretch">'
       + '<summary class="segmented__more-btn"'
       +   ' aria-label="Xem thêm chu kỳ" title="Xem thêm chu kỳ"'
@@ -8434,6 +8564,26 @@ function renderCmpTabs(props) {
    ESC CŨNG ĐÓNG: người dùng bàn phím không có "bấm ra ngoài". Thiếu nhánh này thì mở droplist
    bằng bàn phím xong không có đường nào thoát ngoài việc Tab ngược về thẻ tóm tắt. */
 function pbTabsMoreClose(el) { el.removeAttribute('open'); }
+// Đặt bảng thả `⋮` khi nó là `fixed` (chỉ trên mobile — xem luật `@container` của dải `pill`).
+// Desktop bảng thả vẫn `absolute` dưới nút, hàm thoát ngay. Canh MÉP PHẢI bảng thả với mép phải nút,
+// như bản `absolute`; không để thò quá mép trái khung app. Khung `#proto-frame` có `contain:paint`
+// thì chính nó là khung tham chiếu của `fixed`, nên trừ toạ độ của nó ra.
+function pbTabsMorePlace(d) {
+  if (!d || !d.open) { return; }
+  var panel = d.querySelector('.segmented__more-panel');
+  var btn = d.querySelector('summary');
+  if (!panel || !btn || getComputedStyle(panel).position !== 'fixed') { return; }
+  var frame = d.closest('#proto-frame') || d.closest('.pb-app-shell');
+  var fr = frame ? frame.getBoundingClientRect() : { left: 0, top: 0 };
+  var contained = frame && /paint|strict|content/.test(getComputedStyle(frame).contain || '');
+  var ox = contained ? fr.left : 0, oy = contained ? fr.top : 0;
+  var r = btn.getBoundingClientRect();
+  var left = Math.max(fr.left, r.right - panel.offsetWidth);
+  panel.style.right = 'auto';
+  panel.style.left = (left - ox) + 'px';
+  // Khe giữa nút và bảng thả là `margin-top` của luật mobile, không cộng ở đây.
+  panel.style.top = (r.bottom - oy) + 'px';
+}
 function pbTabsMoreOnClick(ev) {
   var list = document.querySelectorAll('details.segmented__more[open]');
   for (var i = 0; i < list.length; i++) {
@@ -18996,7 +19146,7 @@ function renderCmpActionFooter(props) {
   // sai → runtime bỏ ẩn slot nhưng không có gì để bấm. Slot đã tự ẩn khi không có thông điệp, nên
   // một handler nằm sẵn trên phần tử ẩn không hại gì.
   var clickable = !!props.onStatusClick;
-  var statusSlot = '<div id="' + sid + '" role="status" aria-live="polite"'
+  var statusSlot = '<div id="' + sid + '" class="pb-actfoot__status" role="status" aria-live="polite"'
     + (clickable ? ' onclick="' + props.onStatusClick + '" tabindex="0"' : '')
     + ' style="flex:1 1 0;min-width:0;display:' + (hasStatus ? 'flex' : 'none') + ';'
     + 'align-items:center;gap:var(--space-2xs);'
@@ -19109,17 +19259,82 @@ function renderCmpActionFooter(props) {
       + 'color:var(--text-muted)">' + noteText + '</div>'
     : '';
 
-  var row = '<div style="display:flex;align-items:center;'
+  /* ── MOBILE · NÚT THỨ BA TRỞ ĐI VÀO `⋮` (đợt 5 mobile, 08/10/2026 — `_Footer` `10048:152225`) ──
+     Chỉ thị: không tràn, không cuộn ngang; nút chính và nút phụ luôn hiện, nút thứ ba và thứ tư
+     gom vào một nút `More` mở action sheet từ đáy. Frame vẽ đúng hình đó: `⋮` · nút viền · nút cam.
+
+     BẬC NHẤN ĐẾM TỪ PHẢI SANG, KHÔNG THEO TÊN NÚT. Thứ tự DOM đã là thứ tự nhấn tăng dần
+     (`Hủy` · `Lưu nháp` · nút giữa · `Gửi đề xuất` · CTA), nên nút KHÔNG RỖNG cuối cùng là chính,
+     nút trước nó là phụ, mọi nút còn lại là "tràn". Đếm theo vị trí chứ không ghim tên vì bộ nút
+     đổi theo vai và pha: QL Thiết lập có `Gửi đề xuất`, QL Đánh giá có `Trả lại`, có màn bỏ CTA
+     (`hideSubmit`) — luật vị trí đúng cho mọi tổ hợp mà không cần bảng tra.
+
+     MỘT BỘ NÚT, KHÔNG NHÂN BẢN. Dòng trong sheet không mang handler của riêng nó: nó `click()` vào
+     chính nút gốc đang ẩn trong hàng. Nhân bản thì phải chép handler và — với `Trả lại` — một nhãn
+     mở hộp thoại mang `id`, tức hai phần tử trùng `id` trên một trang. Desktop không đọc lớp nào
+     trong số này: nút `⋮` và sheet ẩn sẵn, chỉ khối `@container` mới bật. */
+  var acts = [
+    { html: showCancel ? mk('secondary', 'Hủy', cancelJs) : '', label: 'Hủy' },
+    // `ghost` (chỉ thị 07/10/2026): không nền, không viền, chữ đen — tách `Lưu nháp` khỏi nút viền
+    // `Gửi đề xuất` đứng ngay cạnh, để hàng nút đọc theo ba bậc nhấn thay vì hai nút viền giống nhau.
+    { html: mk('ghost', 'Lưu nháp', props.onSaveDraft), label: 'Lưu nháp' },
+    { html: props.extraActions || '', label: props.extraActionsLabel || 'Trả lại' },
+    { html: proposeBtn, label: proposeLabel },
+    { html: cta, label: ctaLabel }
+  ];
+  var kept = 0, ovfRows = '';
+  for (var ai = acts.length - 1; ai >= 0; ai--) {
+    if (!acts[ai].html) { continue; }
+    kept++;
+    if (kept > 2) {
+      acts[ai].html = '<span class="pb-actfoot__ovf" data-ovf="' + ai + '" style="display:contents">'
+        + acts[ai].html + '</span>';
+      // Dòng sheet thêm vào ĐẦU: vòng lặp đi từ phải sang, nên chèn trước để sheet đọc trên-xuống
+      // đúng thứ tự trái-sang-phải của hàng nút desktop.
+      ovfRows = pbUse('menu-item-button', { className: 'pb-actfoot__sheetitem', label: acts[ai].label,
+        padding: 'var(--space-sm) var(--space-md)', lineHeight: 'var(--line-height-body)',
+        onClick: 'pbActFootOvf(this,' + ai + ')' }) + ovfRows;
+    }
+  }
+  var moreBtn = !ovfRows ? '' : '<span class="pb-actfoot__more" style="display:none">'
+    + pbUse('button', { shape: 'outline-round', icon: 'ellipsis-vertical', label: 'Thao tác khác',
+        onClick: 'pbActFootSheet(this,true)' })
+    + '</span>';
+  var sheet = !ovfRows ? '' : '<div class="pb-actfoot__sheet" role="dialog" aria-label="Thao tác khác"'
+    + ' onclick="if(event.target===this){pbActFootSheet(this,false)}"'
+    + ' style="display:none;position:fixed;inset:0;z-index:1000;align-items:flex-end;'
+    + 'background:var(--bg-app-overlay)">'
+    + '<div style="width:100%;box-sizing:border-box;display:flex;flex-direction:column;'
+    +   'gap:var(--space-2xs);padding:var(--space-sm) var(--space-md) var(--space-lg);'
+    +   'background:var(--bg-app-base-white);border-radius:var(--radius-xl) var(--radius-xl) 0 0;'
+    +   'box-shadow:var(--shadow-xl)">'
+    +   ovfRows
+    +   pbUse('menu-item-button', { className: 'pb-actfoot__sheetitem', label: 'Đóng',
+          color: 'var(--text-muted)', padding: 'var(--space-sm) var(--space-md)',
+          lineHeight: 'var(--line-height-body)', onClick: 'pbActFootSheet(this,false)' })
+    + '</div></div>';
+  var mobileCss = (typeof pbShellContainerName !== 'function' || typeof PB_BP_MOBILE === 'undefined') ? ''
+    : '<style>.pb-actfoot__sheetitem:hover{background:var(--bg-app-hover)}'
+    + '@container ' + pbShellContainerName() + ' (max-width:' + (PB_BP_MOBILE - 1) + 'px){'
+    + '.pb-actfoot__ovf{display:none!important}'
+    + '.pb-actfoot__more{display:inline-flex!important}'
+    + '.pb-actfoot__sheet.is-open{display:flex!important}'
+    // Ô lỗi tranh trục ngang với hàng nút; ở bề ngang điện thoại nó lên một dòng riêng phía trên.
+    + '.pb-actfoot__row{flex-wrap:wrap}'
+    + '.pb-actfoot__status{flex:1 0 100%!important}'
+    + '.pb-actfoot__btns{flex:1 1 auto!important}'
+    + '}</style>';
+
+  var row = '<div class="pb-actfoot__row" style="display:flex;align-items:center;'
     + 'gap:var(--space-action-gap);min-height:var(--size-control-lg)">'
     + statusSlot
-    + '<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;'
+    + '<div class="pb-actfoot__btns" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;'
     +   'align-items:flex-end;gap:var(--space-xs)">'
     +   '<div style="width:100%;display:flex;align-items:center;justify-content:flex-end;'
     +     'gap:var(--space-action-gap)">'
-    +     (showCancel ? mk('secondary', 'Hủy', cancelJs) : '')
-    // `ghost` (chỉ thị 07/10/2026): không nền, không viền, chữ đen — tách `Lưu nháp` khỏi nút viền
-    // `Gửi đề xuất` đứng ngay cạnh, để hàng nút đọc theo ba bậc nhấn thay vì hai nút viền giống nhau.
-    +     mk('ghost', 'Lưu nháp', props.onSaveDraft)
+    +     moreBtn
+    +     acts[0].html
+    +     acts[1].html
     // ── SLOT GIỮA CHO NÚT THỨ BA (thêm 21/09/2026) ────────────────────────────────────────
     // `R-23` / spec §5.3: CTA của quản lý ở pha Đánh giá là `Lưu nháp` · `Trả lại` · `Hoàn thành`.
     // Hàng nút trước đây cứng đúng ba ô (`Hủy?` · `Lưu nháp` · CTA), không có chỗ cho nút giữa.
@@ -19132,9 +19347,9 @@ function renderCmpActionFooter(props) {
     //
     // Đứng SAU `Lưu nháp`, TRƯỚC CTA — đúng thứ tự spec liệt kê, và giữ hành động phá huỷ xa nút
     // chính một ô để không bấm nhầm.
-    +     (props.extraActions || '')
-    +     proposeBtn
-    +     cta
+    +     acts[2].html
+    +     acts[3].html
+    +     acts[4].html
     +   '</div>'
     +   noteSlot
     + '</div>'
@@ -19155,8 +19370,41 @@ function renderCmpActionFooter(props) {
     + 'background:var(--bg-app-base-white);box-shadow:var(--shadow-inverse-md)">'
     + '<style>.pb-actfoot [aria-busy="true"] svg{animation:pb-actfoot-spin .9s linear infinite}'
     + '@keyframes pb-actfoot-spin{to{transform:rotate(360deg)}}</style>'
-    + row
+    + mobileCss + row + sheet
     + '</div>';
+}
+
+// Mở / đóng action sheet của footer. Tìm theo `.pb-actfoot` gần nhất vì một trang có thể có nhiều
+// footer (mỗi phạm vi lưu một cái) — không được đụng sheet của footer khác.
+function pbActFootSheet(el, open) {
+  var foot = el && el.closest ? el.closest('.pb-actfoot') : null;
+  var sh = foot ? foot.querySelector('.pb-actfoot__sheet') : null;
+  if (!sh) { return; }
+  // NEO VÀO KHUNG APP, KHÔNG VÀO CỬA SỔ. `position:fixed` tính theo cửa sổ trình duyệt — mà cửa sổ
+  // còn chứa thanh công cụ của builder, nên lớp phủ trải rộng hơn app và sheet rơi xuống dưới đáy
+  // app. Khi `#proto-frame` mang `contain:paint` (khung thiết bị của builder) thì chính nó đã là
+  // khung tham chiếu của `fixed` và `inset:0` là đúng; còn lại thì đo khung app và đặt toạ độ.
+  if (open) {
+    var frame = foot.closest('#proto-frame') || foot.closest('.pb-app-shell');
+    var contained = frame && /paint|strict|content/.test(getComputedStyle(frame).contain || '');
+    if (frame && !contained) {
+      var r = frame.getBoundingClientRect();
+      sh.style.inset = 'auto';
+      sh.style.left = r.left + 'px'; sh.style.top = r.top + 'px';
+      sh.style.width = r.width + 'px'; sh.style.height = r.height + 'px';
+    }
+  }
+  sh.classList.toggle('is-open', !!open);
+}
+// Một dòng trong sheet: đóng sheet rồi bấm hộ NÚT GỐC đang ẩn trong hàng — xem khối lý do ở
+// `acts`. `click()` chạy cả `onclick` của nút lẫn hành vi mặc định của nhãn mở hộp thoại.
+function pbActFootOvf(el, idx) {
+  var foot = el && el.closest ? el.closest('.pb-actfoot') : null;
+  if (!foot) { return; }
+  pbActFootSheet(el, false);
+  var host = foot.querySelector('.pb-actfoot__ovf[data-ovf="' + idx + '"]');
+  var target = host ? host.querySelector('button,label,a') : null;
+  if (target) { target.click(); }
 }
 
 // ══ THEO DÕI "CÓ THAY ĐỔI CHƯA LƯU" (spec mục 14.5) ════════════════════════════════════════════
@@ -42143,8 +42391,9 @@ function renderScreenChiTietNhanVien(props) {
     // Cụm hạn nay là CẶP nhãn/giá trị (frame `_CycleStatus` 10114:68574); `info` lùi về vai
     // "một câu khi không có hạn nào để in". Xem khối lý do ở `cycle-status.js`.
     deadlineLabel: ctnvParts ? ctnvParts.head : '',
-    deadlineValue: ctnvParts
-      ? (ctnvParts.overdue ? ctnvParts.day : (ctnvParts.day + ctnvParts.tail)) : '',
+    deadlineValue: ctnvParts ? ctnvParts.day : '',
+    // Đuôi đếm ngược tách riêng (08/10/2026) — bản mobile ẩn nó; desktop vẫn đọc liền một dòng.
+    deadlineTail: (ctnvParts && !ctnvParts.overdue) ? ctnvParts.tail : '',
     info: ((ctnvHistOpen || ctnvXong) ? 'Chu kỳ đánh giá đã kết thúc'
       : (ctnvParts ? ''
           : (isReview ? ('Có ' + nRows + ' mục tiêu cần đánh giá')
@@ -44409,8 +44658,9 @@ function renderScreenHieuSuatCuaToi(props) {
       // Cụm hạn nay là CẶP nhãn/giá trị (frame `_CycleStatus` 10114:68574); `info` lùi về vai
       // "một câu khi không có hạn nào để in". Xem khối lý do ở `cycle-status.js`.
       deadlineLabel: hcpParts ? hcpParts.head : '',
-      deadlineValue: hcpParts
-        ? (hcpParts.overdue ? hcpParts.day : (hcpParts.day + hcpParts.tail)) : '',
+      deadlineValue: hcpParts ? hcpParts.day : '',
+      // Đuôi đếm ngược tách riêng (08/10/2026) — bản mobile ẩn nó; desktop vẫn đọc liền một dòng.
+      deadlineTail: (hcpParts && !hcpParts.overdue) ? hcpParts.tail : '',
       info: ((hcpHist || hcpXong) ? 'Chu kỳ đánh giá đã kết thúc'
         : (hcpParts ? '' : hcpPhaseSubLine(phaseKey, isReview, rows.length))),
       // Quá hạn là một CỤM RIÊNG cạnh dòng hạn, không phải cái đuôi của nó — xem
