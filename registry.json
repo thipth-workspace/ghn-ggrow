@@ -2,7 +2,7 @@
   "_about": "Product Builder registry — the single source of truth the build loop edits. prototype.html renders from this file (a thin adapter maps it onto the in-memory PB_DATA shape the render machinery reads). DATA ONLY — render bodies live as real .js files (render/components/<id>.js, render/screens/<id>.js) referenced by each entry's renderSrc; render.py compiles them at /pb:build --render. Schema is documented in prototype-builder.md.",
   "meta": {
     "name": "GGrow - Quản lý hiệu suất",
-    "schemaVersion": 10,
+    "schemaVersion": 13,
     "entry": "prd",
     "shell": "browser",
     "device": "laptop",
@@ -109,225 +109,7 @@
       "researchSummary": "Chưa có dữ liệu nghiên cứu người dùng (không có số liệu định lượng, khảo sát, hay phỏng vấn) trong PRD hoặc nhật ký quyết định. Nguồn tham chiếu là trang production thật (noibo.ghn.dev/aligno/cycle) + bản clone tĩnh + các frame Figma — mô tả sản phẩm, không phải kết quả nghiên cứu.",
       "executiveSummary": "GGrow (Quản lý hiệu suất) đưa quy trình đánh giá hiệu suất — hiện đang làm offline/thủ công — vào PaySight, dưới dạng hệ thống cấu hình được, phân quyền theo 4 vai trò (HR, Manager, Supervisor, Employee), gồm thiết lập chu kỳ, tiêu chí theo từng cấp nhân viên, và theo dõi. Tiêu chí thành công: được cả 4 vai trò áp dụng, không chỉ HR/admin. Bản dựng hiện tại bổ sung: mục tiêu thử việc (quản lý quyết định Đạt/Không đạt, HR giám sát), OKR có trọng số 2 cấp (mỗi cấp tổng 100%, tự chia đều + chặn gửi khi lệch), cổng sửa suy-từ-ngày (chỉ sửa khi chu kỳ đang diễn ra), màn 'Hiệu suất của tôi' mở thẳng chi tiết chu kỳ mới nhất (chồng 2 chu kỳ nếu dual-cadence), và lịch sử đánh giá của nhân viên."
     },
-    "tradeoffs": [
-      {
-        "title": "Luồng tạo chu kỳ = 'Cài đặt chu kỳ', tách thành 2 trang cố định loại chu kỳ",
-        "question": "Đổi khái niệm 'Tạo chu kỳ' thành 'Cài đặt chu kỳ' và cho chọn loại chu kỳ (tháng/quý vs thử việc) như thế nào?",
-        "options": [
-          "Giữ một trang tạo duy nhất, chọn loại bằng segment trong form (như cũ)",
-          "Một trang tạo, loại chu kỳ do dropdown prefill (không có 2 trang thật)",
-          "Hai trang tạo RIÊNG (tháng/quý & thử việc), chọn qua dropdown trên nút chính; bỏ segment trong form; luồng tạo trở thành khái niệm 'Cài đặt chu kỳ', đổi tên bảng cây cũ thành 'Cấu hình phòng ban'"
-        ],
-        "decision": "Chọn hai trang tạo riêng: cai-dat-chu-ky-thang-quy + cai-dat-chu-ky-thu-viec (mỗi trang cố định loại qua prop dept-config-form fixedCycleType, bỏ segment trong form). Nút chính trên 'Cấu hình phòng ban' thành dropdown 'Sửa chu kỳ ▾' (Chu kỳ tháng/quý · Chu kỳ thử việc). Bảng cây cũ (id cai-dat-chu-ky) giữ nguyên id, chỉ đổi tên hiển thị → 'Cấu hình phòng ban' để nhường tên 'Cài đặt chu kỳ' cho các trang tạo. Sidebar: chỉ có mục phẳng 'Cấu hình phòng ban'; 2 trang cấu hình KHÔNG là mục sidebar — chỉ vào qua dropdown 'Sửa chu kỳ ▾' (submenu lồng đã thử rồi bỏ vì trùng với dropdown).",
-        "why": "Người dùng chốt trực tiếp: create IS 'Cài đặt chu kỳ', và muốn 2 trang cấu hình tách bạch cho tháng/quý vs thử việc thay vì một form đổi segment. Cố định loại theo trang giúp mỗi trang chỉ hiện đúng trường của loại đó (thử việc khoá 'Theo cá nhân' + khung thời gian thử việc; tháng/quý có select Tháng/Quý), rõ ràng hơn segment. Đổi tên (không đổi id) tránh churn ~mọi tham chiếu tới màn hình. Dropdown + con trong sidebar hơi trùng nhưng phục vụ 2 ý định khác nhau (điều hướng toàn cục vs tạo theo ngữ cảnh) và đối xứng với luồng giám sát.",
-        "tabsAffected": [
-          "Cài đặt chu kỳ",
-          "Theo dõi chu kỳ"
-        ]
-      },
-      {
-        "title": "Trạng thái chu kỳ suy ra từ ngày (ngưỡng 2 tuần / 48 giờ)",
-        "question": "Trạng thái theo-ngày của nhóm/phòng nên tính bằng ngưỡng nào?",
-        "options": [
-          "start-soon = bất kỳ lúc nào trước ngày bắt đầu",
-          "start-soon = trong 2 tuần trước bắt đầu; ending-soon = trong 3 ngày (cũ)",
-          "start-soon = trong 2 tuần trước bắt đầu; ending-soon = trong 48 giờ; quá ngày = overdue; >2 tuần trước bắt đầu = vẫn Hoàn thành (không có trạng thái 'chưa bắt đầu')"
-        ],
-        "decision": "Áp dụng ngưỡng: Sắp bắt đầu = trong 14 ngày trước ngày bắt đầu; Đang diễn ra = từ ngày bắt đầu; Sắp hết hạn = trong 48 giờ trước hạn; Quá hạn = qua ngày kết thúc; nếu còn hơn 14 ngày trước chu kỳ kế thì vẫn hiển thị Hoàn thành (chu kỳ trước) — không có trạng thái trung tính 'chưa bắt đầu'.",
-        "why": "Người dùng chốt trực tiếp: nhóm giữ 'Hoàn thành' từ khi xong chu kỳ trước cho tới khi vào cửa sổ 2 tuần của chu kỳ kế, lúc đó chuyển 'Sắp bắt đầu'. 48 giờ phản ánh mốc gấp rút thực tế sát hạn.",
-        "tabsAffected": [
-          "Theo dõi chu kỳ"
-        ]
-      },
-      {
-        "title": "Tỉ lệ hoàn thành: chỉ 100% mới 'Hoàn thành', dồn từ thành viên → nhóm → phòng ban",
-        "question": "Phòng ban được coi là hoàn thành khi nào, và tỉ lệ tính từ đâu?",
-        "options": [
-          "Đếm nhóm hoàn thành ÷ nhóm đã bắt đầu (cũ)",
-          "Trung bình tỉ lệ % của các nhóm",
-          "Gộp toàn bộ thành viên: thành viên hoàn thành ÷ tổng thành viên; chỉ 100% mới 'Hoàn thành'"
-        ],
-        "decision": "Tỉ lệ phòng ban = tổng thành viên hoàn thành ÷ tổng thành viên (gộp mọi nhóm — nhóm đông 'nặng' hơn). Phòng ban chỉ 'Hoàn thành' khi đạt 100%; một thành viên chưa xong là nhóm chưa 100% và phòng ban chưa 100%. Khi chưa 100%, trạng thái phòng ban = trạng thái theo-ngày 'xấu nhất' trong các nhóm con.",
-        "why": "Người dùng chốt 3 quy tắc: (1) phòng ban chỉ hoàn thành khi thanh tiến độ đạt 100%; (2) bất kỳ cấp dưới chưa xong đều dồn lên cấp trên; (3) tỉ lệ phòng ban dựa trên tỉ lệ nhóm, tỉ lệ nhóm dựa trên từng thành viên. Gộp thành viên đảm bảo 100% nghĩa là thật sự mọi người đã xong.",
-        "tabsAffected": [
-          "Theo dõi chu kỳ"
-        ]
-      },
-      {
-        "title": "Trạng thái thành viên kết hợp mức hoàn thành + hạn của nhóm",
-        "question": "Vì sao nhóm 'Sắp hết hạn' mà không thành viên nào có trạng thái đó? Trạng thái thành viên nên phản ánh gì?",
-        "options": [
-          "Chỉ hoàn thành / đang diễn ra (cũ) — thành viên không có trạng thái theo ngày",
-          "Thành viên xong = Hoàn thành; chưa xong = suy ra theo hạn của nhóm (Quá hạn / Sắp hết hạn / Đang diễn ra)"
-        ],
-        "decision": "Trạng thái mỗi thành viên = kết hợp việc hoàn thành của chính họ với hạn chung của nhóm: đã xong → Hoàn thành (kể cả khi nhóm quá hạn); chưa xong + nhóm quá hạn → Quá hạn; chưa xong + trong 48h → Sắp hết hạn; còn lại → Đang diễn ra. Không có 'Sắp bắt đầu' ở cấp thành viên.",
-        "why": "Người dùng hỏi vì sao nhóm 'Sắp hết hạn' nhưng roster không ai 'Sắp hết hạn' — do trước đây thành viên chỉ có hoàn thành/đang diễn ra. Giờ một thành viên chưa xong đang sát hạn sẽ hiển thị đúng 'Sắp hết hạn', khớp với header nhóm.",
-        "tabsAffected": [
-          "Theo dõi chu kỳ"
-        ]
-      },
-      {
-        "title": "Thống nhất từ 'Thời gian kết thúc' thành 'Thời hạn'",
-        "question": "Nhãn cột cho mốc kết thúc nên dùng từ nào cho nhất quán?",
-        "options": [
-          "Giữ 'Thời gian kết thúc' ở bảng cây, 'Thời hạn' ở drawer (không nhất quán)",
-          "Thống nhất tất cả thành 'Thời hạn'"
-        ],
-        "decision": "Đổi mọi nhãn hiển thị 'Thời Gian Kết Thúc' thành 'Thời Hạn' (viết hoa đầu chữ để khớp các cột lân cận). Bảng cây Theo dõi chu kỳ và component tree-table đều dùng 'Thời Hạn', trùng với thuật ngữ drawer roster đã dùng.",
-        "why": "Người dùng yêu cầu gộp từ vựng. Drawer roster đã dùng 'Thời hạn' từ trước — thống nhất về một từ, tránh hai tên cho cùng một khái niệm.",
-        "tabsAffected": [
-          "Theo dõi chu kỳ"
-        ]
-      },
-      {
-        "title": "Nhiều bộ trạng thái giữ riêng — 'màu trùng được, ý nghĩa không gộp'",
-        "question": "Các khái niệm trạng thái khác nhau (vòng đời chu kỳ, theo-ngày, nộp đánh giá, thiết lập mục tiêu, cờ hiệu lực) có nên gộp chung nếu màu giống nhau?",
-        "options": [
-          "Gộp lại dùng chung key nếu màu trùng",
-          "Giữ mỗi ý nghĩa là một key riêng dù màu có thể trùng"
-        ],
-        "decision": "Giữ 5–6 bộ trạng thái tách biệt: mỗi ý nghĩa là một key MAP riêng, chỉ ghi đè nhãn khi cần, không đổi tên để dùng lại. Màu có thể trùng nhưng ý nghĩa không được gộp.",
-        "why": "Nếu gộp theo màu, một thay đổi màu/ý nghĩa sẽ vô tình lan sang khái niệm khác. Tách biệt để mỗi trạng thái tiến hoá độc lập và tài liệu định nghĩa phản ánh đúng.",
-        "tabsAffected": [
-          "Nội dung sản phẩm"
-        ]
-      },
-      {
-        "title": "Vòng đời 4 giai đoạn được gỡ khỏi màn hình đang chạy (thành code chết)",
-        "question": "Từ vựng vòng đời cố định (Bản nháp → Đang thực hiện → Đang đánh giá → Hoàn thành) có còn gắn với Theo dõi chu kỳ không?",
-        "options": [
-          "Giữ mô hình danh sách chu kỳ 4 giai đoạn trên màn hình",
-          "Chuyển sang bảng giám sát 3 trạng thái theo-ngày; giữ từ vựng 4 giai đoạn là định nghĩa cố định nhưng không gắn màn hình"
-        ],
-        "decision": "Gỡ mô hình danh sách 4 giai đoạn khỏi Theo dõi chu kỳ (2026-07-20); màn hình thành bảng giám sát trạng thái theo-ngày. Từ vựng 4 giai đoạn vẫn là 'cố định, không tự chế biến thể' nhưng hiện là code chết, không wire vào màn hình nào.",
-        "why": "Màn hình được dựng lại thành bảng giám sát chỉ đọc; các trạng thái theo-ngày phù hợp hơn với việc theo dõi. Từ vựng cố định vẫn giữ để nhất quán khi cần dùng lại.",
-        "tabsAffected": [
-          "Theo dõi chu kỳ",
-          "Nội dung sản phẩm"
-        ]
-      },
-      {
-        "title": "Theo dõi chu kỳ: từ màn hình 'tạo chu kỳ' thành bảng giám sát chỉ đọc",
-        "question": "Theo dõi chu kỳ nên là nơi tạo chu kỳ (như PRD) hay bảng theo dõi?",
-        "options": [
-          "Giữ theo PRD: tạo & quản lý chu kỳ, bảng 7 cột, có nút tạo",
-          "Dựng lại thành bảng giám sát/theo dõi trạng thái, không tạo gì"
-        ],
-        "decision": "Dựng lại (2026-07-20) thành bảng giám sát tiêu thụ cấu hình phòng ban và KHÔNG tạo gì; việc tạo chu kỳ chuyển vào luồng tạo 'cấu hình' (Cài đặt chu kỳ). Gỡ mảng cycles, toggle grid/bảng, nút tạo, và từ vựng 4 giai đoạn khỏi màn hình.",
-        "why": "Người dùng làm rõ nghiệp vụ thật: đây là dashboard theo dõi, không phải nơi tạo. PRD đã cũ ở điểm này; decisions.md là nguồn chuẩn.",
-        "tabsAffected": [
-          "Theo dõi chu kỳ",
-          "Nội dung sản phẩm"
-        ]
-      },
-      {
-        "title": "[SUPERSEDED 2026-08-10] Upper Manager là dữ liệu accessLevel, không phải vai trò thứ 5",
-        "question": "Quản lý cấp trên (view + comment) nên là vai trò thứ 5 hay là dữ liệu?",
-        "options": [
-          "Thêm vai trò 'upper-manager' thứ 5 vào meta.roles",
-          "Mô hình bằng trường accessLevel theo từng phòng ban (full vs oversight)"
-        ],
-        "decision": "Giữ 4 vai trò (hr/manager/supervisor/employee). Quan hệ Upper Manager mô hình bằng trường dữ liệu accessLevel theo từng phòng ban: 'full' (là Line Manager / Supervisor được uỷ quyền) vs 'oversight' (quản lý cấp trên: chỉ xem + bình luận). — SUPERSEDED 2026-08-10 (spec D3). Trường accessLevel đã được GỠ BỎ. Phân quyền nay được giải theo (vai trò × quan hệ) trong permission-runtime.js, không lưu trên từng phòng ban. Quản lý cấp trên nhìn phòng ban cấp dưới nay giải ra bucket `upper` (sửa + duyệt), thay vì chỉ xem. Bucket `oversight` vẫn còn, nhưng nay dành cho một `manager` nhìn phòng ban KHÔNG phải cấp dưới trực tiếp của mình — trường hợp mà cờ lưu sẵn không thể diễn đạt.",
-        "why": "Phân quyền cấp màn hình chỉ cần phân biệt Manager/Supervisor; sự khác biệt 'phòng của mình vs giám sát cấp dưới' là dữ liệu sơ đồ tổ chức, không phải một persona. Tránh phình mô hình vai trò. — Lý do supersede: kết luận \"khác biệt này là dữ liệu sơ đồ tổ chức\" vẫn đúng, nhưng cờ theo phòng ban chỉ nói được \"phòng này ai cũng chỉ xem\". Nó không nói được \"chỉ xem với quản lý ngang cấp, sửa được với quản lý cấp trên\" — đúng thứ D3 yêu cầu. Quan hệ vẫn là dữ liệu; nó nằm sẵn ở managementType, nên không cần migrate.",
-        "tabsAffected": [
-          "Hiệu suất phòng ban",
-          "Nội dung sản phẩm"
-        ]
-      },
-      {
-        "title": "Nhân viên thử việc = dòng trong roster, quản lý quyết định Đạt/Không đạt",
-        "question": "Mục tiêu thử việc nên mô hình hoá và đặt ở đâu?",
-        "options": [
-          "Chỉ hiển thị ở màn 'Hiệu suất của tôi' của nhân viên",
-          "Là một dòng nhân viên trong bảng roster để quản lý thao tác",
-          "Cả quản lý (thao tác) lẫn HR (giám sát)"
-        ],
-        "decision": "Nhân viên thử việc là DÒNG trong roster: quản lý thao tác ở 'Hiệu suất phòng ban' (phòng 'Nhân viên thử việc' — Duyệt qua thử việc / Đánh dấu không đạt, gate theo quyền + chu kỳ), HR giám sát chỉ đọc ở drawer roster của 'Theo dõi chu kỳ'. Ba trạng thái: Đạt (mục tiêu chuyển theo chu kỳ & mục tiêu nhóm, dữ liệu hoàn thành được tính vào chu kỳ hiện tại) / Không đạt (đếm ngược đến ngày gỡ) / Đang thử việc (chờ đánh giá). Mặc định 2 tháng, cho chọn dài hơn.",
-        "why": "Đúng mô hình người dùng hình dung (dòng-trong-bảng, không phải thẻ). Tách audience: quản lý là người quyết định, HR chỉ theo dõi. 3 dòng mẫu (mỗi trạng thái một dòng) để thấy đủ mọi kết quả mà không cần thao tác.",
-        "tabsAffected": [
-          "Hiệu suất phòng ban",
-          "Theo dõi chu kỳ"
-        ]
-      },
-      {
-        "title": "[SUPERSEDED 2026-07-31] OKR có trọng số 2 cấp, mỗi cấp tổng 100% (auto-chia đều + chặn gửi)",
-        "question": "Nhập trọng số OKR thế nào để mỗi cấp luôn đủ 100%?",
-        "options": [
-          "Auto chia đều, không cho sửa tay",
-          "Nhập tay + cảnh báo khi ≠100 (không có auto-chia)",
-          "Nhập tay + cảnh báo trực tiếp + nút 'Chia đều' + chặn gửi khi ≠100"
-        ],
-        "decision": "OKR là cây 2 cấp có trọng số: các Objective chia nhau 100%, và các Key Result trong MỖI Objective chia nhau 100% (độc lập từng Objective). Mỗi cấp có chỉ báo 'Tổng: X/100%' chạy trực tiếp (đỏ + cảnh báo khi ≠100), nút 'Chia đều' để auto-phân bổ, và nút 'Gửi đề xuất' bị CHẶN cho tới khi mọi cấp đủ 100%. — [SUPERSEDED 2026-07-31] Cây trọng số 2 cấp này đã bị xoá cùng OKR ngày 2026-07-30 và KHÔNG quay lại. Ngày 2026-07-31 chỉ TÊN LOẠI \"OKR - Mục tiêu\" trở lại, như một nhãn SUY RA TỪ CẤP tổ chức (branch ⇒ OKR, leaf ⇒ KPI). Không có Objective, không có Key Result, không có trọng số 2 cấp; bảng KPI vẫn là bề mặt mục tiêu duy nhất.",
-        "why": "Người dùng yêu cầu xử lý cẩn thận luồng nhập tay: vừa auto-chia đều vừa cảnh báo khi người dùng nhập lại lệch 100%. Gửi phải là onClick thuần (không phải data-action='submit') vì handler submit của shell là listener uỷ quyền ở khung cha mà inline onclick không huỷ được — nên cổng trọng số tự bắn toast thành công. — [SUPERSEDED 2026-07-31] Cây trọng số 2 cấp này đã bị xoá cùng OKR ngày 2026-07-30 và KHÔNG quay lại. Ngày 2026-07-31 chỉ TÊN LOẠI \"OKR - Mục tiêu\" trở lại, như một nhãn SUY RA TỪ CẤP tổ chức (branch ⇒ OKR, leaf ⇒ KPI). Không có Objective, không có Key Result, không có trọng số 2 cấp; bảng KPI vẫn là bề mặt mục tiêu duy nhất.",
-        "tabsAffected": [
-          "Hiệu suất của tôi",
-          "Hiệu suất phòng ban"
-        ]
-      },
-      {
-        "title": "Sửa được chỉ khi chu kỳ đang diễn ra (cổng theo thời gian)",
-        "question": "Khi nào cho phép xem-và-sửa vs chỉ-xem?",
-        "options": [
-          "Dùng cờ tĩnh active/closed",
-          "Suy ra từ ngày: chỉ sửa được khi chu kỳ đã tới thời gian hoạt động (ongoing/ending-soon)"
-        ],
-        "decision": "Cổng sửa suy ra từ NGÀY qua computeConfigStatus: chu kỳ chỉ cho sửa/cập nhật khi đã đạt cửa sổ hoạt động (key ∈ {ongoing, ending-soon}); ngoài ra chỉ xem (kèm ghi chú 'Chu kỳ đã đóng — chỉ xem'). Bên quản lý: sửa được ⇔ toàn quyền VÀ chu kỳ đang diễn ra (oversight vẫn chỉ xem).",
-        "why": "Người dùng yêu cầu 'khi chu kỳ active thì cho quản lý/nhân viên sửa'. Suy-từ-ngày nhất quán với cổng đã dùng ở 'Cài đặt chu kỳ', và phân biệt được cadence tháng/quý cho trường hợp 2 chu kỳ song song.",
-        "tabsAffected": [
-          "Hiệu suất của tôi",
-          "Hiệu suất phòng ban"
-        ]
-      },
-      {
-        "title": "'Hiệu suất của tôi' mở thẳng chi tiết chu kỳ mới nhất (2 chu kỳ nếu dual-cadence)",
-        "question": "Màn nhân viên nên mở ra cái gì đầu tiên?",
-        "options": [
-          "Lưới thẻ chu kỳ như cũ",
-          "Lưới nhưng ghim chi tiết chu kỳ hiện tại lên đầu",
-          "Mở thẳng chi tiết chu kỳ mới nhất (sửa được nếu đang diễn ra)"
-        ],
-        "decision": "Bình thường một thời điểm chỉ một chu kỳ; màn mở THẲNG vào chi tiết chu kỳ mới nhất (sửa được nếu đang diễn ra, chỉ xem nếu đã đóng), không phải lưới thẻ. Nhân viên có 'dual-cadence' (được cấu hình cả tháng lẫn quý trong tạo chu kỳ) → chồng CẢ HAI chi tiết đang hoạt động (tháng trên, quý dưới). Link 'Xem tất cả chu kỳ' mở lưới + lịch sử. — [SỬA ĐỔI MỘT PHẦN 2026-09-22] Vế mở màn vẫn đúng. Riêng câu cuối đã lỗi hai lần: lưới thẻ bị gỡ 12/09 và bảng lịch sử chuyển hẳn sang screen `lich-su-danh-gia`; nhãn nút đổi thành `Lịch sử đánh giá` ngày 22/09. Nay nút là một cú ĐIỀU HƯỚNG sang trang đó, không còn lật radio để hiện lưới.",
-        "why": "Người dùng yêu cầu 'hiển thị chi tiết cho sửa ngay khi tới thời gian, ngay ở màn đầu'. Dual-cadence là biệt lệ hợp lệ (checkbox 'cả 2 loại chu kì' khi tạo). Đây là màn đầu tiên trong prototype mặc định vào chi tiết thay vì danh sách.",
-        "tabsAffected": [
-          "Hiệu suất của tôi"
-        ]
-      },
-      {
-        "title": "Lịch sử đánh giá của nhân viên (bảng chu kỳ đã qua)",
-        "question": "Xem lịch sử đánh giá của nhân viên ở đâu?",
-        "options": [
-          "Chỉ ở màn quản lý",
-          "Cả màn quản lý (chi tiết thành viên) lẫn màn nhân viên (của chính mình)"
-        ],
-        "decision": "Bảng 'Lịch sử đánh giá' chỉ đọc (Chu kỳ / Loại / Điểm / Xếp loại / Trạng thái) xuất hiện ở CHI TIẾT thành viên bên quản lý ('Hiệu suất phòng ban') VÀ ở màn nhân viên ('Lịch sử của tôi' trên 'Hiệu suất của tôi'), dùng chung một helper để hai bảng luôn cùng hình dạng.",
-        "why": "Người dùng yêu cầu 'khi mở chi tiết nhân viên, thấy được lịch sử đánh giá'. Dùng chung renderRatingHistoryTable để nhất quán giữa hai màn.",
-        "tabsAffected": [
-          "Hiệu suất phòng ban",
-          "Hiệu suất của tôi"
-        ]
-      },
-      {
-        "title": "Chỉ còn MỘT loại hiệu suất: KPI — và quyền soạn KPI là 'ai viết trước thắng'",
-        "question": "Khi bỏ OKR, ai là người soạn KPI của một nhân viên: quản lý (như luật KPI top-down cũ) hay nhân viên?",
-        "options": [
-          "Giữ KPI top-down tuyệt đối — chỉ quản lý soạn, nhân viên luôn chỉ xem",
-          "Chỉ nhân viên tự soạn rồi gửi duyệt",
-          "Ai viết trước thắng: quản lý áp thì nhân viên bị khoá; chưa ai áp thì nhân viên tự soạn + gửi duyệt",
-          "Cấu hình theo phòng ban: mỗi phòng chọn một chế độ cho toàn bộ thành viên"
-        ],
-        "decision": "Ai viết trước thắng, theo TỪNG nhân viên (`origin` = employee|manager, đóng dấu một lần). Kèm ảnh chụp `approvedRows` để 'Trả lại' hoàn về bản duyệt gần nhất — điều này SIÊU CHỈNH quyết định đã ghi hai lần rằng không có hành động từ chối. — [SỬA ĐỔI MỘT PHẦN 2026-07-31] Vẫn đúng về QUYỀN SOẠN KPI. Riêng mệnh đề \"chỉ còn MỘT loại hiệu suất\" nay có hai: branch ⇒ OKR, leaf ⇒ KPI, suy ra từ cấp (nodePerfType). Lý do bỏ OKR (\"một cột mà mọi ô đều giống nhau thì không nói lên sự thật nào\" + \"2 lựa chọn radio không phải là một lựa chọn\") bị VÔ HIỆU chứ không bị bỏ qua: giá trị nay thật sự có hai, và không ai chọn nó — nên vẫn KHÔNG có control nào cho nó ở bất cứ đâu.",
-        "why": "Yêu cầu (2) và (3) của người dùng mô tả cả hai chiều, nên KPI không thể chỉ top-down nữa. Chốt theo từng nhân viên thay vì theo phòng ban vì đó là cách đọc sát nghĩa nhất của 'nếu quản lý áp cho họ thì họ không sửa được' — 'họ' là một người, không phải cả phòng. Không có ảnh chụp thì 'hoàn về bản trước' không có đích, nên snapshot là điều kiện để từ chối trở thành hành động thật. — [SỬA ĐỔI MỘT PHẦN 2026-07-31] Vẫn đúng về QUYỀN SOẠN KPI. Riêng mệnh đề \"chỉ còn MỘT loại hiệu suất\" nay có hai: branch ⇒ OKR, leaf ⇒ KPI, suy ra từ cấp (nodePerfType). Lý do bỏ OKR (\"một cột mà mọi ô đều giống nhau thì không nói lên sự thật nào\" + \"2 lựa chọn radio không phải là một lựa chọn\") bị VÔ HIỆU chứ không bị bỏ qua: giá trị nay thật sự có hai, và không ai chọn nó — nên vẫn KHÔNG có control nào cho nó ở bất cứ đâu.",
-        "tabsAffected": [
-          "Hiệu suất của tôi",
-          "Hiệu suất phòng ban",
-          "Cài đặt chu kỳ",
-          "Theo dõi chu kỳ",
-          "Data",
-          "UX Design",
-          "Project Summary"
-        ]
-      }
-    ],
+    "tradeoffs": [],
     "others": "<div class=\"meta-section\">\n  <div class=\"meta-h2\">Nội dung sản phẩm — Định nghĩa &amp; thuật ngữ (GGrow)</div>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">\n    Tổng hợp thuật ngữ &amp; quy tắc đang dùng trong GGrow (Quản lý hiệu suất). Nguồn: <code>prd.md</code> + <code>decisions.md</code>. Phản ánh trạng thái hiện hành của sản phẩm.\n  </p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">1. Vai trò &amp; quyền</div>\n  <p class=\"meta-label\">Định nghĩa vai trò</p>\n  <ul class=\"meta-p\">\n    <li><strong>HR</strong> — quyền cao nhất (admin), thấy toàn bộ màn hình.</li>\n    <li><strong>Manager</strong> — trưởng phòng/nhóm, toàn quyền trên dữ liệu phòng ban của mình.</li>\n    <li><strong>Supervisor</strong> — giống hệt Manager; là người được uỷ quyền khi chủ KPI không phải Line Manager trực tiếp.</li>\n    <li><strong>Employee</strong> — nhân viên, xem/nhập đánh giá của chính mình (tự soạn KPI và gửi duyệt, trừ khi quản lý đã áp KPI).</li>\n    <li><strong>Upper Manager</strong> — không phải vai trò riêng mà là dữ liệu <code>accessLevel</code> (<code>oversight</code>) theo phòng ban: chỉ xem + bình luận, không sửa/xoá.</li>\n  </ul>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">✓ = có quyền &nbsp;·&nbsp; — = không có quyền. Quyền của Manager/Supervisor/Upper Manager áp dụng trên dữ liệu phòng ban họ phụ trách; Employee trên dữ liệu của chính mình.</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Vai trò</th><th>Xem</th><th>Bình luận</th><th>Chỉnh sửa</th><th>Xoá</th><th>Cấu hình &amp; khởi tạo chu kỳ</th></tr></thead>\n    <tbody>\n      <tr><td><strong>HR</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>\n      <tr><td><strong>Manager</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>—</td></tr>\n      <tr><td><strong>Supervisor</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>—</td></tr>\n      <tr><td><strong>Employee</strong></td><td>✓</td><td>—</td><td>✓<sup>*</sup></td><td>—</td><td>—</td></tr>\n      <tr><td><strong>Upper Manager</strong></td><td>✓</td><td>✓</td><td>—</td><td>—</td><td>—</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><sup>*</sup> Employee chỉ \"nhập của mình\": tự soạn KPI rồi gửi quản lý duyệt; nếu quản lý đã áp KPI cho họ thì chỉ xem — không sửa dữ liệu của người khác.</p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">2. Bốn màn hình chính</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>#</th><th>Màn hình</th><th>Vai trò</th><th>Mục đích</th></tr></thead>\n    <tbody>\n      <tr><td>1</td><td><strong>Theo dõi chu kỳ</strong> (tháng/quý · thử việc)</td><td>HR</td><td>Bảng giám sát trạng thái chu kỳ (chỉ đọc — không tạo). Việc tạo nằm ở luồng 'Cài đặt chu kỳ'.</td></tr>\n      <tr><td>2</td><td><strong>Cài đặt chu kỳ</strong> (tháng/quý · thử việc)</td><td>HR</td><td>Tạo &amp; cấu hình chu kỳ toàn công ty theo sơ đồ tổ chức — tách thành hai trang cố định loại chu kỳ: 'Cài đặt chu kỳ tháng/quý' và 'Cài đặt chu kỳ thử việc'. Mở từ dropdown 'Sửa chu kỳ ▾' trên 'Cấu hình phòng ban'.</td></tr>\n      <tr><td>2b</td><td><strong>Cấu hình phòng ban</strong></td><td>HR / C&amp;B</td><td>Danh sách/bảng cây cấu hình theo phòng ban → nhóm (trước đây tên là 'Cài đặt chu kỳ'). Là nơi mở dropdown tạo chu kỳ ở trên.</td></tr>\n      <tr><td>3</td><td><strong>Hiệu suất phòng ban</strong></td><td>Manager / Supervisor</td><td>Xem / sửa / xoá hiệu suất phòng ban.</td></tr>\n      <tr><td>4</td><td><strong>Hiệu suất của tôi</strong></td><td>Employee</td><td>Xem &amp; nhập hiệu suất của mình.</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><em>Sidebar: nhóm CHU KÌ — 'Theo dõi chu kỳ' (tháng/quý · thử việc) và 'Cấu hình phòng ban' (nút 'Sửa chu kỳ ▾' mở 2 trang Cài đặt chu kỳ tháng/quý · thử việc, không phải mục sidebar) · nhóm CÁ NHÂN (Hiệu suất phòng ban / của tôi) · footer \"Góp ý sản phẩm\".</em></p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">3. Các bộ trạng thái (mỗi ý nghĩa là một bộ riêng — màu có thể trùng, ý nghĩa không gộp)</div>\n\n  <p class=\"meta-label\">3.1 · Trạng thái chu kỳ (Theo dõi chu kỳ) — suy ra từ ngày</p>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">Vòng đời gồm <strong>4 giai đoạn</strong>: Chưa thiết lập → Đã thiết lập → Đang đánh giá → Hoàn thành (<em>thiết lập</em> = đã có cấu hình chu kỳ, không phải đã giao mục tiêu). <strong>Sắp hết hạn</strong> và <strong>Quá hạn</strong> KHÔNG phải giai đoạn — chúng là lớp phủ theo hạn, đè lên giai đoạn hiện tại. Xem <code>constitution.md</code> Nguyên tắc 7.</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Trạng thái</th><th>Điều kiện</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Chưa thiết lập</strong></td><td>Phòng/nhóm chưa gắn cấu hình chu kỳ (giai đoạn 1).</td></tr>\n      <tr><td><strong>Đã thiết lập</strong></td><td>Đã có cấu hình, trong 14 ngày trước ngày bắt đầu (giai đoạn 2).</td></tr>\n      <tr><td><strong>Đang đánh giá</strong></td><td>Từ ngày bắt đầu đến hết giai đoạn hoạt động (giai đoạn 3).</td></tr>\n      <tr><td><strong>Sắp hết hạn</strong></td><td>Trong 48 giờ trước hạn kết thúc.</td></tr>\n      <tr><td><strong>Quá hạn</strong></td><td>Đã qua ngày kết thúc.</td></tr>\n      <tr><td><strong>Hoàn thành</strong></td><td>Đạt 100% (hoặc chu kỳ trước còn hiển thị hoàn thành, chưa tới cửa sổ 2 tuần của chu kỳ kế).</td></tr>\n    </tbody>\n  </table>\n\n  <p class=\"meta-label\">3.2 · Các bộ trạng thái khác (theo màn hình)</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Bộ</th><th>Giá trị</th><th>Dùng ở</th></tr></thead>\n    <tbody>\n      <tr><td>Thiết lập &amp; duyệt mục tiêu <span style=\"color:var(--text-tertiary)\">(nhân viên ↔ quản lý)</span></td><td>Chưa thiết lập → Đã thiết lập → Chờ duyệt → Đã duyệt</td><td>Hiệu suất của tôi (nhân viên) + Hiệu suất phòng ban (quản lý)</td></tr>\n      <tr><td>Cờ hiệu lực</td><td>Hiệu lực / Ngừng hiệu lực</td><td>Cấu hình</td></tr>\n    </tbody>\n  </table>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">4. Thực thể &amp; thuật ngữ</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Thuật ngữ</th><th>Định nghĩa</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Chu kỳ</strong></td><td>Một chu kỳ đánh giá hiệu suất; tạo qua trang 'Cài đặt chu kỳ' (tháng/quý hoặc thử việc), mở từ 'Cấu hình phòng ban'.</td></tr>\n      <tr><td><strong>Khối / Phòng ban / Nhóm</strong></td><td>Đơn vị tổ chức, xếp cây (phòng ban → nhóm con).</td></tr>\n      <tr><td><strong>Nhân viên</strong></td><td>Lá của sơ đồ tổ chức.</td></tr>\n      <tr><td><strong>KPI - Chỉ tiêu</strong></td><td>Loại hiệu suất DUY NHẤT. Một KPI gồm <strong>Tên · Tỷ trọng · Đơn vị</strong>; một nhân viên có nhiều KPI, tổng tỷ trọng 100%. Dạng bảng.</td></tr>\n      <tr><td><strong>Đơn vị</strong></td><td>Đơn vị đo của một KPI: % · VNĐ · Số lượng · Thời gian (bộ cố định).</td></tr><tr><td><strong>Người thiết lập</strong></td><td>Ai soạn bộ KPI của một nhân viên trong kỳ: <em>nhân viên</em> (tự đề xuất, cần duyệt) hoặc <em>quản lý</em> (áp trực tiếp, nhân viên chỉ xem). Ai viết trước thì giữ quyền cho kỳ đó.</td></tr>\n      \n      <tr><td><strong>Chu kì hiệu suất</strong></td><td>Nhịp: Tháng / Quý.</td></tr>\n      <tr><td><strong>Period Duration</strong></td><td>Cửa sổ hoàn tất đánh giá: 7 / 14 / 21 ngày.</td></tr>\n      <tr><td><strong>Đối tượng áp dụng</strong></td><td>Theo điều kiện / Theo nhân viên (hoặc Theo phòng ban / Theo cá nhân).</td></tr>\n      <tr><td><strong>Thời hạn</strong></td><td>Mốc kết thúc (từ vựng đã thống nhất — thay cho \"Thời gian kết thúc\").</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><em>Sơ đồ tổ chức: Phòng ban → Phòng ban cha/con ↔ Quản lý trên/dưới ↔ Line Manager · Nhân viên (+ Supervisor) · Nhịp · Period Duration.</em></p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">5. Quy tắc nghiệp vụ chính</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Quy tắc</th><th>Nội dung</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Luồng KPI</strong></td><td><strong>Ai viết trước thắng.</strong> Nhân viên tự soạn KPI (Tên/Tỷ trọng/Đơn vị) rồi <em>Gửi để duyệt</em>; mọi lần gửi hoặc sửa đều cần quản lý duyệt, không duyệt thì <em>Trả lại</em> và hoàn về bản đã duyệt gần nhất. Ngược lại, nếu quản lý <em>Áp dụng KPI</em> trước thì nhân viên không sửa được kỳ đó. Trong kỳ mọi thứ sửa được cho tới hạn; quá hạn thì cả hai phía chỉ xem.</td></tr>\n      \n      <tr><td><strong>Kiểu quyền</strong></td><td>Xem / Bình luận / Chỉnh sửa / Xoá — cấp theo từng vai trò × từng màn hình.</td></tr>\n      <tr><td><strong>Tỉ lệ hoàn thành</strong></td><td>Nhóm hoàn thành ⇔ mọi thành viên xong (100%). Bất kỳ cấp dưới chưa xong đều dồn lên cấp trên. Tỉ lệ phòng ban = tổng thành viên hoàn thành ÷ tổng thành viên (gộp mọi nhóm). Chưa 100% → lấy trạng thái theo-ngày \"xấu nhất\" của nhóm con (Quá hạn &gt; Sắp hết hạn &gt; Đang đánh giá &gt; Đã thiết lập).</td></tr>\n      <tr><td><strong>Trạng thái thành viên</strong></td><td>Xong → Hoàn thành. Chưa xong → theo hạn nhóm: Quá hạn / Sắp hết hạn / Đang đánh giá.</td></tr>\n    </tbody>\n  </table>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">6. Nhãn cột &amp; từ vựng cố định</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Nơi</th><th>Nhãn</th></tr></thead>\n    <tbody>\n      <tr><td>Bảng cây Theo dõi chu kỳ</td><td>Tên Khối/Phòng Ban · Tỉ Lệ Hoàn Thành · Thời Hạn · Trạng Thái · Chu Kì Hiệu Suất</td></tr>\n      <tr><td>Bảng Cấu hình phòng ban</td><td>Phòng ban · Trưởng phòng · Supervisor · Chu kỳ · Thời hạn</td></tr>\n      <tr><td>Chip xám (neutral)</td><td>Quý · Tháng · KPI - Chỉ tiêu</td></tr>\n      <tr><td>Nút / nhãn view</td><td>Dạng bảng · Dạng lưới · Sửa chu kỳ ▾ (Chu kỳ tháng/quý · Chu kỳ thử việc) · Lưu nháp · Tạo và kích hoạt chu kỳ · Quay lại</td></tr>\n      <tr><td>Khác</td><td>Ngôn ngữ: tiếng Việt · Wordmark: GGrow · Placeholder chưa dựng: \"Sắp ra mắt\"</td></tr>\n    </tbody>\n  </table>\n</div>\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">7. Đánh giá & chấm điểm (KPI / Thử việc) — quy tắc mới</div>\n  <p class=\"meta-p\">Bổ sung bản dựng hiện tại. Chi tiết luồng ở tab <strong>UX Design</strong>, mô hình dữ liệu ở tab <strong>Data</strong>.</p>\n  <p class=\"meta-label\">Mục tiêu thử việc (Thử việc)</p>\n  <ul class=\"meta-p\">\n    <li>Nhân viên thử việc là một <strong>dòng trong roster</strong> ở \"Hiệu suất phòng ban\" (phòng \"Nhân viên thử việc\"); quản lý thao tác, HR giám sát chỉ đọc ở drawer roster của \"Theo dõi chu kỳ\".</li>\n    <li><strong>Đạt thử việc</strong> → mục tiêu tiếp theo mặc định chuyển theo chu kỳ &amp; mục tiêu của nhóm; dữ liệu hoàn thành trong thời gian thử việc được tính vào chu kỳ hiện tại.</li>\n    <li><strong>Không đạt</strong> → thông báo không đạt + đếm ngược đến ngày gỡ khỏi hệ thống (cuối thời gian thử việc).</li>\n    <li><strong>Đang thử việc</strong> → chờ quản lý đánh giá.</li>\n    <li>Thời gian thử việc mặc định <strong>2 tháng</strong>, cho phép chọn dài hơn.</li>\n  </ul>\n  <p class=\"meta-label\">KPI khi chu kỳ đang diễn ra</p>\n  <ul class=\"meta-p\">\n    <li><strong>Cổng sửa theo thời gian:</strong> chỉ cho xem-và-sửa khi chu kỳ đã tới cửa sổ hoạt động (Đang đánh giá / Sắp hết hạn); ngoài ra chỉ xem (\"Chu kỳ đã đóng — chỉ xem\"). Bên quản lý: sửa được ⇔ toàn quyền VÀ chu kỳ đang diễn ra.</li>\n    <li><strong>Soạn KPI</strong> — nhân viên tự đề xuất (cần duyệt mỗi lần gửi/sửa), hoặc quản lý áp trực tiếp (khoá nhân viên khỏi việc sửa). Ai viết trước giữ quyền cho kỳ đó.</li>\n    <li><strong>Duyệt / Trả lại</strong> — quản lý xem bản đề xuất đặt cạnh bản đã duyệt gần nhất, rồi Duyệt hoặc Trả lại. Trả lại sẽ khôi phục bản đã duyệt đó.</li>\n  </ul>\n  <p class=\"meta-label\">\"Hiệu suất của tôi\" — màn đầu tiên</p>\n  <ul class=\"meta-p\">\n    <li>Bình thường một thời điểm chỉ <strong>một chu kỳ</strong>; màn mở thẳng vào <strong>chi tiết chu kỳ mới nhất</strong> (sửa được nếu đang diễn ra), không phải lưới thẻ.</li>\n    <li><strong>Dual-cadence</strong> (biệt lệ, bật bằng checkbox \"cả 2 loại chu kì\" khi tạo chu kỳ): nhân viên có cả chu kỳ tháng lẫn quý cùng hoạt động → màn đầu chồng <strong>cả hai chi tiết</strong> (tháng trên, quý dưới).</li>\n    <li>\"Lịch sử đánh giá\" mở trang lịch sử các chu kỳ đã qua.</li>\n  </ul>\n  <p class=\"meta-label\">Lịch sử đánh giá</p>\n  <p class=\"meta-p\">Bảng chỉ đọc các chu kỳ đã qua (Chu kỳ / Loại / Điểm / Xếp loại / Trạng thái), có ở chi tiết thành viên bên quản lý (\"Lịch sử đánh giá\") và ở màn nhân viên (\"Lịch sử của tôi\").</p>\n</div>\n",
     "figmaFileKey": "Ckmv6HrRVGKZNPEecwqoxZ"
   },
@@ -2117,7 +1899,8 @@
         "Vắng mặt thì KHÔNG dựng thẻ rỗng, kể cả cả hàng dưới."
       ],
       "specSrc": "spec/components/cycle-status.json",
-      "description": "Hàng trạng thái chu kỳ (`_CycleStatus`): `Trạng thái` + chip · vạch · hạn · quá hạn, và `Kết quả cuối cùng` dồn phải. KHÔNG còn hàng tiêu đề — gỡ 30/09."
+      "description": "Hàng trạng thái chu kỳ (`_CycleStatus`): `Trạng thái` + chip · vạch · hạn · quá hạn, và `Kết quả cuối cùng` dồn phải. KHÔNG còn hàng tiêu đề — gỡ 30/09.",
+      "logicSrc": "logic/components/cycle-status.json"
     },
     {
       "id": "unit-select",
@@ -2462,7 +2245,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-objc\">…</div>"
       },
-      "specSrc": "spec/components/objective-card.json"
+      "specSrc": "spec/components/objective-card.json",
+      "logicSrc": "logic/components/objective-card.json"
     },
     {
       "id": "objective-list",
@@ -2676,7 +2460,8 @@
       },
       "logicNotes": [
         "shape:'outline-round' CÓ CALLER THẬT từ 2026-07-31: nút icon edit của mỗi dòng trong bảng Tiêu chí KPI ở CẢ HAI màn review. Trước đó nó được build 2026-07-30 rồi mồ côi 0 caller. Dùng nó (chứ không phải idiom truyền renderCmpIcon vào `label`) vì nó phát aria-label + title từ `label`, còn idiom kia không có accessible name."
-      ]
+      ],
+      "logicSrc": "logic/components/button.json"
     },
     {
       "id": "split-button",
@@ -2756,7 +2541,8 @@
         "snippet": "<span class=\"pb-splitbtn\">…</span>"
       },
       "renderSrc": "render/components/split-button.js",
-      "specSrc": "spec/components/split-button.json"
+      "specSrc": "spec/components/split-button.json",
+      "logicSrc": "logic/components/split-button.json"
     },
     {
       "id": "input",
@@ -2839,7 +2625,8 @@
         "snippet": "<input class=\"field__input\" placeholder=\"Tìm kiếm theo tên chu kì\" />"
       },
       "renderSrc": "render/components/input.js",
-      "specSrc": "spec/components/input.json"
+      "specSrc": "spec/components/input.json",
+      "logicSrc": "logic/components/input.json"
     },
     {
       "id": "select",
@@ -2897,7 +2684,8 @@
         "snippet": "<select class=\"field__input\"><option>Tháng</option><option>Quý</option></select>"
       },
       "renderSrc": "render/components/select.js",
-      "specSrc": "spec/components/select.json"
+      "specSrc": "spec/components/select.json",
+      "logicSrc": "logic/components/select.json"
     },
     {
       "id": "dropdown-select",
@@ -2953,7 +2741,8 @@
       "specSrc": "spec/components/dropdown-select.json",
       "logicNotes": [
         "DÒNG `Tự nhập` ẨN MẶC ĐỊNH (chỉ thị 30/09). Chỉ cái NÚT trong droplist bị ẩn, qua cờ `customRow` (mặc định tắt, không chỗ gọi nào truyền). Tính năng tự nhập GIỮ NGUYÊN: `allowCustom` vẫn bật `data-dd-free` để `pbDropdownSelectCommit` nhận chuỗi gõ tay làm giá trị, vẫn hiện câu gợi ý \"dùng luôn …\" khi gõ không khớp, và vẫn chèn được một giá trị đã lưu nằm ngoài danh sách."
-      ]
+      ],
+      "logicSrc": "logic/components/dropdown-select.json"
     },
     {
       "id": "datepicker",
@@ -3011,7 +2800,8 @@
         "snippet": "<span class=\"field__input\">📅 01/04/2026</span>"
       },
       "renderSrc": "render/components/datepicker.js",
-      "specSrc": "spec/components/datepicker.json"
+      "specSrc": "spec/components/datepicker.json",
+      "logicSrc": "logic/components/datepicker.json"
     },
     {
       "id": "checkbox-radio",
@@ -3074,7 +2864,8 @@
       "specSrc": "spec/components/checkbox-radio.json",
       "logicNotes": [
         "BARE VARIANT (2026-08-11). The <input> markup is built once and shared by both paths so the bare form can never drift from the labelled one on size, accent colour or margin. Added when access-control-drawer's delegate picker swapped its rows off `toggle-input` — the VISUALLY-HIDDEN atom that drives :has() reveals, which was correct for a reveal driver and wrong for a box the user is meant to tick: the panel offered a multi-select with no visible selection state."
-      ]
+      ],
+      "logicSrc": "logic/components/checkbox-radio.json"
     },
     {
       "id": "textarea",
@@ -3171,7 +2962,8 @@
         "snippet": "<label><input type=\"checkbox\"/> Có (Hiệu lực ngay)</label>"
       },
       "renderSrc": "render/components/switch.js",
-      "specSrc": "spec/components/switch.json"
+      "specSrc": "spec/components/switch.json",
+      "logicSrc": "logic/components/switch.json"
     },
     {
       "id": "status-tag",
@@ -3312,7 +3104,8 @@
         "snippet": "<span class=\"status-tag\">Hiệu lực</span>"
       },
       "renderSrc": "render/components/status-tag.js",
-      "specSrc": "spec/components/status-tag.json"
+      "specSrc": "spec/components/status-tag.json",
+      "logicSrc": "logic/components/status-tag.json"
     },
     {
       "id": "cycle-tag",
@@ -3386,7 +3179,8 @@
         "lang": "html",
         "snippet": "<span class=\"pb-kpitype pb-kpitype--department\" style=\"display:inline-flex;align-items:center;gap:var(--space-xs);padding:var(--space-3xs) var(--space-xs);border-radius:var(--radius-sm);background:var(--bg-grey-muted);color:var(--text-grey-hover)\"><svg></svg><span>Phòng ban</span></span>"
       },
-      "renderSrc": "render/components/kpi-type-tag.js"
+      "renderSrc": "render/components/kpi-type-tag.js",
+      "logicSrc": "logic/components/kpi-type-tag.json"
     },
     {
       "id": "card",
@@ -3532,7 +3326,8 @@
       "logicNotes": [
         "R13 rowOnClick gained an `onkeydown` (2026-07-31). The overlay has always been role=\"button\" tabindex=\"0\" — focusable and announced as a button — but the shell binds only a click listener, so Enter/Space did nothing: a focusable-but-inert control, which constitution principle 3 forbids. Emitted only for rowOnClick (a JS call we can replay on the key); rowNav rides the shell's delegated data-nav path and rowForId rows are real <label>s the browser already activates, so both are byte-identical. This also repairs cai-dat-chu-ky's existing roster rows, which have used rowOnClick since 2026-07-30.",
         "R1-03 (2026-08-04) added frozenCols + maxHeight (R17) and columns[].sortIcon + rows[].sortVals (R18), and retuned header/body cells to Figma 7811:7984 (R19). sortIcon defaults OFF and must never be set on a tree table: pbSortTable reorders tbody.rows with appendChild, and on a tree document order IS the hierarchy (decision 5). R17's frozen cells are position:sticky, i.e. positioned — a screen still hand-rolling its own row-click overlay inside the name cell must migrate to rowForId/rowNav/rowOnClick before passing frozenCols."
-      ]
+      ],
+      "logicSrc": "logic/components/table.json"
     },
     {
       "id": "table-pagination",
@@ -3587,7 +3382,8 @@
             "required": true
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/table-pagination.json"
     },
     {
       "id": "tabs",
@@ -3681,7 +3477,8 @@
       "specSrc": "spec/components/tabs.json",
       "logicNotes": [
         "options[].count added 2026-08-10 (Figma 8110:35213 — \"Đánh giá chu kì  12\"). Rendered through the existing `badge` atom so a tab count and every other count in the app share one chip, and called directly (renderCmpBadge, not pbUse) matching this file's own renderCmpIcon call — `tabs` is an atom and R-LEVEL-ORDER only forbids an atom composing via pbUse(). Every pre-existing caller omits it and emits byte-identical markup."
-      ]
+      ],
+      "logicSrc": "logic/components/tabs.json"
     },
     {
       "id": "cycle-tabs",
@@ -3739,7 +3536,8 @@
         "snippet": "<div class=\"segmented segmented--pill\">…</div>"
       },
       "renderSrc": "render/components/cycle-tabs.js",
-      "specSrc": "spec/components/cycle-tabs.json"
+      "specSrc": "spec/components/cycle-tabs.json",
+      "logicSrc": "logic/components/cycle-tabs.json"
     },
     {
       "id": "cycle-card",
@@ -3804,7 +3602,8 @@
         "snippet": "<div class=\"cycle-card\">…</div>"
       },
       "renderSrc": "render/components/cycle-card.js",
-      "specSrc": "spec/components/cycle-card.json"
+      "specSrc": "spec/components/cycle-card.json",
+      "logicSrc": "logic/components/cycle-card.json"
     },
     {
       "id": "department-tag-select",
@@ -3848,7 +3647,8 @@
         "snippet": "<span class=\"dept-tag\">251100 - GIDO - Vận hành miền Bắc ×</span>"
       },
       "renderSrc": "render/components/department-tag-select.js",
-      "specSrc": "spec/components/department-tag-select.json"
+      "specSrc": "spec/components/department-tag-select.json",
+      "logicSrc": "logic/components/department-tag-select.json"
     },
     {
       "id": "condition-builder-row",
@@ -3883,7 +3683,8 @@
         "snippet": "<div>…field…operator…</div>"
       },
       "renderSrc": "render/components/condition-builder-row.js",
-      "specSrc": "spec/components/condition-builder-row.json"
+      "specSrc": "spec/components/condition-builder-row.json",
+      "logicSrc": "logic/components/condition-builder-row.json"
     },
     {
       "id": "cycle-create-drawer",
@@ -3933,7 +3734,8 @@
         "snippet": "<div class=\"cc-root\">…</div>"
       },
       "renderSrc": "render/components/cycle-create-drawer.js",
-      "specSrc": "spec/components/cycle-create-drawer.json"
+      "specSrc": "spec/components/cycle-create-drawer.json",
+      "logicSrc": "logic/components/cycle-create-drawer.json"
     },
     {
       "id": "sidebar",
@@ -3977,7 +3779,8 @@
         "snippet": "<div class=\"pb-app-sidebar\">…</div>"
       },
       "renderSrc": "render/components/sidebar.js",
-      "specSrc": "spec/components/sidebar.json"
+      "specSrc": "spec/components/sidebar.json",
+      "logicSrc": "logic/components/sidebar.json"
     },
     {
       "id": "bottom-nav",
@@ -4013,7 +3816,8 @@
         "snippet": "<nav class=\"pb-bottom-nav\">…</nav>"
       },
       "renderSrc": "render/components/bottom-nav.js",
-      "specSrc": "spec/components/bottom-nav.json"
+      "specSrc": "spec/components/bottom-nav.json",
+      "logicSrc": "logic/components/bottom-nav.json"
     },
     {
       "id": "header-footer-app",
@@ -4052,7 +3856,8 @@
         "snippet": "<div class=\"pb-app-shell\">…</div>"
       },
       "renderSrc": "render/components/header-footer-app.js",
-      "specSrc": "spec/components/header-footer-app.json"
+      "specSrc": "spec/components/header-footer-app.json",
+      "logicSrc": "logic/components/header-footer-app.json"
     },
     {
       "id": "file-attachment",
@@ -4106,7 +3911,8 @@
         "onChange + fileNames + caption `<inputId>-files` (2026-07-29): pbFileAttachSync ghi tên file đã chọn vào caption và (kèm goalId) vào goal.selfAssessment.fileNames.",
         "`H-21` (27/09/2026) — `state:'read-only'` (hoặc `readOnly:true`): bỏ nút và ô chọn tệp, chip mất nút X và nhận nút tải. Dùng cho khối Nhận xét chung của một kỳ đã chốt, nơi trước đây cả danh sách file bị ẩn hẳn.",
         "`H-21` — NỘI DUNG file giữ ngoài store, ở `PB_FA_BLOBS`, khoá bằng `employeeId|cycleId|side` (`downloadKey`). Không nhét vào `pbAppStore()` vì vài đường sao chép sâu bằng JSON sẽ biến một đối tượng tệp thành `{}` và mất byte lặng lẽ. File chỉ có TÊN (dữ liệu gieo) thì `pbFaDownload` nói thẳng bằng toast chứ không sinh nội dung giả."
-      ]
+      ],
+      "logicSrc": "logic/components/file-attachment.json"
     },
     {
       "id": "accordion",
@@ -4135,7 +3941,8 @@
         "snippet": "<div class=\"pb-accordion\">…</div>"
       },
       "renderSrc": "render/components/accordion.js",
-      "specSrc": "spec/components/accordion.json"
+      "specSrc": "spec/components/accordion.json",
+      "logicSrc": "logic/components/accordion.json"
     },
     {
       "id": "icon",
@@ -4330,7 +4137,8 @@
         "snippet": "<svg viewBox=\"0 0 24 24\">…</svg>"
       },
       "renderSrc": "render/components/icon.js",
-      "specSrc": "spec/components/icon.json"
+      "specSrc": "spec/components/icon.json",
+      "logicSrc": "logic/components/icon.json"
     },
     {
       "id": "cycle-form",
@@ -4370,7 +4178,8 @@
         "snippet": "<div>…Thông tin chung…Đối tượng áp dụng…Chu kỳ thực hiện…</div>"
       },
       "renderSrc": "render/components/cycle-form.js",
-      "specSrc": "spec/components/cycle-form.json"
+      "specSrc": "spec/components/cycle-form.json",
+      "logicSrc": "logic/components/cycle-form.json"
     },
     {
       "id": "dept-config-form",
@@ -4448,7 +4257,8 @@
         "STATUS-GATED EDITING (2026-07-28, direct user instruction). Two additive props: `lockedFields` (array of field tokens — 'name'/'description'/'performanceType'/'cadence'/'scope' — that must render state:'disabled'; 'performanceType' now locks the cycle-type segment + KPI cards together) and `editableStatus` (a computeConfigStatus() key that selects a top-of-form banner). \"Thời hạn\" (the self-review + manager-review duration selects) is DELIBERATELY never in lockedFields — it stays editable even in the locked/running case so the cycle can be extended.",
         "WARNING DISPLAY IS BANNER-ONLY (confirmed): a single info-banner at the very top of the form is the sole explanation surface. Locked fields render disabled (their existing state:'disabled' support) with NO per-field lock icon/tooltip chrome. Banner tones (token-only, via the shared info-banner molecule): editableStatus ∈ {ongoing, ending-soon} → warning \"Chu kỳ đang chạy — chỉ chỉnh được Thời hạn...\"; ∈ {overdue, completed} → info \"Chu kỳ đã kết thúc — mọi thay đổi sẽ áp dụng cho chu kỳ mới...\"; 'start-soon' → subtle success \"Chu kỳ chưa bắt đầu — sửa được mọi trường.\"; any other/empty → no banner. Perf/scope radio cards use var(--bg-app-disabled) (the same disabled-surface token select/input use) for their disabled look — this DS has no opacity token to reach for.",
         "RE-POPULATABLE EMPLOYEE IDENTITY CARD (2026-07-30). The card now carries stable hooks — an `<idPrefix>-emp-card` id plus `.dcf-emp-name` / `.dcf-emp-title` on its two text spans — so ONE rendered drawer can be re-pointed at any employee by JS (cai-dat-chu-ky's cdOpenEmpEdit writes those two spans plus the avatar's initials). This is what let the roster stop being capped at 3: at 55.7 KB per drawer, one drawer per person across that screen's 11,373 roster people would have been ~618 MB of HTML. The `.dcf-emp-title` span is now rendered WHENEVER employeeInfo is present, even with no title — an absent span is a node cdOpenEmpEdit would have to create, and a shared card must be able to go from a person with a title to one without; it collapses to zero height when empty, so a caller passing {name} only looks exactly as before."
-      ]
+      ],
+      "logicSrc": "logic/components/dept-config-form.json"
     },
     {
       "id": "dept-config-drawer",
@@ -4564,7 +4374,8 @@
             "required": true
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/dept-config-drawer.json"
     },
     {
       "id": "access-control-drawer",
@@ -4638,7 +4449,8 @@
             "required": true
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/access-control-drawer.json"
     },
     {
       "id": "leaf-config-drawer",
@@ -4838,7 +4650,8 @@
       },
       "logicNotes": [
         "MANAGER MOVED INTO THE INFO STRIP AS ITS 3RD FIELD (2026-07-31, direct user instruction — the \"apply for leaf also\" half of \"add another field is manager, in the 3rd place, then remove the manager name below the dept. name\"). Same change as chi-tiet-phong-ban: `manager` stops being drawer-header's `subtitle` and becomes a \"Quản lý\" strip field ordered before Supervisor. The prop is still READ — only the header slot no longer uses it — and drawer-header's `subtitle` slot itself is untouched, still used by hieu-suat-phong-ban's own drawers where that subtitle is the only place its fact appears. NOT DIRECTLY VERIFIABLE IN THE DOM: this component currently has NO live caller — `pbUse('leaf-config-drawer')` appears nowhere, since the leaf detail surface became the chi-tiet-phong-ban PAGE. The change was applied anyway because the instruction named the leaf explicitly and this file is the leaf drawer; it is correct-by-construction against the page's verified equivalent, and will be right if this drawer is ever remounted. Flagged to the user rather than silently claimed as tested."
-      ]
+      ],
+      "logicSrc": "logic/components/leaf-config-drawer.json"
     },
     {
       "id": "leaf-detail-body",
@@ -4915,7 +4728,8 @@
       ],
       "logicNotes": [
         "FLATTENED TO THREE PANES AND THE STRIP MOVED OUT (2026-08-10). The Level-1 underline pair (Chu kì hiện tại / Lịch sử) with a Level-2 pill pair inside it collapses into ONE strip of three underline tabs, and that strip now belongs to page-header via config-page-shell's `tabs` slot — this component renders only the panes and the :has() rules that reveal them, keyed off `tabName` within `tabRoot`. Also removed: the assessment-timeline at the head of the current pane (its question is answered once by the host's new footer phase bar), `fullBleedTabs` and its negative-margin bleed (they existed for the strip that is gone, along with config-page-shell's matching [class^=\"pb-ldb-tabs-\"] override), and the `period` prop (it only fed the Level-2 pill labels; each section still carries its own period inside `cycles`). Roster columns are now six: Tên nhân viên · Chu kỳ · Trạng thái · Nhân viên · Quản lý · Kết quả — Thời hạn dropped because the footer bar states the deadline once for the page. Scores come from the caller (cqLeafDetailPayload stamps them deterministically) and both tables tint through one shared >100/<90 rule."
-      ]
+      ],
+      "logicSrc": "logic/components/leaf-detail-body.json"
     },
     {
       "id": "config-page-shell",
@@ -5028,7 +4842,8 @@
             "required": false
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/config-page-shell.json"
     },
     {
       "id": "detail-drawer",
@@ -5063,7 +4878,8 @@
         "snippet": "<div class=\"dtl-root\">…</div>"
       },
       "renderSrc": "render/components/detail-drawer.js",
-      "specSrc": "spec/components/detail-drawer.json"
+      "specSrc": "spec/components/detail-drawer.json",
+      "logicSrc": "logic/components/detail-drawer.json"
     },
     {
       "id": "inline-indicator",
@@ -5165,7 +4981,8 @@
       },
       "renderSrc": "render/components/ghn-logo-lockup.js",
       "specSrc": "spec/components/ghn-logo-lockup.json",
-      "dsMatch": null
+      "dsMatch": null,
+      "logicSrc": "logic/components/ghn-logo-lockup.json"
     },
     {
       "id": "product-brand",
@@ -5193,7 +5010,8 @@
         "Tên sản phẩm lấy từ prop, IN HOA bằng `text-transform`. Frame in chuỗi hoa sẵn; chép nó vào đây là bản thứ hai của cùng một cái tên, và hai bản luôn trôi khỏi nhau.",
         "Chuỗi base64 để NGOÀI thân hàm (`PB_BRAND_LOGO_SRC`, cuối file) để thân hàm còn đọc được trong một màn hình."
       ],
-      "description": "Cụm thương hiệu sản phẩm: logo GGrow + tên sản phẩm in hoa. Dùng ở bay trái của `app-topbar`."
+      "description": "Cụm thương hiệu sản phẩm: logo GGrow + tên sản phẩm in hoa. Dùng ở bay trái của `app-topbar`.",
+      "logicSrc": "logic/components/product-brand.json"
     },
     {
       "id": "badge",
@@ -5345,7 +5163,8 @@
         "snippet": "<span class=\"pb-label\">Tên chu kỳ<span style=\"color:var(--text-error)\">*</span></span>"
       },
       "renderSrc": "render/components/label.js",
-      "specSrc": "spec/components/label.json"
+      "specSrc": "spec/components/label.json",
+      "logicSrc": "logic/components/label.json"
     },
     {
       "id": "breadcrumb",
@@ -5390,7 +5209,8 @@
         "snippet": "<nav class=\"pb-breadcrumb\" aria-label=\"Breadcrumb\"><a class=\"pb-breadcrumb-link\" href=\"#\">Thị trường</a><span class=\"pb-breadcrumb-sep\">›</span><a class=\"pb-breadcrumb-link\" href=\"#\">Vùng</a><span class=\"pb-breadcrumb-sep\">›</span><span class=\"pb-breadcrumb-current\" aria-current=\"page\">Bưu cục</span></nav>"
       },
       "renderSrc": "render/components/breadcrumb.js",
-      "specSrc": "spec/components/breadcrumb.json"
+      "specSrc": "spec/components/breadcrumb.json",
+      "logicSrc": "logic/components/breadcrumb.json"
     },
     {
       "id": "tooltip",
@@ -5446,7 +5266,8 @@
       "specSrc": "spec/components/tooltip.json",
       "logicNotes": [
         "CONTAINMENT + WIDTH CAP (2026-07-31, direct user instruction — \"make the content fix inside the drawer, don't let it scroll horizontal\"). The bubble is position:absolute but hidden with visibility+opacity, so it OCCUPIES LAYOUT and contributes to any ancestor's scrollWidth even while invisible — measured as the entire cause of the side-drawer's horizontal scrollbar (988px of content in a 624px body). Three additive changes: `contain:layout` on `.pb-tt` so a trigger is its own layout container and its absolute overflow no longer propagates outward; `max-width:var(--pb-tt-max,var(--size-popover-max-w))` so a CONTAINER can narrow every tooltip inside it without touching call sites; and `white-space:pre-line` (was nowrap) so a long label wraps instead of running off, while authored newlines still hold. Placement rules are UNCHANGED — top/bottom stay centered on the trigger, which is what keeps the arrow honest. Two anchor-based fixes were tried first and both measured WRONG: a blanket right:0 pushed a bubble whose trigger sits 250px into a 576px form 16px past the LEFT edge, and no static left/right choice satisfies all three tooltips on one form (room measured 171/264/554px left vs 482/389/99px right against a 280px bubble). CSS cannot read a trigger's distance to its container, so containment — which is position-independent — is the correct primitive."
-      ]
+      ],
+      "logicSrc": "logic/components/tooltip.json"
     },
     {
       "id": "typography",
@@ -5636,7 +5457,8 @@
       "anatomy": {
         "description": "A fixed-size circle or square holding an image, or an initials fallback (max two uppercase chars) on a brand-subtle fill, wrapped in a thin surface-colored ring so avatars read cleanly when stacked.",
         "parts": []
-      }
+      },
+      "logicSrc": "logic/components/avatar.json"
     },
     {
       "id": "avatar-stack",
@@ -5731,7 +5553,8 @@
             "required": false
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/avatar-stack.json"
     },
     {
       "id": "delegate-cluster",
@@ -5796,7 +5619,8 @@
         "snippet": "<span class=\"pb-delegc\">…</span>"
       },
       "renderSrc": "render/components/delegate-cluster.js",
-      "specSrc": "spec/components/delegate-cluster.json"
+      "specSrc": "spec/components/delegate-cluster.json",
+      "logicSrc": "logic/components/delegate-cluster.json"
     },
     {
       "id": "progress",
@@ -5878,7 +5702,8 @@
         "snippet": "<div role=\"progressbar\"><span><span style=\"width:60%\"></span></span><span>60%</span></div>"
       },
       "renderSrc": "render/components/progress.js",
-      "specSrc": "spec/components/progress.json"
+      "specSrc": "spec/components/progress.json",
+      "logicSrc": "logic/components/progress.json"
     },
     {
       "id": "popover",
@@ -5935,7 +5760,8 @@
         "snippet": "<span class=\"pb-popover-anchor\" tabindex=\"0\"><span class=\"pb-pop-trigger\">Di chuột vào đây</span><span class=\"pb-pop-panel\" role=\"tooltip\">…</span></span>"
       },
       "renderSrc": "render/components/popover.js",
-      "specSrc": "spec/components/popover.json"
+      "specSrc": "spec/components/popover.json",
+      "logicSrc": "logic/components/popover.json"
     },
     {
       "id": "dialog",
@@ -6023,7 +5849,8 @@
         "snippet": "<div class=\"dlg-root\"><input type=\"checkbox\" id=\"dlg-x\" checked/><div class=\"dlg-overlay\"><div class=\"dlg-card\" role=\"dialog\" aria-modal=\"true\">…title / body / Hủy + Xác nhận…</div></div></div>"
       },
       "renderSrc": "render/components/dialog.js",
-      "specSrc": "spec/components/dialog.json"
+      "specSrc": "spec/components/dialog.json",
+      "logicSrc": "logic/components/dialog.json"
     },
     {
       "id": "radio-indicator",
@@ -6049,7 +5876,8 @@
         "lang": "html",
         "snippet": "<label class=\"pb-radio\"><input type=\"radio\" name=\"plan\" value=\"pro\" checked hidden><span class=\"pb-radio-ring\"><span class=\"pb-radio-dot\"></span></span></label>"
       },
-      "specSrc": "spec/components/radio-indicator.json"
+      "specSrc": "spec/components/radio-indicator.json",
+      "logicSrc": "logic/components/radio-indicator.json"
     },
     {
       "id": "stepper",
@@ -6113,7 +5941,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-stepper\" style=\"display:flex;align-items:flex-start;width:100%\">\n  <div style=\"display:flex;flex-direction:column;flex:1 1 0\">\n    <div style=\"display:flex;align-items:center\"><span style=\"width:var(--space-xl);height:var(--space-xl);border-radius:var(--radius-lg);background:var(--color-brand-primary);color:var(--color-text-on-brand)\">check</span><span style=\"flex:1;height:var(--border-width);background:var(--color-brand-primary)\"></span></div>\n    <div><div style=\"color:var(--color-text-primary)\">Thông tin</div><div style=\"color:var(--color-text-secondary)\">Nhập thông tin cơ bản</div></div>\n  </div>\n  <!-- active step (current) brand-filled + emphasised title, then outlined grey upcoming steps -->\n</div>"
       },
-      "specSrc": "spec/components/stepper.json"
+      "specSrc": "spec/components/stepper.json",
+      "logicSrc": "logic/components/stepper.json"
     },
     {
       "id": "timeline-marker",
@@ -6179,7 +6008,8 @@
         "lang": "html",
         "snippet": "<div style=\"display:flex;flex-direction:column;align-items:center;gap:var(--space-xs);width:100%\"><span style=\"width:var(--space-sm);height:var(--space-sm);border-radius:var(--radius-lg);background:var(--bg-primary-default);border:calc(var(--border-width) * 2) solid var(--border-primary-default)\"></span><span style=\"font-weight:var(--font-weight-title);color:var(--text-primary)\">Tuần 1</span><span style=\"font-size:var(--font-size-caption);color:var(--text-muted)\">Thiết lập mục tiêu KPI</span></div>"
       },
-      "specSrc": "spec/components/timeline-marker.json"
+      "specSrc": "spec/components/timeline-marker.json",
+      "logicSrc": "logic/components/timeline-marker.json"
     },
     {
       "id": "field-error",
@@ -6236,7 +6066,8 @@
         "snippet": "<span class=\"pb-roster-more-note\" style=\"color:var(--text-muted);font-size:var(--font-size-caption)\">và 3 nhân viên khác</span>"
       },
       "renderSrc": "render/components/roster-more-note.js",
-      "specSrc": "spec/components/roster-more-note.json"
+      "specSrc": "spec/components/roster-more-note.json",
+      "logicSrc": "logic/components/roster-more-note.json"
     },
     {
       "id": "dropdown-menu",
@@ -6309,7 +6140,8 @@
         "snippet": "<div class=\"pb-dd\"><label class=\"pb-dd-trigger\" aria-haspopup=\"menu\">Nguyễn Văn A</label><div class=\"pb-dd-menu\" role=\"menu\"><button class=\"pb-dd-item pb-dd-item--danger\">Đăng xuất</button></div></div>"
       },
       "renderSrc": "render/components/dropdown-menu.js",
-      "specSrc": "spec/components/dropdown-menu.json"
+      "specSrc": "spec/components/dropdown-menu.json",
+      "logicSrc": "logic/components/dropdown-menu.json"
     },
     {
       "id": "date-range-label",
@@ -6371,7 +6203,8 @@
         "snippet": "<label class=\"rmtag\"><input type=\"checkbox\" class=\"rmtag__input\" checked/><span class=\"rmtag__text\">Vận hành miền Bắc</span><span class=\"rmtag__remove\">×</span><span class=\"rmtag__add\">+</span></label>"
       },
       "renderSrc": "render/components/removable-tag.js",
-      "specSrc": "spec/components/removable-tag.json"
+      "specSrc": "spec/components/removable-tag.json",
+      "logicSrc": "logic/components/removable-tag.json"
     },
     {
       "id": "tree-toggle-chevron",
@@ -6403,7 +6236,8 @@
         "snippet": "<label class=\"pb-tree-toggle\" for=\"row-1\" aria-label=\"Mở rộng/thu gọn\"><span class=\"pb-tree-toggle__chevron is-expanded\"><svg>chevron-down</svg></span></label>"
       },
       "renderSrc": "render/components/tree-toggle-chevron.js",
-      "specSrc": "spec/components/tree-toggle-chevron.json"
+      "specSrc": "spec/components/tree-toggle-chevron.json",
+      "logicSrc": "logic/components/tree-toggle-chevron.json"
     },
     {
       "id": "weight-runtime",
@@ -6423,7 +6257,8 @@
         "2026-07-30 (one-performance-type build): this entry WAS `key-result-list`. Its render fn (a <ul> of Key Results under an OKR Objective) died with the OKR performance type, but the file hosted four load-bearing globals — the three weight-pool helpers used by the surviving KPI editors, plus renderRatingHistoryTable used by BOTH history tables. Renamed rather than deleted so those globals keep being inlined. The body opens with a stub `function renderCmpWeightRuntime(props){return '';}` because render.py's fallback path would otherwise wrap the whole weight runtime as one component fn, turning the globals into function-locals (inline on* handlers would throw and both history tables would render empty).",
         "pbOkrWeightGate was renamed pbWeightGate and its scope selector now accepts .pb-kpi-edit. It stays scope-local (not a bare pbWeightGroupTotal===100) because the employee screen renders the same cycle's editor twice, so document-wide sums double-count.",
         "SỐNG LẠI + THÀNH HOST CỦA BỀ MẶT KPI DÙNG CHUNG (2026-07-31). (a) Trước pass này toàn bộ bộ cân tỷ trọng là CODE MỒ CÔI: pbWeightGate, data-weight-group, #wsum-, #wwarn- không có caller nào trong render/, nên quy tắc 100% trên thực tế không được kiểm ở đâu cả. Giờ pbWeightGate chạy ở CẢ HAI nút 'Lưu đánh giá' (hpbSaveReview + hcmSaveReview) và CHẶN lưu; dialog sửa từng dòng cố ý không bị chặn (chặn cả hai chỗ thì 100% không thể đạt). (b) KEY GIỜ DUY NHẤT THEO INSTANCE — 'w-<memberId>' bên quản lý, 'w-<inst>-<goalId>' bên nhân viên (inst='p'|'d'), KHÔNG phải 'kpiset-<emp>-<cycle>' như snippet cũ tả. Đây là điều làm cho pbWeightGroupTotal/pbWeightSumSync/pbWeightDistribute — vốn đều query DOCUMENT — trở nên ĐÚNG mà không phải sửa chúng, và làm biến mất luôn xung đột id #wsum-/#wwarn- (id suy ra từ key). (c) File này giờ publish thêm các global dùng chung cho cả 2 màn review: pbKpiTargetCell (gộp Chỉ tiêu + Đơn vị — % và VNĐ nối vào sau và tự chống lặp, còn Số lượng/Thời gian là LOẠI đơn vị nên xuống dòng dạng caption mờ), pbKpiRowFields (body của dialog sửa dòng, 3 nửa quyền truyền bằng cờ), pbKpiWeightMirror (field tỉ trọng trong dialog mirror xuống input của bảng — chỉ input BẢNG mang data-weight-group nên gate không bao giờ đếm đôi), pbKpiWeightStrip (Tổng/100% + cảnh báo). (d) TẤT CẢ dùng window['renderCmpX'] TRỰC TIẾP, tuyệt đối không compose: component này khai báo level:'atom' và R-LEVEL-ORDER của lint_registry.py coi atom composition là ERROR, không phải warning. pbWeightDistribute vẫn mồ côi — không có nút 'Chia đều' nào."
-      ]
+      ],
+      "logicSrc": "logic/components/weight-runtime.json"
     },
     {
       "id": "objective-validate",
@@ -6508,7 +6343,8 @@
         "snippet": "<button class=\"pb-inline-add-link\">+ Thêm điều kiện</button>"
       },
       "renderSrc": "render/components/inline-add-link.js",
-      "specSrc": "spec/components/inline-add-link.json"
+      "specSrc": "spec/components/inline-add-link.json",
+      "logicSrc": "logic/components/inline-add-link.json"
     },
     {
       "id": "combobox",
@@ -6586,7 +6422,8 @@
         "snippet": "<div class=\"pb-combo\"><input class=\"pb-combo__input\" role=\"combobox\" placeholder=\"Tìm phòng ban / đối tượng\" /><div class=\"pb-combo__panel\" role=\"listbox\"><div class=\"pb-combo__opt\" role=\"option\">Phòng Kế toán</div></div></div>"
       },
       "renderSrc": "render/components/combobox.js",
-      "specSrc": "spec/components/combobox.json"
+      "specSrc": "spec/components/combobox.json",
+      "logicSrc": "logic/components/combobox.json"
     },
     {
       "id": "info-banner",
@@ -6680,7 +6517,8 @@
       "logicNotes": [
         "OPT-IN LEADING GLYPH (2026-07-28, R2 extension). The banner's text is forced to neutral --text-muted, so before this the tone was carried by the muted BACKGROUND TINT ALONE — colour-only signalling, and on the cycle-edit status gate that tint was the only thing separating 'Chu kỳ đang chạy — fields locked' from a calm notice. `icon:true` renders the tone's default glyph (warning/error → solid alert-circle, success → solid circle-check, else info) in that tone's own --icon-<tone>-hover token, the same convention status-tag's chips use. Omitting `icon` keeps output byte-identical, which is why every pre-existing caller is unaffected. Precedent: cai-dat-chu-ky.js already hand-built this shape outside the component. NOTE: this DS has no `lock` glyph, so alert-circle carries the locked-cycle case.",
         "MASTER FORM + TWO-PART COPY (2026-08-10, Figma 8135:118240, direct user instruction). `bordered` was promoted from \"draw an outline\" to \"render the DS master's outlined form\", because two independent instances of the same master — the warning banner on Theo dõi chu kỳ and the info banner in the cycle drawer (8110:31235) — agreed on a geometry this component had drifted from on every count: radius 8 (we drew 12), 8 padding on all four sides (we drew 8/16), a 20 glyph in a 24 box (we drew 16), a 4 row gap (we drew 12/16), and no shadow (we drew --shadow-card). Only the four `bordered` callers are affected; every other banner is byte-identical. The warning tone's border token also moved --border-warning-default -> --border-warning-active, the step ITS frame binds — the DS is not uniform here (the info tone's frame binds border/secondary/default), so each tone names the step its own frame shows rather than being swept to `active` by analogy. `title` is the new bold lead-in. The action button takes --border-app-on-color on the master form, through button.js's existing `borderColor` prop; a soft grey edge disappears against a tinted fill. STATED DEVIATION: the frame's button measures 34 tall (8+16+8+2) and ours is --size-control-sm (28). 34 is not on this DS's control scale (28/32/40/48), and a 2026-07-24 direct instruction pinned this exact button to \"the smallest button\", so inventing a fifth height to match one frame was the worse trade."
-      ]
+      ],
+      "logicSrc": "logic/components/info-banner.json"
     },
     {
       "id": "form-section",
@@ -6720,7 +6558,8 @@
       "logicNotes": [
         "HEADER ROW OMITTED WHEN EMPTY (2026-07-31, direct user instruction — \"remove text đối tượng áp dụng\"). Passing title:'' used to still emit the header row AND an empty <h5> inside it, so a titleless section paid for a zero-height heading plus one --space-sm of the inner stack's gap above its first field — a stray 12px of indent containing nothing. `hasHeader` now gates the row. It checks title OR titleSuffix OR headerAction, not `title` alone: a caller may legitimately want an action or an info-tooltip suffix with no heading text, and dropping the row on an empty title alone would have silently deleted that control. A section with none of the three is now just its content.",
         "`plain` VARIANT (additive, 2026-07-31, direct user instruction — \"remove the box around the content\" on sửa/thêm chu kỳ). Drops the card SURFACE and keeps the section's identity: title row, title/suffix cluster, headerAction slot and the inner --space-sm field rhythm are all unchanged, so a plain section is the same section without its border/background/padding. R2 variant-extension rather than a molecule change because cycle-form also renders this molecule and was not part of the instruction — callers omitting `plain` get byte-identical markup. Deliberately NOT implemented as borderColor:'transparent': the card also supplies padding and a background, so a transparent border would leave the padding and the sections would still read as inset blocks against the drawer's --bg-app-subtle body — the box invisible but still there. Dropping the wrapper removes surface, padding and border in one move, and the parent's own flex gap then supplies all inter-section separation."
-      ]
+      ],
+      "logicSrc": "logic/components/form-section.json"
     },
     {
       "id": "drawer-header",
@@ -6773,7 +6612,8 @@
             "orgId": "typography"
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/drawer-header.json"
     },
     {
       "id": "drawer-info-strip",
@@ -6879,7 +6719,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-duration-select-row\" style=\"display:flex;flex-direction:column;gap:var(--space-2xs);width:100%\"><!-- renderCmpFieldLabel: label + tooltip + 'Kể từ ngày bắt đầu' caption --><!-- renderCmpSelect: 7/14/21 ngày options --></div>"
       },
-      "specSrc": "spec/components/duration-select-row.json"
+      "specSrc": "spec/components/duration-select-row.json",
+      "logicSrc": "logic/components/duration-select-row.json"
     },
     {
       "id": "field-label",
@@ -6939,7 +6780,8 @@
       "logicNotes": [
         "TOOLTIP PLACEMENT DEFAULT IS NOW 'left' (2026-07-31, direct user instruction — same no-horizontal-scroll pass). A field-label's info glyph sits at the END of the label text, so a 'top' bubble centered on the glyph hangs half its width to the RIGHT; in the 640px side-drawer the last deadline field's bubble painted 48px beyond the body's content box, which the body's new overflow-x:hidden would have CLIPPED — cutting the text off on hover. 'left' grows the bubble back across the field it belongs to, where the room always exists. Callers may still pass `tooltipPlacement` explicitly; only the default changed, and only for labels — tooltips built directly via the atom elsewhere keep their own placement.",
         "THIS MOLECULE NOW OWNS THE LABEL→CONTROL GAP, and input/select/textarea/datepicker finally consume it (2026-07-29). Its docstring claimed that consumption since it was written; it was never true — all four hand-rolled their own label markup, four copies agreeing only by luck. Consequences: it gained margin-bottom (it previously set NO gap and delegated to each consumer, which is exactly why consumers disagreed — duration-select-row used 4px, audience-picker used 12px for one label and 4px for another in ONE organism, and dept-config-form's audience field reached 16px). Consumers must therefore NOT add a gap of their own, and must not place this block and its control as separate children of a gap-bearing flex container — duration-select-row/audience-picker/dept-config-form were all corrected accordingly. The four atoms call it via window['renderCmpFieldLabel'], NOT pbUse: they are ATOMS and this is a MOLECULE, so pbUse would trip R-LEVEL-ORDER; demoting this is wrong (it composes label/typography/icon/tooltip) and promoting them is wrong too (only atoms may emit a raw <input>). Also fixed: duration-select-row passed `label`/`helperText` where this reads `text`/`helper`, so it had been rendering NO LABEL AT ALL."
-      ]
+      ],
+      "logicSrc": "logic/components/field-label.json"
     },
     {
       "id": "drawer-footer",
@@ -6984,7 +6826,8 @@
       "anatomy": {
         "description": "A single horizontal action row: a flex container (align-items:center, gap var(--space-sm)) that holds an optional left slot group and a right-aligned action group of pre-rendered buttons. With no left slot the actions hug the right edge (justify-content:flex-end); with a left slot the row splits (space-between). The default (drawer) variant adds the shared footer chrome — a var(--border-width) var(--border-app-default) top border, a var(--color-bg-surface) fill, and var(--space-md) var(--space-lg) padding; the `bare` variant drops all three for use inside cards/modals and the create-page form.",
         "parts": []
-      }
+      },
+      "logicSrc": "logic/components/drawer-footer.json"
     },
     {
       "id": "action-footer",
@@ -7114,7 +6957,8 @@
         "snippet": "<input type=\"radio\" id=\"opt-1\" name=\"option\" value=\"opt-1\" checked hidden><label for=\"opt-1\" class=\"pb-selectable-card\"><div><span class=\"pb-typography--body is-strong\">KPI - Chỉ tiêu</span><span class=\"pb-selcard-ring\"><span class=\"pb-selcard-fill\"></span></span></div><span>Nhân viên đề xuất mục tiêu…</span></label>"
       },
       "spec_note": "",
-      "specSrc": "spec/components/selectable-card.json"
+      "specSrc": "spec/components/selectable-card.json",
+      "logicSrc": "logic/components/selectable-card.json"
     },
     {
       "id": "info-field",
@@ -7191,7 +7035,8 @@
             "orgId": "typography"
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/info-field.json"
     },
     {
       "id": "list-toolbar",
@@ -7247,7 +7092,8 @@
         "snippet": "<div class=\"list-toolbar\"><div class=\"list-toolbar__search\">…</div><div class=\"list-toolbar__toggle\">…</div></div>"
       },
       "renderSrc": "render/components/list-toolbar.js",
-      "specSrc": "spec/components/list-toolbar.json"
+      "specSrc": "spec/components/list-toolbar.json",
+      "logicSrc": "logic/components/list-toolbar.json"
     },
     {
       "id": "tree-search-toolbar",
@@ -7283,7 +7129,8 @@
         "snippet": "<div class=\"pb-tree-search-toolbar\"><div><!-- renderCmpInput icon=search --></div></div>"
       },
       "renderSrc": "render/components/tree-search-toolbar.js",
-      "specSrc": "spec/components/tree-search-toolbar.json"
+      "specSrc": "spec/components/tree-search-toolbar.json",
+      "logicSrc": "logic/components/tree-search-toolbar.json"
     },
     {
       "id": "detail-view-header",
@@ -7329,7 +7176,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-detail-view-header\" style=\"display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-sm)\">\n  <label class=\"btn btn--round\" for=\"hpb-nav-list\" aria-label=\"Quay lại\" style=\"width:var(--size-control);height:var(--size-control);border:var(--border-width) solid var(--icon-default);border-radius:50%;color:var(--icon-default)\">…arrow-left icon…</label>\n  <div class=\"pb-detail-view-header__title\" style=\"display:flex;align-items:center;gap:var(--space-sm);flex-wrap:wrap\">\n    <h2 style=\"margin:0;font-size:var(--font-size-title);font-weight:var(--font-weight-title);color:var(--text-default)\">Nguyễn Văn A</h2>\n    <span class=\"status-tag\">Đang đánh giá</span>\n  </div>\n  <div class=\"pb-detail-view-header__meta\" style=\"display:flex;gap:var(--space-xs);flex-wrap:wrap;font-size:var(--font-size-caption);color:var(--text-muted)\">Phòng Kế toán · OKR · Toàn quyền</div>\n</div>"
       },
-      "specSrc": "spec/components/detail-view-header.json"
+      "specSrc": "spec/components/detail-view-header.json",
+      "logicSrc": "logic/components/detail-view-header.json"
     },
     {
       "id": "filter-toolbar",
@@ -7383,7 +7231,8 @@
         "lang": "html",
         "snippet": "<div class=\"filter-toolbar\"><div style=\"flex:2 1 0;min-width:0\"><!--search--></div><div style=\"flex:1 1 0;min-width:0\"><!--filter--></div></div>"
       },
-      "specSrc": "spec/components/filter-toolbar.json"
+      "specSrc": "spec/components/filter-toolbar.json",
+      "logicSrc": "logic/components/filter-toolbar.json"
     },
     {
       "id": "cycle-card-grid",
@@ -7404,7 +7253,8 @@
         "lang": "html",
         "snippet": "<div class=\"cycle-grid\"><div class=\"cycle-grid__item\">…cycle-card…</div></div>"
       },
-      "specSrc": "spec/components/cycle-card-grid.json"
+      "specSrc": "spec/components/cycle-card-grid.json",
+      "logicSrc": "logic/components/cycle-card-grid.json"
     },
     {
       "id": "page-header",
@@ -7473,7 +7323,8 @@
       "specSrc": "spec/components/page-header.json",
       "logicNotes": [
         "create-variant gap 8px → 24px (2026-07-29, direct user instruction). Sits between the 'Quay lại' back pill and the H4 heading; 8px clustered them too tightly for a heading that size. Only the two 'Sửa chu kỳ' pages pass `backTo`, so in-shell screens keep the 12px default."
-      ]
+      ],
+      "logicSrc": "logic/components/page-header.json"
     },
     {
       "id": "header-page",
@@ -7578,7 +7429,8 @@
         "Vạch ngăn vẽ bằng viền `--border-app-disabled`, không nhúng ảnh: file Figma xuất ra chỉ chứa đúng một thẻ `line` một pixel — đã tải về đọc để lấy màu, không đoán.",
         "MÁNG NGANG HAI MƯƠI LỆCH VỚI THÂN TRANG `.cps-body` (bốn mươi). Chưa chỗ gọi nào dùng nên chưa lộ ra; màn đầu tiên chuyển sang phải quyết cùng lúc: đổi máng thân trang theo, hay truyền `gutter:'space-page-gutter'` cho header."
       ],
-      "description": "Đầu trang theo frame `Header page`: nút Back chỉ có hình + tên trang + mô tả, khối thông tin CÙNG HÀNG bên phải, dải tab bên dưới. Không nhầm với `page-header` — bốn điểm khác nhau ghi trong `logicNotes`."
+      "description": "Đầu trang theo frame `Header page`: nút Back chỉ có hình + tên trang + mô tả, khối thông tin CÙNG HÀNG bên phải, dải tab bên dưới. Không nhầm với `page-header` — bốn điểm khác nhau ghi trong `logicNotes`.",
+      "logicSrc": "logic/components/header-page.json"
     },
     {
       "id": "titled-section",
@@ -7675,7 +7527,8 @@
         "lang": "html",
         "snippet": "<div class=\"card\"><div class=\"pb-empty-state\" style=\"display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-2xs);padding:var(--space-lg) 0;color:var(--text-muted)\"><span>Không có dữ liệu.</span></div></div>"
       },
-      "specSrc": "spec/components/empty-state.json"
+      "specSrc": "spec/components/empty-state.json",
+      "logicSrc": "logic/components/empty-state.json"
     },
     {
       "id": "no-config-block",
@@ -7755,7 +7608,8 @@
         "snippet": "<div class=\"deadline-countdown-cell\"><span class=\"pb-typography pb-typography--body\">23/07/2026</span><span style=\"color:var(--text-error)\">Quá hạn 3 ngày</span></div>"
       },
       "code_note": null,
-      "specSrc": "spec/components/deadline-countdown-cell.json"
+      "specSrc": "spec/components/deadline-countdown-cell.json",
+      "logicSrc": "logic/components/deadline-countdown-cell.json"
     },
     {
       "id": "attach-config-picker",
@@ -7796,7 +7650,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-attach-config\"><input type=\"checkbox\" class=\"pb-attach-config__toggle\" id=\"acp-toggle\"/><label class=\"pb-attach-config__trigger\" for=\"acp-toggle\">+ Thêm cấu hình</label><div class=\"pb-attach-config__panel\"><select>…</select><button>Gán</button></div></div>"
       },
-      "specSrc": "spec/components/attach-config-picker.json"
+      "specSrc": "spec/components/attach-config-picker.json",
+      "logicSrc": "logic/components/attach-config-picker.json"
     },
     {
       "id": "member-roster-table",
@@ -7847,7 +7702,8 @@
         "lang": "html",
         "snippet": "<div style=\"width:100%;overflow:hidden;overflow-x:auto;border:var(--border-width) solid var(--border-app-default);border-radius:var(--radius-control);background:var(--color-bg-surface)\"><table><thead><tr><th>Thành viên</th><th>Loại</th><th>Trạng thái</th><th>Hành động</th></tr></thead><tbody><tr><td><div><span>Nguyễn A</span><span>Mã NV: NV001</span></div></td><td><span class=\"status-tag\">KPI - Chỉ tiêu</span></td><td><span class=\"status-tag\">Đang đánh giá</span></td><td><button class=\"btn\">Xem chi tiết</button></td></tr></tbody></table></div>"
       },
-      "specSrc": "spec/components/member-roster-table.json"
+      "specSrc": "spec/components/member-roster-table.json",
+      "logicSrc": "logic/components/member-roster-table.json"
     },
     {
       "id": "stat-tile",
@@ -7995,7 +7851,8 @@
         "snippet": "<button type=\"button\" class=\"pb-stat-tile\" aria-pressed=\"false\"><span>◐ Đang diễn ra</span><span>17</span></button>"
       },
       "renderSrc": "render/components/stat-tile.js",
-      "specSrc": "spec/components/stat-tile.json"
+      "specSrc": "spec/components/stat-tile.json",
+      "logicSrc": "logic/components/stat-tile.json"
     },
     {
       "id": "sidebar-brand",
@@ -8016,7 +7873,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-sidebar-brand\" style=\"display:flex;align-items:center;gap:var(--space-xs);justify-content:flex-start\"><span class=\"pb-sidebar-brand__logo\" style=\"display:inline-flex;line-height:1\"><!-- GHN logomark svg --></span><span class=\"pb-sidebar-brand__text\" style=\"display:flex;flex-direction:column;overflow:hidden;white-space:nowrap\"><span style=\"font-size:var(--font-size-brand-primary);font-weight:var(--font-weight-title);font-style:italic;color:var(--color-brand-primary);line-height:1.2\">GiaoHangNhanh</span><span style=\"font-size:var(--font-size-brand-secondary);font-weight:var(--font-weight-emphasis);font-style:italic;color:var(--color-brand-secondary);line-height:1.2\">Giao Siêu Nhanh, Giá Siêu Tốt</span></span></div>"
       },
-      "specSrc": "spec/components/sidebar-brand.json"
+      "specSrc": "spec/components/sidebar-brand.json",
+      "logicSrc": "logic/components/sidebar-brand.json"
     },
     {
       "id": "nav-section",
@@ -8072,7 +7930,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-nav-section\"><div class=\"pb-nav-section__label\">CHU KÌ</div><div class=\"pb-nav-section__items\"><!-- renderCmpNavItem × n --></div></div>"
       },
-      "specSrc": "spec/components/nav-section.json"
+      "specSrc": "spec/components/nav-section.json",
+      "logicSrc": "logic/components/nav-section.json"
     },
     {
       "id": "nav-item",
@@ -8123,7 +7982,8 @@
         "snippet": "<button type=\"button\" class=\"pb-nav-item is-active\" aria-current=\"page\"><span class=\"pb-nav-item__icon\"><svg/></span><span class=\"pb-nav-item__label\">Theo dõi chu kỳ</span><span class=\"pb-nav-item__badge\">Sắp ra mắt</span></button>"
       },
       "renderSrc": "render/components/nav-item.js",
-      "specSrc": "spec/components/nav-item.json"
+      "specSrc": "spec/components/nav-item.json",
+      "logicSrc": "logic/components/nav-item.json"
     },
     {
       "id": "nav-popover",
@@ -8173,7 +8033,8 @@
         "snippet": "<div class=\"pb-navpop\">…</div>"
       },
       "renderSrc": "render/components/nav-popover.js",
-      "specSrc": "spec/components/nav-popover.json"
+      "specSrc": "spec/components/nav-popover.json",
+      "logicSrc": "logic/components/nav-popover.json"
     },
     {
       "id": "collapse-toggle",
@@ -8204,7 +8065,8 @@
         "lang": "html",
         "snippet": "<label for=\"shell-sidebar-toggle\" class=\"pb-collapse-toggle\"><span class=\"pb-app-sidebar__item-icon\"><svg>…chevrons-left…</svg></span><span class=\"pb-app-sidebar__item-label\">Thu gọn</span></label>"
       },
-      "specSrc": "spec/components/collapse-toggle.json"
+      "specSrc": "spec/components/collapse-toggle.json",
+      "logicSrc": "logic/components/collapse-toggle.json"
     },
     {
       "id": "alert-summary-cell",
@@ -8286,7 +8148,8 @@
         "lang": "html",
         "snippet": "<span class=\"pb-popover-anchor\"><span class=\"pb-pop-trigger\"><span style=\"display:inline-flex;align-items:center;gap:var(--space-xs)\"><svg/><span>3</span></span></span><span class=\"pb-pop-panel\" role=\"tooltip\"><div>Chi tiết trạng thái</div><div style=\"display:flex;justify-content:space-between\"><span><svg/> Quá hạn</span><span>2 (40%)</span></div></span></span>"
       },
-      "specSrc": "spec/components/alert-summary-cell.json"
+      "specSrc": "spec/components/alert-summary-cell.json",
+      "logicSrc": "logic/components/alert-summary-cell.json"
     },
     {
       "id": "app-switcher-card",
@@ -8317,7 +8180,8 @@
       },
       "renderSrc": "render/components/app-switcher-card.js",
       "specSrc": "spec/components/app-switcher-card.json",
-      "dsMatch": null
+      "dsMatch": null,
+      "logicSrc": "logic/components/app-switcher-card.json"
     },
     {
       "id": "app-topbar",
@@ -8358,7 +8222,8 @@
         "snippet": "<header class=\"pb-app-topbar\" style=\"display:flex;align-items:center;justify-content:space-between;gap:var(--space-md);padding:var(--space-sm) var(--space-lg);background:var(--color-bg-surface);border-bottom:var(--border-width) solid var(--border-app-default)\"><h2 class=\"pb-app-topbar__name\" style=\"margin:0;font-family:var(--font-family-base);font-size:var(--font-size-title);font-weight:var(--font-weight-title);color:var(--text-default)\">GGrow - Quản lý hiệu suất</h2><!-- renderCmpUserMenu(...) --></header>"
       },
       "renderSrc": "render/components/app-topbar.js",
-      "specSrc": "spec/components/app-topbar.json"
+      "specSrc": "spec/components/app-topbar.json",
+      "logicSrc": "logic/components/app-topbar.json"
     },
     {
       "id": "score-summary-card",
@@ -8486,7 +8351,8 @@
         "snippet": "<div class=\"pb-comment-composer\"><textarea class=\"field__input\" rows=\"3\" placeholder=\"Viết bình luận…\"></textarea><div style=\"display:flex;justify-content:flex-end\"><button class=\"btn\"><span>Gửi</span></button></div></div>"
       },
       "spec_note": "",
-      "specSrc": "spec/components/comment-composer.json"
+      "specSrc": "spec/components/comment-composer.json",
+      "logicSrc": "logic/components/comment-composer.json"
     },
     {
       "id": "table-group-header",
@@ -8534,7 +8400,8 @@
         "lang": "html",
         "snippet": "<tr class=\"pb-table-group-header\"><th colspan=\"1\"></th><th colspan=\"2\" style=\"background:var(--bg-app-elevated)\">Doanh số &amp; KH</th><th colspan=\"2\" style=\"background:var(--bg-app-elevated)\">Vận hành</th></tr>"
       },
-      "specSrc": "spec/components/table-group-header.json"
+      "specSrc": "spec/components/table-group-header.json",
+      "logicSrc": "logic/components/table-group-header.json"
     },
     {
       "id": "scope-radio-group",
@@ -8580,7 +8447,8 @@
         "snippet": "<div role=\"radiogroup\"><label><input type=\"radio\" name=\"scopeType\"/> Theo điều kiện</label><label><input type=\"radio\" name=\"scopeType\"/> Theo nhân viên</label></div>"
       },
       "renderSrc": "render/components/scope-radio-group.js",
-      "specSrc": "spec/components/scope-radio-group.json"
+      "specSrc": "spec/components/scope-radio-group.json",
+      "logicSrc": "logic/components/scope-radio-group.json"
     },
     {
       "id": "info-row-list",
@@ -8703,7 +8571,8 @@
       "specSrc": "spec/components/user-menu.json",
       "logicNotes": [
         "Đăng xuất = kết thúc phiên (2026-07-29): onClick mặc định chạy pbResetSandbox() (đã wrap pbAppReset — store về seed, về màn hình đầu) rồi toast; logoutNav/logoutAction của caller vẫn thắng nếu truyền."
-      ]
+      ],
+      "logicSrc": "logic/components/user-menu.json"
     },
     {
       "id": "grid-table-list-view",
@@ -8749,7 +8618,8 @@
         "snippet": "<div class=\"pb-gtv-root\"><input type=\"radio\" name=\"gtv-1\" id=\"gtv-1-grid\" checked/><input type=\"radio\" name=\"gtv-1\" id=\"gtv-1-table\"/><div><!-- tabs --></div><div class=\"pb-gtv-panel pb-gtv-panel--grid\"><!-- cycle-card-grid --></div><div class=\"pb-gtv-panel pb-gtv-panel--table\"><!-- table --></div></div>"
       },
       "renderSrc": "render/components/grid-table-list-view.js",
-      "specSrc": "spec/components/grid-table-list-view.json"
+      "specSrc": "spec/components/grid-table-list-view.json",
+      "logicSrc": "logic/components/grid-table-list-view.json"
     },
     {
       "id": "stat-tile-row",
@@ -8770,7 +8640,8 @@
         "snippet": "<div class=\"pb-stat-tile-row\"><button class=\"pb-stat-tile\">…Sắp bắt đầu…</button><button class=\"pb-stat-tile\">…Đang diễn ra…</button><button class=\"pb-stat-tile\">…Sắp hết hạn…</button><button class=\"pb-stat-tile\">…Quá hạn…</button><button class=\"pb-stat-tile\">…Hoàn thành…</button></div>"
       },
       "renderSrc": "render/components/stat-tile-row.js",
-      "specSrc": "spec/components/stat-tile-row.json"
+      "specSrc": "spec/components/stat-tile-row.json",
+      "logicSrc": "logic/components/stat-tile-row.json"
     },
     {
       "id": "feedback-modal",
@@ -8794,7 +8665,8 @@
       "specSrc": "spec/components/feedback-modal.json",
       "logicNotes": [
         "Gửi góp ý là nút thật (2026-07-29): pbFeedbackSend chặn rỗng (dialog giữ nguyên), có nội dung thì lưu vào store.feedback, xoá textarea, đóng dialog, toast — thay cho dataAction 'submit-feedback' shell không đọc."
-      ]
+      ],
+      "logicSrc": "logic/components/feedback-modal.json"
     },
     {
       "id": "drawer-shell",
@@ -8854,7 +8726,8 @@
         "`.dwsh-root{display:contents}` — PHANTOM SCROLL SPACE FIX (2026-07-31, direct user instruction, reported on Cấu hình chu kỳ: \"when scroll to the last table row, don't let it continue scroll to the blank space anymore\"). A drawer root renders NO layout of its own — its only visible child is a position:fixed overlay — but it was a normal block-level <div>, so on a screen whose page wrapper is a FLEX COLUMN WITH A GAP each root became a zero-height FLEX ITEM that still contributed one full gap. MEASURED on cai-dat-chu-ky: 73 roots beside the tree table at the page's --space-md (16px) gap = 1200px of empty scrollable space; real content 1515px inside a 2699px page, i.e. ~1.5 screens of blank below the last row. After the fix that page is 1531px and scrolling to the bottom lands 25px under the last row (the page's own bottom padding). WHY IN THE SHELL, NOT PER-SCREEN: the space is created by the drawer roots themselves on ANY gapped flex/grid parent, so capping one screen's height would have left the identical bug waiting on every other screen that emits drawers — quan-ly-chu-ky (11 roots), theo-doi-thu-viec (14) and hieu-suat-phong-ban (12) all shed their own phantom gaps from this one change. SAFE FOR THE TWO THINGS THIS ELEMENT IS LOAD-BEARING FOR, both verified in the rendered DOM rather than assumed: `:has()` still matches an element with display:contents (it selects on the DOM tree, not the box tree), so the `.dwsh-root:has(#<toggle>:checked) .dwsh-overlay{display:flex}` reveal is unaffected — panel measured 640x690 and visible; and pbDrawerIdOf's `closest('.dwsh-root')` walks the DOM too, so the runtime level stack still works — verified rule 1 (source closes when a sub-drawer opens), L1 with its back button hidden, L2 with it visible, and pbDrawerBack popping the stack and re-opening the source.",
         "JS-DRIVEN OPEN — `pbDrawerOpenFrom(el, toggleId)` (2026-07-30). Every drawer open used to be a `<label for>`, so the rule-3 click tracker was enough to record the level. A drawer whose CONTENT must be populated before it opens cannot be a label — it needs a handler that fills the panel first (cai-dat-chu-ky's cdOpenEmpEdit: ONE shared employee-edit drawer re-pointed per roster row, replacing one rendered drawer per employee). Such an open never reaches the click tracker, so the stack would stay empty, the drawer would read as an L1 with no back button, and a save inside it would pop nothing. pbDrawerOpenFrom is the programmatic twin of pbDrawerTrackClick's OPENING branch — deliberately the same level arithmetic (derive the opener from `el.closest('.dwsh-panel')`, truncate, guard re-entry, push), then set .checked and call pbDrawerExclusive explicitly since a scripted .checked fires no change event. `el` is the clicked element, which is what decides sub-screen vs fresh L1.",
         "MỘT INSET 16 CHO MỌI BLOCK TRONG `.dwsh-panel` + PANEL RỘNG 560 (2026-08-11, chỉ thị trực tiếp: \"class=\\\"dwsh-panel\\\" change padding of all div inside = 16px, change width = 560px\").\n· WIDTH đổi ở TOKEN, không phải ở element: panel đọc `var(--size-drawer)`, nên --size-drawer 640 → 560. --size-drawer-wide (820) GIỮ NGUYÊN — leaf-config-drawer truyền width:'wide' cho bảng roster 5 cột, 560 không chứa nổi (component đó hiện không còn caller sống, nhưng token vẫn là hợp đồng của nó).\n· PADDING: chrome của panel trước đây trộn hai inset — body ở --space-lg (24) còn drawer-header/footer ở `--space-md --space-lg` (16 dọc, 24 ngang) — nên nhịp dọc và cạnh ngang không khớp nhau. Nay mọi block sở hữu inset của drawer đều là --space-md, ĐÚNG BẰNG 16 trong bộ token này (space-md: 16px) — không có giá trị px thô nào. Năm block đi cùng nhau vì chúng chia một cạnh thị giác: dwsh-body, drawer-header, drawer-footer, drawer-info-strip (nhiệm vụ của nó là nằm khít trong inset của header) và wrapper banner của dept-config-drawer.\n· `gap` CỐ TÌNH KHÔNG ĐỔI: yêu cầu nói về padding; gap giữa các form section là nhịp BÊN TRONG nội dung, không phải cạnh của drawer.\n· drawer-footer đổi DEFAULT thay vì sửa từng call site, vì component mang tên drawer và 5/7 caller là drawer. Hai caller KHÔNG phải drawer — thanh action sticky của hieu-suat-cua-toi và của hieu-suat-phong-ban, là bề mặt trang/pane với inset ngang thuộc về trang chúng — nay truyền `padding` cũ tường minh, để dáng của chúng được GHIM lại chứ không bị một quyết định về drawer kéo theo.\n· Đo trong browser thật (1440×950): panel 560, header/body/footer padding đều 16px, cạnh trái nội dung của header và của body trùng nhau (817), và bodyScrollWidth == bodyClientWidth == 544 → KHÔNG có tràn ngang, kể cả khi các bubble tooltip (vẫn chiếm layout dù ẩn) đã được tính vào. Đây chính là phép đo mà quyết định overflow-x:hidden 2026-07-31 dựa vào, nên nó được chạy lại ở bề rộng mới thay vì suy đoán."
-      ]
+      ],
+      "logicSrc": "logic/components/drawer-shell.json"
     },
     {
       "id": "assessment-timeline",
@@ -8920,7 +8793,8 @@
             "required": true
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/assessment-timeline.json"
     },
     {
       "id": "roadmap-timeline",
@@ -8951,7 +8825,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-roadmap-timeline\"><div style=\"display:flex\">...phase headers...</div><div style=\"position:relative;padding-top:var(--space-lg)\"><div style=\"display:flex;height:var(--space-2xs);border-radius:var(--radius-lg)\">...segments...</div><div style=\"position:relative;height:0\">...absolutely-positioned timeline-marker dots...</div></div><div>...info-banner...</div></div>"
       },
-      "specSrc": "spec/components/roadmap-timeline.json"
+      "specSrc": "spec/components/roadmap-timeline.json",
+      "logicSrc": "logic/components/roadmap-timeline.json"
     },
     {
       "id": "searchable-card-grid",
@@ -9055,7 +8930,8 @@
         "lang": "html",
         "snippet": "<table><tr><th>Mục tiêu/KPI</th><th>Tỷ trọng %</th><th>Chỉ tiêu</th><th>Kết quả</th><th>Hoàn thành</th></tr><tr><td>Doanh thu quý</td><td>40%</td><td>500tr</td><td><input value=\"480tr\"/></td><td><div role=\"progressbar\">96%</div></td></tr></table>"
       },
-      "specSrc": "spec/components/kpi-result-table.json"
+      "specSrc": "spec/components/kpi-result-table.json",
+      "logicSrc": "logic/components/kpi-result-table.json"
     },
     {
       "id": "read-only-detail-body",
@@ -9091,7 +8967,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-read-only-detail-body\" style=\"display:flex;flex-direction:column;gap:var(--space-lg)\"><!-- info-row-list --><div style=\"display:flex;flex-direction:column;gap:var(--space-2xs)\"><!-- member-roster-table --><!-- roster-more-note (optional) --></div></div>"
       },
-      "specSrc": "spec/components/read-only-detail-body.json"
+      "specSrc": "spec/components/read-only-detail-body.json",
+      "logicSrc": "logic/components/read-only-detail-body.json"
     },
     {
       "id": "self-assessment-block",
@@ -9126,7 +9003,8 @@
       "specSrc": "spec/components/self-assessment-block.json",
       "logicNotes": [
         "attachmentOnChange/attachmentFileNames (additive 2026-07-29) chuyển tiếp xuống file-attachment để hiện + lưu tên file đã chọn."
-      ]
+      ],
+      "logicSrc": "logic/components/self-assessment-block.json"
     },
     {
       "id": "audience-picker",
@@ -9167,7 +9045,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-audience-picker\"><div class=\"pb-field-label\">Đối tượng áp dụng *</div><div style=\"display:flex;gap:var(--space-sm)\"><label class=\"pb-selectable-card\">Theo phòng ban</label><label class=\"pb-selectable-card\">Theo cá nhân</label></div><div class=\"pb-field-label\">Nhóm đối tượng *</div><div class=\"field\"><input placeholder=\"Tìm kiếm phòng ban hoặc cá nhân...\" /></div></div>"
       },
-      "specSrc": "spec/components/audience-picker.json"
+      "specSrc": "spec/components/audience-picker.json",
+      "logicSrc": "logic/components/audience-picker.json"
     },
     {
       "id": "repeatable-row",
@@ -9198,7 +9077,8 @@
         "snippet": "<div id=\"rep-abc123-wrap\"><div class=\"pb-repeatable-row\"><div class=\"pb-repeatable-row-slot\" style=\"display:flex\">...condition-builder-row...</div><input type=\"checkbox\" id=\"rep-abc123-row-1\" checked style=\"position:absolute;opacity:0\"/><div class=\"pb-repeatable-row-slot\">...row...<label for=\"rep-abc123-row-1\">Xoá điều kiện</label></div><button data-action=\"add-condition-row\">+ Thêm điều kiện</button></div></div>"
       },
       "renderSrc": "render/components/repeatable-row.js",
-      "specSrc": "spec/components/repeatable-row.json"
+      "specSrc": "spec/components/repeatable-row.json",
+      "logicSrc": "logic/components/repeatable-row.json"
     },
     {
       "id": "tree-table",
@@ -9244,7 +9124,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-tree-table-tt1\">…<table>…<tr><td><input type=checkbox id=pbtt-tt1-toggle-dept1 style=\"position:absolute;opacity:0\">…chevron…Khối Vận Hành</td><td>…progress…</td><td colspan=4>…alert-summary…</td></tr><tr class=\"pbtt-child pbtt-tt1-child-team1\"><td>…Team A</td><td>…progress…</td><td>…deadline…</td><td>…status-tag…</td><td>KPI</td><td>Quý</td></tr></table></div>"
       },
-      "specSrc": "spec/components/tree-table.json"
+      "specSrc": "spec/components/tree-table.json",
+      "logicSrc": "logic/components/tree-table.json"
     },
     {
       "id": "roster-accordion",
@@ -9275,7 +9156,8 @@
         "lang": "html",
         "snippet": "<div class=\"pb-roster-accordion\" style=\"display:flex;flex-direction:column;gap:var(--space-sm)\"><div class=\"pb-roster-accordion__panel\" style=\"border:var(--border-width) solid var(--border-app-default);border-radius:var(--radius-control);overflow:hidden;background:var(--color-bg-surface)\"><label class=\"pb-roster-accordion__header\">Khối Vận hành</label><div class=\"pb-roster-accordion__body\">...department roster panel...</div></div><div class=\"pb-roster-accordion__panel\"><label class=\"pb-roster-accordion__header\">Khối Công nghệ</label><div class=\"pb-roster-accordion__body\"><div class=\"pb-empty-state\">Không có phòng ban nào.</div></div></div></div>"
       },
-      "specSrc": "spec/components/roster-accordion.json"
+      "specSrc": "spec/components/roster-accordion.json",
+      "logicSrc": "logic/components/roster-accordion.json"
     },
     {
       "id": "toggle-input",
@@ -9316,7 +9198,8 @@
         "snippet": "<input type=\"checkbox\" id=\"acc-1\" style=\"position:absolute;opacity:0;width:0;height:0;pointer-events:none\" />"
       },
       "renderSrc": "render/components/toggle-input.js",
-      "specSrc": "spec/components/toggle-input.json"
+      "specSrc": "spec/components/toggle-input.json",
+      "logicSrc": "logic/components/toggle-input.json"
     },
     {
       "id": "file-input",
@@ -9347,7 +9230,8 @@
         "snippet": "<input type=\"file\" id=\"fa-1\" multiple style=\"position:absolute;opacity:0;width:0;height:0;pointer-events:none\" />"
       },
       "renderSrc": "render/components/file-input.js",
-      "specSrc": "spec/components/file-input.json"
+      "specSrc": "spec/components/file-input.json",
+      "logicSrc": "logic/components/file-input.json"
     },
     {
       "id": "menu-item-button",
@@ -9383,7 +9267,8 @@
         "snippet": "<button type=\"button\" role=\"menuitem\" class=\"pb-menu-item\">Item</button>"
       },
       "renderSrc": "render/components/menu-item-button.js",
-      "specSrc": "spec/components/menu-item-button.json"
+      "specSrc": "spec/components/menu-item-button.json",
+      "logicSrc": "logic/components/menu-item-button.json"
     },
     {
       "id": "label-wrap",
@@ -9409,7 +9294,8 @@
         "snippet": "<label for=\"toggle-1\">...</label>"
       },
       "renderSrc": "render/components/label-wrap.js",
-      "specSrc": "spec/components/label-wrap.json"
+      "specSrc": "spec/components/label-wrap.json",
+      "logicSrc": "logic/components/label-wrap.json"
     },
     {
       "id": "app-store",
@@ -9428,7 +9314,8 @@
       "logicNotes": [
         "Non-visual session store: window.PB_APP_STATE is lazily seeded (JSON deep-copy) from per-screen pbAppRegisterSeed() functions whose literals stay colocated in their screen files. pbAppReset() is wired into the shell's pbResetSandbox via an idempotent wrapper installed at first store read, so Sandbox → Reset session AND each /pb:test scenario restore seed defaults (and clear window.PB_TAOCHUKY_PREFILL).",
         "Write-button contract: write actions never use data-action=\"submit\" (document-wide validation + double-fire hazards); each is a pure onClick calling a named top-level save fn — pbSaveGuard → pbScopeValid(scope) → read DOM → mutate store → pbToast → setProtoScreen(...) or pbAppRerender([restore ids])."
-      ]
+      ],
+      "logicSrc": "logic/components/app-store.json"
     },
     {
       "id": "employee-detail-drawer",
@@ -9496,7 +9383,8 @@
         "Shared, read-only, cross-screen drawer (2026-07-30) composed on detail-drawer. Accepts ONE normalized member shape (name required; title/team/manager/probation/goals/goalsLabel/history all optional or nullable). goals/history use null (not []) to mean this surface has no such data at all, which OMITS that whole section; an empty array still renders the section.",
         "Every caller keeps its OWN local sample data (project convention) and maps its own member shape into this normalized contract before calling — this component owns presentation only, never data.",
         "member.roadmap ({steps,filled}|null) adds a read-only \"Lộ trình thông báo\" section ported from dept-config-form.js's probation stepper (computeProbationSteps); member.goalsEmptyText overrides the goals table's default empty-state copy when the goals section renders."
-      ]
+      ],
+      "logicSrc": "logic/components/employee-detail-drawer.json"
     },
     {
       "id": "probation-monitor-pane",
@@ -9524,7 +9412,8 @@
         "FIVE EDITS, ALL ABOVE THE FILTERING BLOCK: the render fn's name, the doc comment, the dropped header-footer-app wrapper (the host is already in the shell; wrapping again would nest a second sidebar inside the first one's content column), the dropped local page-header (the host's one header carries the title, the tab name and — via subtitleHtml — this pane's subtitle), and the root wrapper's classes. Everything from the FILTERING block down is byte-identical, verified by hash.",
         "`.scr-tdtv` SURVIVES VERBATIM on the root — it is a seam, not decoration: tdtvSetStatusFilter and tdtvApplyFilters both scope their reads through it. `.scr-cycle-page` was dropped from the root because the host owns that class now, and a nested copy would make the host's own :has() reveal rules match this pane's subtree as well as its own.",
         "THE ROOT CARRIES NO INLINE `display`, and that is load-bearing: an inline display beats a class rule at any specificity, so a pane declaring its own would be permanently visible and the tab would silently do nothing. This codebase has hit that exact failure three times."
-      ]
+      ],
+      "logicSrc": "logic/components/probation-monitor-pane.json"
     },
     {
       "id": "hidden-value",
@@ -9550,7 +9439,8 @@
       "code": {
         "lang": "html",
         "snippet": "<input type=\"hidden\" id=\"…\" class=\"field__input\" value=\"…\"/>"
-      }
+      },
+      "logicSrc": "logic/components/hidden-value.json"
     },
     {
       "id": "unit-field",
@@ -9655,7 +9545,8 @@
         "readOnly render ra TEXT, không bao giờ input disabled: input disabled vẫn có .value đọc ra '' và các reader sẽ ghi đè dữ liệu của bên kia. Ở chế độ readOnly component KHÔNG phát ra id nào.",
         "KHÔNG bao giờ đặt data-required — pbScopeValid quét .field__input không kiểm tra visibility, mà màn L3 giữ mọi pane trong DOM cùng lúc, nên một field bắt buộc đang ẨN sẽ chặn mọi cú lưu. Prop `required` chỉ vẽ dấu sao.",
         "size-control-lg thêm cùng component này — DS Input khai thang sm/md/lg, registry đã có size-control-sm/md/size-control, đây là bậc lg."
-      ]
+      ],
+      "logicSrc": "logic/components/unit-field.json"
     },
     {
       "id": "goal-card",
@@ -9769,7 +9660,8 @@
             "orgId": "typography"
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/goal-card.json"
     },
     {
       "id": "assessment-panel",
@@ -9808,7 +9700,8 @@
             "orgId": "typography"
           }
         ]
-      }
+      },
+      "logicSrc": "logic/components/assessment-panel.json"
     },
     {
       "id": "app-switcher-panel",
@@ -9829,7 +9722,8 @@
       },
       "renderSrc": "render/components/app-switcher-panel.js",
       "specSrc": "spec/components/app-switcher-panel.json",
-      "dsMatch": null
+      "dsMatch": null,
+      "logicSrc": "logic/components/app-switcher-panel.json"
     },
     {
       "id": "export-excel-action",
@@ -9888,7 +9782,8 @@
       "specSrc": "spec/components/export-excel-action.json",
       "logicNotes": [
         "P1 · Xuất Excel (2026-08-09) — composes button+icon+typography+scope-radio-group; \"Tải xuống\" now calls the shared bulk-excel-engine.js's pbXlxGenerate('export', rows, opts) to build a real 3-sheet .xlsx and trigger a genuine browser download via SheetJS (loaded from CDN). 'rows' is resolved by each host screen from its own real roster/kpiSets data (never invented here) and forwarded as-is. OUTBOX job bookkeeping (pbOutboxCreate/pbOutboxSetStatus) is real but in-memory — there is still no server. See spec/components/export-excel-action.json for the full DS-first rationale and state machine."
-      ]
+      ],
+      "logicSrc": "logic/components/export-excel-action.json"
     },
     {
       "id": "bulk-assign-kpi-action",
@@ -9941,7 +9836,8 @@
         "Template download (pbBulkAssignDownloadTemplate) calls pbXlxGenerate('bulk-assign-kpi', rows, opts) with real starting rows resolved from the current roster/kpiSets (pbBulkAssignTemplateRows) — a real, downloaded .xlsx, not a toast stub. Upload (pbBulkAssignFilePicked) reads the real picked File and calls pbXlxParse(file, 'bulk-assign-kpi', onDone); parsed rows run through pbXlxValidate — T0–T4 errors render a NEW data-bki-state=\"invalid\" pane (blocks), T5 completeness is a warning only.",
         "Preview (pbBulkAssignRenderPreview) groups the REAL parsed rows by Mã NV and renders a per-employee three-way diff via pbXlxDiff (giá trị khi tải về · hiện tại · bạn nhập), keeping the existing handoff-* status-tag conflict-outcome badge (pbBulkAssignSkipReason, unchanged). Commit (pbBulkAssignCommit) writes the REAL parsed rows into kpiSets via pbKpiSetEnsure (unchanged first-writer-wins path) and now also calls pbAuditLogWrite('CYCLE_EMPLOYEE', employeeId, actorId, 'BULK_ASSIGN_COMMIT', summary) per employee actually written. pbBulkAssignGeneratedRows() (the old 2-row fabrication) is deleted — nothing else called it.",
         "Still simulated, unchanged: 'Ghi đè' (override) is not offered anywhere in this flow — pbBulkAssignSkipReason's protections have no bypass. See spec/components/bulk-assign-kpi-action.json."
-      ]
+      ],
+      "logicSrc": "logic/components/bulk-assign-kpi-action.json"
     },
     {
       "id": "bulk-evaluate-action",
@@ -9995,7 +9891,8 @@
         "Preview (pbBulkEvalRenderPreview) groups the REAL parsed rows by Mã NV and renders a per-employee three-way diff via pbXlxDiff (Điểm trung bình / số dòng) plus a status-tag outcome badge (write/skip/fail) from pbBulkEvalOutcomeFor — the ONE resolver both preview and commit call. Skip rule (pbBulkEvalSkipReason) is 'no kpiSet/rows yet' or 'set.status===\"approved\"' (the exact stamp hpbSubmitRatings applies at cycle-close) — deliberately NOT gated on origin, unlike P2's first-writer-wins (P3 scores an existing goal set, it doesn't re-assign one).",
         "Commit (pbBulkEvalCommit) is ATOMIC PER CYCLE_EMPLOYEE: pbBulkEvalMatchRows (matching each uploaded row's Mục tiêu name to an existing kpiRow's name — no rid column was added, per this task's engine-edit boundary) runs BEFORE any field is written; if any uploaded row for an employee fails to match, that employee's commit writes zero fields (validate-then-write, no rollback needed). Writes only row.score/row.completion/row.mgrNote on the matched existing rows. One pbAuditLogWrite('CYCLE_EMPLOYEE', employeeId, actorId, 'BULK_EVALUATE_COMMIT', summary) per employee actually written.",
         "NEW: on partial failure, a 'Tải báo cáo lỗi' affordance in the done pane calls pbXlxGenerateErrorReport('bulk-evaluate', rows, errorsByKey, opts) (bulk-excel-engine.js, new) — the same uploaded rows plus a new 'Lỗi' column, reusing pbXlxGenerate's own sheet-building internals (pbXlxBuildDataSheet). No approve/reject anywhere in this component — that stays interactive-only in this screen's existing 'Xem lại và hoàn tất' flow. See spec/components/bulk-evaluate-action.json."
-      ]
+      ],
+      "logicSrc": "logic/components/bulk-evaluate-action.json"
     },
     {
       "id": "excel-upload-pane",
@@ -10068,7 +9965,8 @@
         "pbXlxFileSizeOk (top level in this file) enforces the frame's \"Tối đa 15MB\", which nothing had been checking — an oversized workbook went straight to FileReader and left the dialog on `validating` forever. Deliberately NOT routed through the T0–T5 validator: those tiers describe what is wrong INSIDE a workbook and this file was never opened, so it would put a row-less, tier-less entry in a list whose whole shape is \"[tier] Dòng N: …\".",
         "The frame's banner text reads \"Thay đổi sẽ được áp dụng sẽ được áp dụng cho chu kì tiếp theo\" — the clause is duplicated. Shipped de-duplicated as a plain copy slip; recorded rather than silently applied. The sentence is load-bearing, not decoration: for a RUNNING cycle pbEditCycleCommit writes config.next, so the change genuinely lands on the following cycle.",
         "The frame's drop-zone line reads \"…file Excel đánh giá hàng loạt\" — the EVALUATE action's wording sitting in the cycle-config frame. `uploadInstruction` is therefore a prop, so each action names its OWN file rather than telling a user to drop an evaluation file into a configuration dialog."
-      ]
+      ],
+      "logicSrc": "logic/components/excel-upload-pane.json"
     },
     {
       "id": "bulk-excel-engine",
@@ -10090,7 +9988,8 @@
         "pbXlxGenerate(jobType, rows, opts) — real 3-sheet .xlsx (Dữ liệu / Hướng dẫn / hidden _meta) via window.XLSX, downloaded through XLSX.writeFile (Blob+<a> fallback only if that throws), Sheet 1 built by the shared pbXlxBuildDataSheet. pbXlxParse(file, jobType, onDone) — FileReader + XLSX.read, calls onDone(rows, meta), never throws (a malformed file surfaces as a T0 validation failure instead). pbXlxGenerateErrorReport(jobType, rows, errorsByKey, opts) — one-sheet error-report .xlsx (rows + Lỗi column) for a partial-failure re-upload attempt, added for P3 but generic to any job type.",
         "pbXlxValidate(jobType, rows, meta, scopeContext) — tiers T0 (file/sheet/header/version shape) through T5 (aggregate completeness, a warning), returning {errors, warnings}. pbXlxDiff(downloadedRow, currentRow, uploadedRow) — three-way per-field diff for the preview step.",
         "pbBulkWriteAllowed() — role gate for P2/P3 only (manager/high-level-manager/supervisor/hr; employee blocked), reading the same state.activeRole global hpbCommentSend already reads. pbAuditLogWrite(entityType, entityId, actorId, action, summary) and pbOutboxCreate(jobType, requestedBy)/pbOutboxSetStatus(jobId, status) — in-memory AUDIT_LOG/OUTBOX records seeded via the same pbAppRegisterSeed convention app-store.js uses, field names matching registry.json's ERD entities verbatim EXCEPT created_time: both write the same relative-string convention this project's other timestamp-like fields already use ('Vừa xong', see kpiSets[].submittedAt/feedback[].when), not a numeric epoch-ms literal — the ERD's BIGINT/epoch-example note describes the eventual real-backend shape, not this prototype's own in-memory value."
-      ]
+      ],
+      "logicSrc": "logic/components/bulk-excel-engine.json"
     },
     {
       "id": "permission-runtime",
@@ -10113,7 +10012,8 @@
         "WHY IT DROPS IN WITHOUT A DATA MIGRATION: the seed's `managementType` (truc-tiep | gian-tiep | supervisor) ALREADY was the spec's relationship axis — it simply was not being read as one. pbPermRelationship maps it (direct | indirect | assigned) and the resolver consumes that, so no department row needs re-stamping. `visibleToRoles` is untouched and still decides whether a team renders at all.",
         "cycleStatus is deliberately NOT folded into the permission predicates. A closed cycle blocks writes for every bucket including hr, so it is a lifecycle fact rather than a permission fact; pbCanWriteDept composes the two. Keeping them separate is what lets §5.2's 'a record can be PENDING_APPROVAL and overdue' stay expressible, and stops a later reader concluding that closing a cycle demotes a role.",
         "SIMULATED, per the same boundary decisions.md already states for the bulk features: §2.5 requires permission resolved server-side on every record, and this artifact has no server. Every read and write path in the prototype consults this resolver, but it is presentation-layer only and is NOT a security boundary."
-      ]
+      ],
+      "logicSrc": "logic/components/permission-runtime.json"
     },
     {
       "id": "notification-runtime",
@@ -10135,7 +10035,8 @@
         "TWO KINDS, deliberately: STORED events (pbNotify, written once by the handler that caused them) and DERIVED state (§8.1's two deadline rows, computed at read time from live cycle state). A real system schedules the second kind; this prototype has no scheduler, and setInterval would make the inbox depend on how long the tab had been open. A derived row therefore carries no read/unread state — pbNotifMarkRead returns false for one rather than pretending — and uses a STABLE synthetic id so a re-render does not make an unchanged condition look like a new arrival.",
         "§8.2 WIRED: pbReminderSettings() reads back the five values dept-config-form writes. Until now the only thing that read them was that form's own stepper preview, so changing a value changed nothing anywhere in the product. probationCheckinEvery is parsed so 0 ('Không nhắc') survives — a plain `||` would silently restore 7 and discard a real choice.",
         "TRIGGERS NOT WIRED HERE, by design: GOAL_SUBMITTED/APPROVED/REJECTED/ASSIGNED fire from handlers phase 5 builds. BULK_COMMITTED is excluded entirely (plan decision E) though §8.1 lists it — a recorded seam, not an oversight."
-      ]
+      ],
+      "logicSrc": "logic/components/notification-runtime.json"
     },
     {
       "id": "notification-inbox",
@@ -10182,7 +10083,8 @@
         "Unread badge suppressed at zero rather than rendered as '0' — a permanent zero badge is noise that makes a real count harder to notice. The list scrolls at size-listbox-max-h so it can never grow the panel past the viewport.",
         "pbNotifInboxMarkAll passes the toggle id to pbAppRerender as a restore id; without it, marking read would slam the panel shut mid-interaction.",
         "LEVEL = molecule, not organism. Constitution Principle 5 derives level from pbUse DEPTH, and every child here is an atom (typography, status-tag, button, icon, label-wrap, toggle-input) so the chain is 1. The first cut composed the `empty-state` MOLECULE for its empty copy, which made the chain 2 and the component an organism — and app-topbar is itself an organism, so R-LEVEL-ORDER (compose strictly lower) failed. Fixed by rendering the empty line through typography instead, which is also the honest reading: empty-state is built for a large empty region, this is one line in a dropdown."
-      ]
+      ],
+      "logicSrc": "logic/components/notification-inbox.json"
     },
     {
       "id": "bulk-edit-cycle-config-action",
@@ -10245,7 +10147,8 @@
         "MODAL, not the anchored popover every sibling bulk-Excel action (export-excel-action/bulk-assign-kpi-action/bulk-evaluate-action) uses — built on dialog.js with size:'full' per direct user instruction (\"modal dialog\"). footer:'' suppresses dialog.js's generic footer; each data-ecc-state pane carries its own action buttons instead, same idiom as the sibling popovers just nested one level into the dialog body.",
         "Role-gated: pbBulkWriteAllowed() at the top of the render function, same convention as P2/P3. rows/scopeContext are resolved by each host SCREEN from its own currently-filtered tree-table (never invented here), matching export-excel-action.js's own rows-prop contract — this component has no way to know which rows are visible in a particular screen's DOM at render time.",
         "Commit (pbEditCycleCommit) reuses cai-dat-chu-ky.js's own running/not-running gate (computeConfigStatus + cdIsCycleRunning): a mid-flight cycle's edit lands on config.next, never overwriting terms an in-flight evaluation started under. Not-running units write straight to config.name/config.execOffset and promote configOwn=true, mirroring cdSaveTeamConfig's own \"an edit stops silent re-inheritance\" rule. One pbAuditField('ORG_NODE', ...) call per changed field, explicit source:'EXCEL'. See spec/components/bulk-edit-cycle-config-action.json."
-      ]
+      ],
+      "logicSrc": "logic/components/bulk-edit-cycle-config-action.json"
     },
     {
       "id": "change-history",
@@ -10283,7 +10186,8 @@
         "A null `field` renders the prose summary rather than three em-dashes — that shape is §1.3's coarse whole-entity event, which is exactly what the two shipped bulk commit paths write (they remain on the 5-arg pbAuditLogWrite, plan decision E).",
         "Returns '' when empty, applying §9.1's suppression rule — an unedited record is the normal case, and a heading over 'no changes' spends a section to say nothing.",
         "JOB-LEVEL view is queryable but has no data: §1.4's BULK_JOB is not modelled, so every shipped bulk write carries job_id = null. pbAuditFor's jobId branch is correct and returns nothing until that entity exists."
-      ]
+      ],
+      "logicSrc": "logic/components/change-history.json"
     },
     {
       "id": "timeline-phase-bar",
@@ -10320,7 +10224,8 @@
           ]
         }
       ],
-      "specSrc": "spec/components/timeline-phase-bar.json"
+      "specSrc": "spec/components/timeline-phase-bar.json",
+      "logicSrc": "logic/components/timeline-phase-bar.json"
     },
     {
       "id": "timeline-owner-legend",
@@ -10337,7 +10242,8 @@
           "default": "[{\"label\": \"Nhân viên tự đánh giá\", \"tone\": \"secondary\"}, {\"label\": \"Quản lý\", \"tone\": \"primary\"}]"
         }
       ],
-      "specSrc": "spec/components/timeline-owner-legend.json"
+      "specSrc": "spec/components/timeline-owner-legend.json",
+      "logicSrc": "logic/components/timeline-owner-legend.json"
     },
     {
       "id": "cycle-extend-modal",
@@ -10414,7 +10320,8 @@
         "THE GRANT IS DERIVED, NOT ENTERED: pbCycleExtendSubmit computes (picked Thời hạn quản lý − the stored one) and refuses equal (a no-op) and shorter (not an extension) with their own messages, before pbCycleExtend's own `days > 0` guard is reached. Thời hạn quản lý governs because it is the LAST milestone on the band.",
         "canExtend:false returns '' — no trigger and no dialog at all, rather than a disabled button, because §7 is about who may act. pbCycleExtend re-checks anyway: the boolean was resolved at render time and both the actor and the phase can have moved since.",
         "DEVIATION from the frame: the dual-cadence field is a `switch`, not the checkbox 8110:109454 draws. dept-config-form renders the identical setting as a switch per the newer 8110:31228, and one stored setting appearing as two different controls on two surfaces is worse than deviating from the older drawing."
-      ]
+      ],
+      "logicSrc": "logic/components/cycle-extend-modal.json"
     },
     {
       "id": "notice-period-timeline",
@@ -10472,7 +10379,8 @@
           "default": "[{\"tone\": \"secondary\", \"weight\": 2, \"label\": \"12/06\", \"fillPct\": 8}, {\"tone\": \"primary\", \"weight\": 1, \"label\": \"19/06\"}]"
         }
       ],
-      "specSrc": "spec/components/notice-period-timeline.json"
+      "specSrc": "spec/components/notice-period-timeline.json",
+      "logicSrc": "logic/components/notice-period-timeline.json"
     },
     {
       "id": "sidebar-banner",
@@ -10508,7 +10416,8 @@
       },
       "renderSrc": "render/components/sidebar-banner.js",
       "specSrc": "spec/components/sidebar-banner.json",
-      "dsMatch": null
+      "dsMatch": null,
+      "logicSrc": "logic/components/sidebar-banner.json"
     },
     {
       "id": "sidebar-flyout",
@@ -10529,7 +10438,8 @@
       },
       "renderSrc": "render/components/sidebar-flyout.js",
       "specSrc": "spec/components/sidebar-flyout.json",
-      "dsMatch": null
+      "dsMatch": null,
+      "logicSrc": "logic/components/sidebar-flyout.json"
     },
     {
       "id": "kpi-detail-card",
@@ -10594,7 +10504,8 @@
       },
       "renderSrc": "render/components/kpi-detail-card.js",
       "specSrc": "spec/components/kpi-detail-card.json",
-      "dsMatch": null
+      "dsMatch": null,
+      "logicSrc": "logic/components/kpi-detail-card.json"
     },
     {
       "id": "ai-chat-widget",
@@ -10620,7 +10531,8 @@
           ]
         }
       ],
-      "specSrc": "spec/components/ai-chat-widget.json"
+      "specSrc": "spec/components/ai-chat-widget.json",
+      "logicSrc": "logic/components/ai-chat-widget.json"
     },
     {
       "id": "field-result",
@@ -10646,7 +10558,8 @@
             }
           ]
         }
-      ]
+      ],
+      "logicSrc": "logic/components/field-result.json"
     },
     {
       "id": "employee-cell",
@@ -10715,7 +10628,8 @@
         "Gom từ BẢY bản chép tay của cụm avatar + mã/tên + chức danh (16/09/2026). Trước khi gom, bảy bản đã lệch nhau ở khe dọc, cỡ avatar, cỡ chữ dòng tên, và dòng chức danh thì thiếu line-height/font-weight/letter-spacing nên nhận bất kỳ thứ gì ô bảng áp xuống.",
         "Dòng chức danh thiếu font-weight là lỗi thật: trong cột ghim, R22 của atom table đẩy mọi giá trị lên emphasis, nên nó hiện ra đậm trong khi Figma (node Tab, frame 9318:98463) nói Regular. Đi qua typography role body3 thì weight thuộc về style.",
         "Không khai state: cụm không tương tác, dòng bảng mới là thứ bắt click (.tbl-row-click)."
-      ]
+      ],
+      "logicSrc": "logic/components/employee-cell.json"
     },
     {
       "id": "probation-ld-card",
@@ -10743,7 +10657,8 @@
         "KHÔNG dùng `info-banner`: frame vẽ một THẺ TRẮNG ngang hàng với thẻ mục tiêu, còn `info-banner` là dải có nền tô theo tông — đặt vào sẽ ra một dải màu giữa hai thẻ trắng.",
         "`Xem kết quả` không có đích: prototype không có màn kết quả khoá học, và dữ liệu L&D do hệ thống ngoài trả về. Có đích thật thì truyền `onViewResult`."
       ],
-      "description": "Thẻ trạng thái khoá học L&D trên phiếu nhân viên thử việc. Hai trạng thái: đã / chưa hoàn thành."
+      "description": "Thẻ trạng thái khoá học L&D trên phiếu nhân viên thử việc. Hai trạng thái: đã / chưa hoàn thành.",
+      "logicSrc": "logic/components/probation-ld-card.json"
     }
   ],
   "screens": [
@@ -10942,7 +10857,8 @@
           "label": "Tab Nhân viên thử việc",
           "verifiedAt": "2026-09-03"
         }
-      ]
+      ],
+      "logicSrc": "logic/screens/quan-ly-chu-ky.json"
     },
     {
       "id": "chi-tiet-phong-ban",
@@ -11113,7 +11029,8 @@
           "verifiedAt": "2026-09-06",
           "note": "Hai node này là cùng một màn cấp 2 vẽ hai lần cho hai nhịp của 'Chuyên viên xử lý bậc 2' — đó là cách frame thể hiện chu kỳ kép: không phải hai tag trong một dòng mà HAI LỘ TRÌNH riêng, cùng một người có mặt ở cả hai."
         }
-      ]
+      ],
+      "logicSrc": "logic/screens/chi-tiet-phong-ban.json"
     },
     {
       "id": "chi-tiet-nhan-vien",
@@ -11175,7 +11092,8 @@
           "label": "Chi tiết nhân viên (từ trang phòng ban)",
           "verifiedAt": "2026-09-03"
         }
-      ]
+      ],
+      "logicSrc": "logic/screens/chi-tiet-nhan-vien.json"
     },
     {
       "id": "hieu-suat-cua-toi",
@@ -11370,7 +11288,8 @@
         }
       ],
       "renderSrc": "render/screens/hieu-suat-cua-toi.js",
-      "level": "page"
+      "level": "page",
+      "logicSrc": "logic/screens/hieu-suat-cua-toi.json"
     },
     {
       "id": "cai-dat-chu-ky",
@@ -11677,7 +11596,8 @@
           "verifiedAt": "2026-09-03",
           "note": "Thay 8245:39261 (28/08). Suy từ đường dẫn người dùng đặt, chưa mở screenshot riêng."
         }
-      ]
+      ],
+      "logicSrc": "logic/screens/cai-dat-chu-ky.json"
     },
     {
       "id": "hieu-suat-phong-ban-truc-tiep",
@@ -12090,7 +12010,8 @@
         "Mở lại 2026-09-02: khối `return` sớm trả empty-state 'Design in-progress' (đặt từ 2026-08-29) đã GỠ HẲN khỏi hpbRenderScoped. Kèm responsive khung rộng: @container pbshell >=1440 đặt trần --size-page-column-wide + căn giữa cho .scr-hpb, và chốt --size-roadmap-max cho timeline-phase-bar (đo được 1326 ở monitor). Dùng @container chứ không @media vì trang nằm trong device frame."
       ],
       "renderSrc": "render/screens/hieu-suat-phong-ban.js",
-      "level": "page"
+      "level": "page",
+      "logicSrc": "logic/screens/hieu-suat-phong-ban-truc-tiep.json"
     },
     {
       "id": "hieu-suat-phong-ban-gian-tiep",
@@ -12502,7 +12423,8 @@
         "Mở lại 2026-09-02: khối `return` sớm trả empty-state 'Design in-progress' (đặt từ 2026-08-29) đã GỠ HẲN khỏi hpbRenderScoped. Kèm responsive khung rộng: @container pbshell >=1440 đặt trần --size-page-column-wide + căn giữa cho .scr-hpb, và chốt --size-roadmap-max cho timeline-phase-bar (đo được 1326 ở monitor). Dùng @container chứ không @media vì trang nằm trong device frame."
       ],
       "renderSrc": "render/screens/hieu-suat-phong-ban.js",
-      "level": "page"
+      "level": "page",
+      "logicSrc": "logic/screens/hieu-suat-phong-ban-gian-tiep.json"
     },
     {
       "id": "hieu-suat-phong-ban-uy-quyen",
@@ -12914,7 +12836,8 @@
         "Mở lại 2026-09-02: khối `return` sớm trả empty-state 'Design in-progress' (đặt từ 2026-08-29) đã GỠ HẲN khỏi hpbRenderScoped. Kèm responsive khung rộng: @container pbshell >=1440 đặt trần --size-page-column-wide + căn giữa cho .scr-hpb, và chốt --size-roadmap-max cho timeline-phase-bar (đo được 1326 ở monitor). Dùng @container chứ không @media vì trang nằm trong device frame."
       ],
       "renderSrc": "render/screens/hieu-suat-phong-ban.js",
-      "level": "page"
+      "level": "page",
+      "logicSrc": "logic/screens/hieu-suat-phong-ban-uy-quyen.json"
     },
     {
       "id": "cai-dat-chu-ky-chi-tiet",
@@ -13007,7 +12930,8 @@
           "verifiedAt": "2026-09-03",
           "note": "Đã đối chiếu screenshot: breadcrumb 'Cài đặt chu kỳ / Phòng Product', info strip Chu kỳ·Quản lý·Ủy quyền, card 'Chu kỳ phòng ban' + 'Chu kỳ chức danh trong phòng ban'. Thay 8245:39253 (28/08)."
         }
-      ]
+      ],
+      "logicSrc": "logic/screens/cai-dat-chu-ky-chi-tiet.json"
     },
     {
       "id": "hieu-suat-phong-ban-chi-tiet",
@@ -13162,7 +13086,8 @@
           "orgId": "split-button",
           "label": "Tab `Quản lý cấp dưới`: split button `Đánh giá hàng loạt` thay nút `Thiết lập bằng Excel`. Nửa trái mở ngăn Đánh giá hàng loạt; danh sách có `Đánh giá hàng loạt` và `Thiết lập hàng loạt`, mỗi mục mở ngăn tương ứng (mount với `hideTrigger`). Ngoại lệ có chủ ý với `HS-01`, chủ sản phẩm chốt 05/10/2026."
         }
-      ]
+      ],
+      "logicSrc": "logic/screens/hieu-suat-phong-ban-chi-tiet.json"
     },
     {
       "id": "thu-nghiem-ty-trong",
@@ -13203,7 +13128,8 @@
           "name": "Typography",
           "orgId": "typography"
         }
-      ]
+      ],
+      "logicSrc": "logic/screens/thu-nghiem-ty-trong.json"
     }
   ],
   "staleness": {
@@ -15173,5 +15099,307 @@
       "Session 2026-07-31 (bảng KPI chỉ-đọc + dialog sửa từng dòng — KHÔNG có entity/field mới, chỉ là 6 điều chỉnh SEMANTIC đã kiểm bằng grep): (1) GOAL.target giờ giữ GIÁ TRỊ THUẦN, đơn vị chỉ nằm ở GOAL.unit — trước đây prototype nhúng đơn vị vào target ('≥ 90%', '500 đơn/tháng'); đã dọn 24 literal pbKpiRow trong app-store.js. Còn LỆCH chưa giải quyết: giá trị vẫn là TEXT có toán tử so sánh ('≥ 90', '≥ 4.5/5') nên NUMERIC(18,4) của schema canonical chưa chứa được — không tự bịa ra operator field. (2) 4 dòng thang 5 điểm ('≥ 4.5/5') bị gán unit PERCENT sai, đã sửa thành COUNT. (3) Quy tắc pool 100% của GOAL.weight LẦN ĐẦU được thực thi (pbWeightGate trước đó mồ côi 0 caller) — chặn ở nút commit, chỉ cảnh báo ở dialog từng dòng. (4) GOAL.origin hết là 'first writer wins': hai phía cùng ghi 5 field định nghĩa, last-save-wins; origin chỉ còn dùng để khoá nhân viên khi set do quản lý áp. (5) GOAL.approved_snapshot vẫn được GHI nhưng reader duy nhất là pbKpiNextRid (tránh trùng rid) — luồng revert-về-bản-duyệt của PRD rule 5 KHÔNG có implementation. (6) Ba field CHẾT trong prototype dù còn trong schema: GOAL.rating (0 read — Xếp loại đã bỏ khỏi sản phẩm), kpiSets[].submittedAt và kpiSets[].lastRejection (0 read — luồng gửi-duyệt/trả-lại của phía nhân viên đã bị xoá). Giữ lại và ghi rõ thay vì xoá: chúng là schema backend canonical, không phải state của prototype.",
       "GUARDRAIL 1 (PK) update 2026-08-09: AUDIT_LOG và OUTBOX không còn là 2-field placeholder — mỗi entity nay có PK thật (audit_id, job_id) cộng một shape tối thiểu (AUDIT_LOG: entity_type/entity_id/actor_id/action/summary/created_time; OUTBOX: job_type/status/requested_by/created_time). RÕ RÀNG: đây là shape do PROTOTYPE TỰ ĐẶT RA để P2/P3 bulk-write có thể commit truy vết được (memory/decisions.md 2026-08-09 'Bulk-Ops Q1–Q6 resolved' + tasks.md gap register F1) — KHÔNG PHẢI tài liệu hoá field spec thật từ trang Confluence nguồn; trang đó vẫn chưa công bố field spec cho 2 entity này. Không dùng shape này làm bằng chứng về schema backend thật khi audit lại sau này; nếu Confluence công bố field spec thật, thay thế shape này bằng field spec đó. AUDIT_LOG cũng KHÔNG phải một hệ thống compliance đầy đủ — summary là mô tả trước/sau ngắn, không phải full snapshot; OUTBOX vẫn là job record in-memory, không phải hàng đợi async thật. GOAL_TREE_PATH thì KHÔNG phải lỗi: nó là closure table, key là COMPOSITE (cycle_id, ancestor_goal_id, descendant_goal_id) — đã ghi rõ vào notes của 3 field đó thay vì tạo surrogate id. Guardrail 2/3/4/5 vẫn đạt: mọi FK có cardinality tường minh (||--o{ / ||--o|, gồm 2 quan hệ User→AUDIT_LOG/OUTBOX mới thêm), mọi entity trong mermaid đều có trong table[], entity names PascalCase singular, và pass này không xoá/đổi tên entity nào."
     ]
-  }
+  },
+  "ia": {
+    "populated": false,
+    "rules": [
+      {
+        "id": "luong-tao-chu-ky-cai-dat-chu-ky-tach-thanh-2-tra",
+        "title": "Luồng tạo chu kỳ = 'Cài đặt chu kỳ', tách thành 2 trang cố định loại chu kỳ",
+        "kind": "decision",
+        "decision": {
+          "question": "Đổi khái niệm 'Tạo chu kỳ' thành 'Cài đặt chu kỳ' và cho chọn loại chu kỳ (tháng/quý vs thử việc) như thế nào?",
+          "options": [
+            "Giữ một trang tạo duy nhất, chọn loại bằng segment trong form (như cũ)",
+            "Một trang tạo, loại chu kỳ do dropdown prefill (không có 2 trang thật)",
+            "Hai trang tạo RIÊNG (tháng/quý & thử việc), chọn qua dropdown trên nút chính; bỏ segment trong form; luồng tạo trở thành khái niệm 'Cài đặt chu kỳ', đổi tên bảng cây cũ thành 'Cấu hình phòng ban'"
+          ],
+          "chose": "Chọn hai trang tạo riêng: cai-dat-chu-ky-thang-quy + cai-dat-chu-ky-thu-viec (mỗi trang cố định loại qua prop dept-config-form fixedCycleType, bỏ segment trong form). Nút chính trên 'Cấu hình phòng ban' thành dropdown 'Sửa chu kỳ ▾' (Chu kỳ tháng/quý · Chu kỳ thử việc). Bảng cây cũ (id cai-dat-chu-ky) giữ nguyên id, chỉ đổi tên hiển thị → 'Cấu hình phòng ban' để nhường tên 'Cài đặt chu kỳ' cho các trang tạo. Sidebar: chỉ có mục phẳng 'Cấu hình phòng ban'; 2 trang cấu hình KHÔNG là mục sidebar — chỉ vào qua dropdown 'Sửa chu kỳ ▾' (submenu lồng đã thử rồi bỏ vì trùng với dropdown).",
+          "why": "Người dùng chốt trực tiếp: create IS 'Cài đặt chu kỳ', và muốn 2 trang cấu hình tách bạch cho tháng/quý vs thử việc thay vì một form đổi segment. Cố định loại theo trang giúp mỗi trang chỉ hiện đúng trường của loại đó (thử việc khoá 'Theo cá nhân' + khung thời gian thử việc; tháng/quý có select Tháng/Quý), rõ ràng hơn segment. Đổi tên (không đổi id) tránh churn ~mọi tham chiếu tới màn hình. Dropdown + con trong sidebar hơi trùng nhưng phục vụ 2 ý định khác nhau (điều hướng toàn cục vs tạo theo ngữ cảnh) và đối xứng với luồng giám sát.",
+          "affects": [
+            "Cài đặt chu kỳ",
+            "Theo dõi chu kỳ"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "trang-thai-chu-ky-suy-ra-tu-ngay-nguong-2-tuan-4",
+        "title": "Trạng thái chu kỳ suy ra từ ngày (ngưỡng 2 tuần / 48 giờ)",
+        "kind": "decision",
+        "decision": {
+          "question": "Trạng thái theo-ngày của nhóm/phòng nên tính bằng ngưỡng nào?",
+          "options": [
+            "start-soon = bất kỳ lúc nào trước ngày bắt đầu",
+            "start-soon = trong 2 tuần trước bắt đầu; ending-soon = trong 3 ngày (cũ)",
+            "start-soon = trong 2 tuần trước bắt đầu; ending-soon = trong 48 giờ; quá ngày = overdue; >2 tuần trước bắt đầu = vẫn Hoàn thành (không có trạng thái 'chưa bắt đầu')"
+          ],
+          "chose": "Áp dụng ngưỡng: Sắp bắt đầu = trong 14 ngày trước ngày bắt đầu; Đang diễn ra = từ ngày bắt đầu; Sắp hết hạn = trong 48 giờ trước hạn; Quá hạn = qua ngày kết thúc; nếu còn hơn 14 ngày trước chu kỳ kế thì vẫn hiển thị Hoàn thành (chu kỳ trước) — không có trạng thái trung tính 'chưa bắt đầu'.",
+          "why": "Người dùng chốt trực tiếp: nhóm giữ 'Hoàn thành' từ khi xong chu kỳ trước cho tới khi vào cửa sổ 2 tuần của chu kỳ kế, lúc đó chuyển 'Sắp bắt đầu'. 48 giờ phản ánh mốc gấp rút thực tế sát hạn.",
+          "affects": [
+            "Theo dõi chu kỳ"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "ti-le-hoan-thanh-chi-100-moi-hoan-thanh-don-tu-t",
+        "title": "Tỉ lệ hoàn thành: chỉ 100% mới 'Hoàn thành', dồn từ thành viên → nhóm → phòng ban",
+        "kind": "decision",
+        "decision": {
+          "question": "Phòng ban được coi là hoàn thành khi nào, và tỉ lệ tính từ đâu?",
+          "options": [
+            "Đếm nhóm hoàn thành ÷ nhóm đã bắt đầu (cũ)",
+            "Trung bình tỉ lệ % của các nhóm",
+            "Gộp toàn bộ thành viên: thành viên hoàn thành ÷ tổng thành viên; chỉ 100% mới 'Hoàn thành'"
+          ],
+          "chose": "Tỉ lệ phòng ban = tổng thành viên hoàn thành ÷ tổng thành viên (gộp mọi nhóm — nhóm đông 'nặng' hơn). Phòng ban chỉ 'Hoàn thành' khi đạt 100%; một thành viên chưa xong là nhóm chưa 100% và phòng ban chưa 100%. Khi chưa 100%, trạng thái phòng ban = trạng thái theo-ngày 'xấu nhất' trong các nhóm con.",
+          "why": "Người dùng chốt 3 quy tắc: (1) phòng ban chỉ hoàn thành khi thanh tiến độ đạt 100%; (2) bất kỳ cấp dưới chưa xong đều dồn lên cấp trên; (3) tỉ lệ phòng ban dựa trên tỉ lệ nhóm, tỉ lệ nhóm dựa trên từng thành viên. Gộp thành viên đảm bảo 100% nghĩa là thật sự mọi người đã xong.",
+          "affects": [
+            "Theo dõi chu kỳ"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "trang-thai-thanh-vien-ket-hop-muc-hoan-thanh-han",
+        "title": "Trạng thái thành viên kết hợp mức hoàn thành + hạn của nhóm",
+        "kind": "decision",
+        "decision": {
+          "question": "Vì sao nhóm 'Sắp hết hạn' mà không thành viên nào có trạng thái đó? Trạng thái thành viên nên phản ánh gì?",
+          "options": [
+            "Chỉ hoàn thành / đang diễn ra (cũ) — thành viên không có trạng thái theo ngày",
+            "Thành viên xong = Hoàn thành; chưa xong = suy ra theo hạn của nhóm (Quá hạn / Sắp hết hạn / Đang diễn ra)"
+          ],
+          "chose": "Trạng thái mỗi thành viên = kết hợp việc hoàn thành của chính họ với hạn chung của nhóm: đã xong → Hoàn thành (kể cả khi nhóm quá hạn); chưa xong + nhóm quá hạn → Quá hạn; chưa xong + trong 48h → Sắp hết hạn; còn lại → Đang diễn ra. Không có 'Sắp bắt đầu' ở cấp thành viên.",
+          "why": "Người dùng hỏi vì sao nhóm 'Sắp hết hạn' nhưng roster không ai 'Sắp hết hạn' — do trước đây thành viên chỉ có hoàn thành/đang diễn ra. Giờ một thành viên chưa xong đang sát hạn sẽ hiển thị đúng 'Sắp hết hạn', khớp với header nhóm.",
+          "affects": [
+            "Theo dõi chu kỳ"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "thong-nhat-tu-thoi-gian-ket-thuc-thanh-thoi-han",
+        "title": "Thống nhất từ 'Thời gian kết thúc' thành 'Thời hạn'",
+        "kind": "decision",
+        "decision": {
+          "question": "Nhãn cột cho mốc kết thúc nên dùng từ nào cho nhất quán?",
+          "options": [
+            "Giữ 'Thời gian kết thúc' ở bảng cây, 'Thời hạn' ở drawer (không nhất quán)",
+            "Thống nhất tất cả thành 'Thời hạn'"
+          ],
+          "chose": "Đổi mọi nhãn hiển thị 'Thời Gian Kết Thúc' thành 'Thời Hạn' (viết hoa đầu chữ để khớp các cột lân cận). Bảng cây Theo dõi chu kỳ và component tree-table đều dùng 'Thời Hạn', trùng với thuật ngữ drawer roster đã dùng.",
+          "why": "Người dùng yêu cầu gộp từ vựng. Drawer roster đã dùng 'Thời hạn' từ trước — thống nhất về một từ, tránh hai tên cho cùng một khái niệm.",
+          "affects": [
+            "Theo dõi chu kỳ"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "nhieu-bo-trang-thai-giu-rieng-mau-trung-duoc-y-n",
+        "title": "Nhiều bộ trạng thái giữ riêng — 'màu trùng được, ý nghĩa không gộp'",
+        "kind": "decision",
+        "decision": {
+          "question": "Các khái niệm trạng thái khác nhau (vòng đời chu kỳ, theo-ngày, nộp đánh giá, thiết lập mục tiêu, cờ hiệu lực) có nên gộp chung nếu màu giống nhau?",
+          "options": [
+            "Gộp lại dùng chung key nếu màu trùng",
+            "Giữ mỗi ý nghĩa là một key riêng dù màu có thể trùng"
+          ],
+          "chose": "Giữ 5–6 bộ trạng thái tách biệt: mỗi ý nghĩa là một key MAP riêng, chỉ ghi đè nhãn khi cần, không đổi tên để dùng lại. Màu có thể trùng nhưng ý nghĩa không được gộp.",
+          "why": "Nếu gộp theo màu, một thay đổi màu/ý nghĩa sẽ vô tình lan sang khái niệm khác. Tách biệt để mỗi trạng thái tiến hoá độc lập và tài liệu định nghĩa phản ánh đúng.",
+          "affects": [
+            "Nội dung sản phẩm"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "vong-doi-4-giai-doan-duoc-go-khoi-man-hinh-dang",
+        "title": "Vòng đời 4 giai đoạn được gỡ khỏi màn hình đang chạy (thành code chết)",
+        "kind": "decision",
+        "decision": {
+          "question": "Từ vựng vòng đời cố định (Bản nháp → Đang thực hiện → Đang đánh giá → Hoàn thành) có còn gắn với Theo dõi chu kỳ không?",
+          "options": [
+            "Giữ mô hình danh sách chu kỳ 4 giai đoạn trên màn hình",
+            "Chuyển sang bảng giám sát 3 trạng thái theo-ngày; giữ từ vựng 4 giai đoạn là định nghĩa cố định nhưng không gắn màn hình"
+          ],
+          "chose": "Gỡ mô hình danh sách 4 giai đoạn khỏi Theo dõi chu kỳ (2026-07-20); màn hình thành bảng giám sát trạng thái theo-ngày. Từ vựng 4 giai đoạn vẫn là 'cố định, không tự chế biến thể' nhưng hiện là code chết, không wire vào màn hình nào.",
+          "why": "Màn hình được dựng lại thành bảng giám sát chỉ đọc; các trạng thái theo-ngày phù hợp hơn với việc theo dõi. Từ vựng cố định vẫn giữ để nhất quán khi cần dùng lại.",
+          "affects": [
+            "Theo dõi chu kỳ",
+            "Nội dung sản phẩm"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "theo-doi-chu-ky-tu-man-hinh-tao-chu-ky-thanh-ban",
+        "title": "Theo dõi chu kỳ: từ màn hình 'tạo chu kỳ' thành bảng giám sát chỉ đọc",
+        "kind": "decision",
+        "decision": {
+          "question": "Theo dõi chu kỳ nên là nơi tạo chu kỳ (như PRD) hay bảng theo dõi?",
+          "options": [
+            "Giữ theo PRD: tạo & quản lý chu kỳ, bảng 7 cột, có nút tạo",
+            "Dựng lại thành bảng giám sát/theo dõi trạng thái, không tạo gì"
+          ],
+          "chose": "Dựng lại (2026-07-20) thành bảng giám sát tiêu thụ cấu hình phòng ban và KHÔNG tạo gì; việc tạo chu kỳ chuyển vào luồng tạo 'cấu hình' (Cài đặt chu kỳ). Gỡ mảng cycles, toggle grid/bảng, nút tạo, và từ vựng 4 giai đoạn khỏi màn hình.",
+          "why": "Người dùng làm rõ nghiệp vụ thật: đây là dashboard theo dõi, không phải nơi tạo. PRD đã cũ ở điểm này; decisions.md là nguồn chuẩn.",
+          "affects": [
+            "Theo dõi chu kỳ",
+            "Nội dung sản phẩm"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "upper-manager-la-du-lieu-accesslevel-khong-phai",
+        "title": "Upper Manager là dữ liệu accessLevel, không phải vai trò thứ 5",
+        "kind": "decision",
+        "decision": {
+          "question": "Quản lý cấp trên (view + comment) nên là vai trò thứ 5 hay là dữ liệu?",
+          "options": [
+            "Thêm vai trò 'upper-manager' thứ 5 vào meta.roles",
+            "Mô hình bằng trường accessLevel theo từng phòng ban (full vs oversight)"
+          ],
+          "chose": "Giữ 4 vai trò (hr/manager/supervisor/employee). Quan hệ Upper Manager mô hình bằng trường dữ liệu accessLevel theo từng phòng ban: 'full' (là Line Manager / Supervisor được uỷ quyền) vs 'oversight' (quản lý cấp trên: chỉ xem + bình luận). — SUPERSEDED 2026-08-10 (spec D3). Trường accessLevel đã được GỠ BỎ. Phân quyền nay được giải theo (vai trò × quan hệ) trong permission-runtime.js, không lưu trên từng phòng ban. Quản lý cấp trên nhìn phòng ban cấp dưới nay giải ra bucket `upper` (sửa + duyệt), thay vì chỉ xem. Bucket `oversight` vẫn còn, nhưng nay dành cho một `manager` nhìn phòng ban KHÔNG phải cấp dưới trực tiếp của mình — trường hợp mà cờ lưu sẵn không thể diễn đạt.",
+          "why": "Phân quyền cấp màn hình chỉ cần phân biệt Manager/Supervisor; sự khác biệt 'phòng của mình vs giám sát cấp dưới' là dữ liệu sơ đồ tổ chức, không phải một persona. Tránh phình mô hình vai trò. — Lý do supersede: kết luận \"khác biệt này là dữ liệu sơ đồ tổ chức\" vẫn đúng, nhưng cờ theo phòng ban chỉ nói được \"phòng này ai cũng chỉ xem\". Nó không nói được \"chỉ xem với quản lý ngang cấp, sửa được với quản lý cấp trên\" — đúng thứ D3 yêu cầu. Quan hệ vẫn là dữ liệu; nó nằm sẵn ở managementType, nên không cần migrate.",
+          "affects": [
+            "Hiệu suất phòng ban",
+            "Nội dung sản phẩm"
+          ],
+          "status": "superseded",
+          "supersededOn": "2026-08-10"
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "nhan-vien-thu-viec-dong-trong-roster-quan-ly-quy",
+        "title": "Nhân viên thử việc = dòng trong roster, quản lý quyết định Đạt/Không đạt",
+        "kind": "decision",
+        "decision": {
+          "question": "Mục tiêu thử việc nên mô hình hoá và đặt ở đâu?",
+          "options": [
+            "Chỉ hiển thị ở màn 'Hiệu suất của tôi' của nhân viên",
+            "Là một dòng nhân viên trong bảng roster để quản lý thao tác",
+            "Cả quản lý (thao tác) lẫn HR (giám sát)"
+          ],
+          "chose": "Nhân viên thử việc là DÒNG trong roster: quản lý thao tác ở 'Hiệu suất phòng ban' (phòng 'Nhân viên thử việc' — Duyệt qua thử việc / Đánh dấu không đạt, gate theo quyền + chu kỳ), HR giám sát chỉ đọc ở drawer roster của 'Theo dõi chu kỳ'. Ba trạng thái: Đạt (mục tiêu chuyển theo chu kỳ & mục tiêu nhóm, dữ liệu hoàn thành được tính vào chu kỳ hiện tại) / Không đạt (đếm ngược đến ngày gỡ) / Đang thử việc (chờ đánh giá). Mặc định 2 tháng, cho chọn dài hơn.",
+          "why": "Đúng mô hình người dùng hình dung (dòng-trong-bảng, không phải thẻ). Tách audience: quản lý là người quyết định, HR chỉ theo dõi. 3 dòng mẫu (mỗi trạng thái một dòng) để thấy đủ mọi kết quả mà không cần thao tác.",
+          "affects": [
+            "Hiệu suất phòng ban",
+            "Theo dõi chu kỳ"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "okr-co-trong-so-2-cap-moi-cap-tong-100-auto-chia",
+        "title": "OKR có trọng số 2 cấp, mỗi cấp tổng 100% (auto-chia đều + chặn gửi)",
+        "kind": "decision",
+        "decision": {
+          "question": "Nhập trọng số OKR thế nào để mỗi cấp luôn đủ 100%?",
+          "options": [
+            "Auto chia đều, không cho sửa tay",
+            "Nhập tay + cảnh báo khi ≠100 (không có auto-chia)",
+            "Nhập tay + cảnh báo trực tiếp + nút 'Chia đều' + chặn gửi khi ≠100"
+          ],
+          "chose": "OKR là cây 2 cấp có trọng số: các Objective chia nhau 100%, và các Key Result trong MỖI Objective chia nhau 100% (độc lập từng Objective). Mỗi cấp có chỉ báo 'Tổng: X/100%' chạy trực tiếp (đỏ + cảnh báo khi ≠100), nút 'Chia đều' để auto-phân bổ, và nút 'Gửi đề xuất' bị CHẶN cho tới khi mọi cấp đủ 100%. — [SUPERSEDED 2026-07-31] Cây trọng số 2 cấp này đã bị xoá cùng OKR ngày 2026-07-30 và KHÔNG quay lại. Ngày 2026-07-31 chỉ TÊN LOẠI \"OKR - Mục tiêu\" trở lại, như một nhãn SUY RA TỪ CẤP tổ chức (branch ⇒ OKR, leaf ⇒ KPI). Không có Objective, không có Key Result, không có trọng số 2 cấp; bảng KPI vẫn là bề mặt mục tiêu duy nhất.",
+          "why": "Người dùng yêu cầu xử lý cẩn thận luồng nhập tay: vừa auto-chia đều vừa cảnh báo khi người dùng nhập lại lệch 100%. Gửi phải là onClick thuần (không phải data-action='submit') vì handler submit của shell là listener uỷ quyền ở khung cha mà inline onclick không huỷ được — nên cổng trọng số tự bắn toast thành công. — [SUPERSEDED 2026-07-31] Cây trọng số 2 cấp này đã bị xoá cùng OKR ngày 2026-07-30 và KHÔNG quay lại. Ngày 2026-07-31 chỉ TÊN LOẠI \"OKR - Mục tiêu\" trở lại, như một nhãn SUY RA TỪ CẤP tổ chức (branch ⇒ OKR, leaf ⇒ KPI). Không có Objective, không có Key Result, không có trọng số 2 cấp; bảng KPI vẫn là bề mặt mục tiêu duy nhất.",
+          "affects": [
+            "Hiệu suất của tôi",
+            "Hiệu suất phòng ban"
+          ],
+          "status": "superseded",
+          "supersededOn": "2026-07-31"
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "sua-duoc-chi-khi-chu-ky-dang-dien-ra-cong-theo-t",
+        "title": "Sửa được chỉ khi chu kỳ đang diễn ra (cổng theo thời gian)",
+        "kind": "decision",
+        "decision": {
+          "question": "Khi nào cho phép xem-và-sửa vs chỉ-xem?",
+          "options": [
+            "Dùng cờ tĩnh active/closed",
+            "Suy ra từ ngày: chỉ sửa được khi chu kỳ đã tới thời gian hoạt động (ongoing/ending-soon)"
+          ],
+          "chose": "Cổng sửa suy ra từ NGÀY qua computeConfigStatus: chu kỳ chỉ cho sửa/cập nhật khi đã đạt cửa sổ hoạt động (key ∈ {ongoing, ending-soon}); ngoài ra chỉ xem (kèm ghi chú 'Chu kỳ đã đóng — chỉ xem'). Bên quản lý: sửa được ⇔ toàn quyền VÀ chu kỳ đang diễn ra (oversight vẫn chỉ xem).",
+          "why": "Người dùng yêu cầu 'khi chu kỳ active thì cho quản lý/nhân viên sửa'. Suy-từ-ngày nhất quán với cổng đã dùng ở 'Cài đặt chu kỳ', và phân biệt được cadence tháng/quý cho trường hợp 2 chu kỳ song song.",
+          "affects": [
+            "Hiệu suất của tôi",
+            "Hiệu suất phòng ban"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "hieu-suat-cua-toi-mo-thang-chi-tiet-chu-ky-moi-n",
+        "title": "'Hiệu suất của tôi' mở thẳng chi tiết chu kỳ mới nhất (2 chu kỳ nếu dual-cadence)",
+        "kind": "decision",
+        "decision": {
+          "question": "Màn nhân viên nên mở ra cái gì đầu tiên?",
+          "options": [
+            "Lưới thẻ chu kỳ như cũ",
+            "Lưới nhưng ghim chi tiết chu kỳ hiện tại lên đầu",
+            "Mở thẳng chi tiết chu kỳ mới nhất (sửa được nếu đang diễn ra)"
+          ],
+          "chose": "Bình thường một thời điểm chỉ một chu kỳ; màn mở THẲNG vào chi tiết chu kỳ mới nhất (sửa được nếu đang diễn ra, chỉ xem nếu đã đóng), không phải lưới thẻ. Nhân viên có 'dual-cadence' (được cấu hình cả tháng lẫn quý trong tạo chu kỳ) → chồng CẢ HAI chi tiết đang hoạt động (tháng trên, quý dưới). Link 'Xem tất cả chu kỳ' mở lưới + lịch sử. — [SỬA ĐỔI MỘT PHẦN 2026-09-22] Vế mở màn vẫn đúng. Riêng câu cuối đã lỗi hai lần: lưới thẻ bị gỡ 12/09 và bảng lịch sử chuyển hẳn sang screen `lich-su-danh-gia`; nhãn nút đổi thành `Lịch sử đánh giá` ngày 22/09. Nay nút là một cú ĐIỀU HƯỚNG sang trang đó, không còn lật radio để hiện lưới.",
+          "why": "Người dùng yêu cầu 'hiển thị chi tiết cho sửa ngay khi tới thời gian, ngay ở màn đầu'. Dual-cadence là biệt lệ hợp lệ (checkbox 'cả 2 loại chu kì' khi tạo). Đây là màn đầu tiên trong prototype mặc định vào chi tiết thay vì danh sách.",
+          "affects": [
+            "Hiệu suất của tôi"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "lich-su-danh-gia-cua-nhan-vien-bang-chu-ky-da-qu",
+        "title": "Lịch sử đánh giá của nhân viên (bảng chu kỳ đã qua)",
+        "kind": "decision",
+        "decision": {
+          "question": "Xem lịch sử đánh giá của nhân viên ở đâu?",
+          "options": [
+            "Chỉ ở màn quản lý",
+            "Cả màn quản lý (chi tiết thành viên) lẫn màn nhân viên (của chính mình)"
+          ],
+          "chose": "Bảng 'Lịch sử đánh giá' chỉ đọc (Chu kỳ / Loại / Điểm / Xếp loại / Trạng thái) xuất hiện ở CHI TIẾT thành viên bên quản lý ('Hiệu suất phòng ban') VÀ ở màn nhân viên ('Lịch sử của tôi' trên 'Hiệu suất của tôi'), dùng chung một helper để hai bảng luôn cùng hình dạng.",
+          "why": "Người dùng yêu cầu 'khi mở chi tiết nhân viên, thấy được lịch sử đánh giá'. Dùng chung renderRatingHistoryTable để nhất quán giữa hai màn.",
+          "affects": [
+            "Hiệu suất phòng ban",
+            "Hiệu suất của tôi"
+          ]
+        },
+        "origin": "tradeoff"
+      },
+      {
+        "id": "chi-con-mot-loai-hieu-suat-kpi-va-quyen-soan-kpi",
+        "title": "Chỉ còn MỘT loại hiệu suất: KPI — và quyền soạn KPI là 'ai viết trước thắng'",
+        "kind": "decision",
+        "decision": {
+          "question": "Khi bỏ OKR, ai là người soạn KPI của một nhân viên: quản lý (như luật KPI top-down cũ) hay nhân viên?",
+          "options": [
+            "Giữ KPI top-down tuyệt đối — chỉ quản lý soạn, nhân viên luôn chỉ xem",
+            "Chỉ nhân viên tự soạn rồi gửi duyệt",
+            "Ai viết trước thắng: quản lý áp thì nhân viên bị khoá; chưa ai áp thì nhân viên tự soạn + gửi duyệt",
+            "Cấu hình theo phòng ban: mỗi phòng chọn một chế độ cho toàn bộ thành viên"
+          ],
+          "chose": "Ai viết trước thắng, theo TỪNG nhân viên (`origin` = employee|manager, đóng dấu một lần). Kèm ảnh chụp `approvedRows` để 'Trả lại' hoàn về bản duyệt gần nhất — điều này SIÊU CHỈNH quyết định đã ghi hai lần rằng không có hành động từ chối. — [SỬA ĐỔI MỘT PHẦN 2026-07-31] Vẫn đúng về QUYỀN SOẠN KPI. Riêng mệnh đề \"chỉ còn MỘT loại hiệu suất\" nay có hai: branch ⇒ OKR, leaf ⇒ KPI, suy ra từ cấp (nodePerfType). Lý do bỏ OKR (\"một cột mà mọi ô đều giống nhau thì không nói lên sự thật nào\" + \"2 lựa chọn radio không phải là một lựa chọn\") bị VÔ HIỆU chứ không bị bỏ qua: giá trị nay thật sự có hai, và không ai chọn nó — nên vẫn KHÔNG có control nào cho nó ở bất cứ đâu.",
+          "why": "Yêu cầu (2) và (3) của người dùng mô tả cả hai chiều, nên KPI không thể chỉ top-down nữa. Chốt theo từng nhân viên thay vì theo phòng ban vì đó là cách đọc sát nghĩa nhất của 'nếu quản lý áp cho họ thì họ không sửa được' — 'họ' là một người, không phải cả phòng. Không có ảnh chụp thì 'hoàn về bản trước' không có đích, nên snapshot là điều kiện để từ chối trở thành hành động thật. — [SỬA ĐỔI MỘT PHẦN 2026-07-31] Vẫn đúng về QUYỀN SOẠN KPI. Riêng mệnh đề \"chỉ còn MỘT loại hiệu suất\" nay có hai: branch ⇒ OKR, leaf ⇒ KPI, suy ra từ cấp (nodePerfType). Lý do bỏ OKR (\"một cột mà mọi ô đều giống nhau thì không nói lên sự thật nào\" + \"2 lựa chọn radio không phải là một lựa chọn\") bị VÔ HIỆU chứ không bị bỏ qua: giá trị nay thật sự có hai, và không ai chọn nó — nên vẫn KHÔNG có control nào cho nó ở bất cứ đâu.",
+          "affects": [
+            "Hiệu suất của tôi",
+            "Hiệu suất phòng ban",
+            "Cài đặt chu kỳ",
+            "Theo dõi chu kỳ",
+            "Data",
+            "UX Design",
+            "Project Summary"
+          ]
+        },
+        "origin": "tradeoff"
+      }
+    ]
+  },
+  "runtime": []
 }
