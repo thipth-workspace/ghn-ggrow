@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- pb-shell v1.11.0 · rendered 2026-10-08T02:31:51Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-10-08T04:43:20Z -->
 <!--
   ============================================================================
   PRODUCT BUILDER — the rendered prototype shell
@@ -26344,7 +26344,7 @@ function pbResetViewState() {
 //
 // `wrap.id` giữ nguyên `pb-confirm-overlay` cho CẢ HAI: nó là khoá "chỉ một hộp thoại tại một
 // thời điểm". Đổi tên id sẽ cho phép một hộp báo tin chồng lên một hộp xác nhận.
-function pbModalCard(gap) {
+function pbModalCard(gap, padding) {
   var host = document.getElementById('proto-frame') || document.body;
   var prev = document.getElementById('pb-confirm-overlay');
   if (prev && prev.parentNode) { prev.parentNode.removeChild(prev); }
@@ -26358,7 +26358,8 @@ function pbModalCard(gap) {
   var card = document.createElement('div');
   card.style.cssText = 'width:var(--size-dialog);max-width:100%;box-sizing:border-box;'
     + 'display:flex;flex-direction:column;gap:' + (gap || 'var(--space-md)') + ';'
-    + 'padding:var(--space-lg);border-radius:var(--radius-lg);'
+    // `padding` (08/10/2026): mặc định `--space-lg`; hộp `Chi tiết` diễn giải điểm truyền `--space-md`.
+    + 'padding:' + (padding || 'var(--space-lg)') + ';border-radius:var(--radius-lg);'
     + 'background:var(--color-bg-surface);box-shadow:var(--shadow-lg)';
   wrap.appendChild(card);
   var close = function () { if (wrap.parentNode) { wrap.parentNode.removeChild(wrap); } };
@@ -26393,7 +26394,9 @@ function pbModalBtn(label, variant, onClick) {
 // mà một dòng tự tắt sau 3,4 giây thì người dùng có thể không bao giờ đọc được.
 function pbInform(opts) {
   opts = opts || {};
-  var m = pbModalCard('var(--space-lg)');
+  // `opts.padding` (08/10/2026): ĐỆM của thẻ — hộp `Chi tiết` diễn giải điểm xin `--space-md`; mọi hộp
+  // khác giữ `--space-lg`. Tham số thứ nhất vẫn là KHE giữa các khối, không đổi.
+  var m = pbModalCard('var(--space-lg)', opts.padding);
 
   var head = document.createElement('div');
   // ── NÚT ĐÓNG CĂN GIỮA THEO TIÊU ĐỀ (chỉ thị 22/09/2026) ───────────────────────────────────
@@ -29661,14 +29664,10 @@ function pbKpiWeightedScore(set, side) {
    Hộp là `pbInform` (một nút, không lựa chọn) — không dựng hộp thứ hai.
 
    CON SỐ TÍNH LẠI TỪ CÙNG CÔNG THỨC VỚI `pbKpiWeightedScore`, không đọc một bản lưu sẵn.
-   BA CỘT, MỘT LUẬT CHO MỌI DÒNG (chỉ thị 07/10/2026, lượt ba): `Mục tiêu` (số thứ tự) ·
-   `Tỷ trọng × Tỷ lệ hoàn thành` (in đúng phép nhân) · `Kết quả` (= đúng phép nhân đó).
-     dòng thành phần     = wTask × rate   → các dòng con cộng lại ra TỶ LỆ của mục tiêu chính
-     dòng mục tiêu chính = wObj × rateChính → các dòng chính cộng lại ra TỔNG KẾT QUẢ
-   Lượt hai từng cho dòng con in `wObj·wTask·rate` để cả cột cộng ra tổng; với cột giữa ghi rõ phép
-   nhân hai thừa số thì con số đó tự mâu thuẫn ("60% × 91% = 32,8%"), nên quay về hai thừa số.
-   Không thành phần: tỷ lệ của chính mục tiêu (`R-03`). Dòng TỔNG lấy thẳng `pbKpiWeightedScore`,
-   nên luôn trùng số trên trang; từng dòng làm tròn để đọc, tổng không cộng từ số đã làm tròn.
+   BỐ CỤC (chỉ thị 08/10/2026, lượt năm): năm cột — số thứ tự · tỷ trọng chính · tỷ trọng thành phần ·
+   tỷ lệ hoàn thành · kết quả; chỉ dòng lá (thành phần ba thừa số, không thành phần hai — `R-03`), nên cột
+   `Kết quả` cộng thẳng ra tổng. Chi tiết ở thân `pbScoreExplain`. Dòng TỔNG lấy thẳng
+   `pbKpiWeightedScore`, nên luôn trùng số trên trang; từng dòng làm tròn để đọc.
 
    `side`: `self` (NV) · `mgr` (QL) · `final` (`Kết quả cuối cùng` = điểm QL theo `H-17`). */
 /* ══ PHIẾU NÀO LÀ PHIẾU THỬ VIỆC, VÀ KHI NÀO CÓ `Kết quả cuối cùng` (07/10/2026) ══════════════
@@ -29724,54 +29723,69 @@ function pbScoreExplain(employeeId, cycleId, side) {
     + 'var(--border-app-disabled);text-align:right;white-space:nowrap';
   var nameCss = 'padding:var(--space-2xs) var(--space-xs);border-bottom:var(--border-width) solid '
     + 'var(--border-app-disabled);text-align:left';
-  var tr = function (cells, strong, indent) {
-    return '<tr style="' + (strong ? 'font-weight:var(--font-weight-emphasis);color:var(--text-default)' : '') + '">'
-      + '<td style="' + nameCss + (indent ? ';padding-left:var(--space-lg)' : '') + '">' + cells[0] + '</td>'
-      + '<td style="' + cellCss + '">' + cells[1] + '</td>'
-      + '<td style="' + cellCss + '">' + cells[2] + '</td></tr>';
+  /* ── NĂM CỘT (chỉ thị 08/10/2026, lượt năm) ─────────────────────────────────────────────────
+     `Mục tiêu` · `Tỷ trọng chính` · `Tỷ trọng thành phần` · `Tỷ lệ hoàn thành` · `Kết quả` — mỗi thừa số
+     một cột. Tiêu đề ba cột giữa là MỘT ô trải ngang ba cột, đúng bảng mẫu của chỉ thị. Vẫn chỉ dòng lá:
+     thành phần = chính × thành phần × tỷ lệ; mục tiêu không thành phần để trống ô thành phần (`R-03`).
+     Dòng tổng: nhãn trải bốn cột, số ở cột `Kết quả`. */
+  var td = function (v, left, extra) {
+    return '<td' + (extra || '') + ' style="' + (left ? nameCss : cellCss) + '">' + v + '</td>';
   };
-  // Cột giữa in đúng phép nhân của dòng: `<tỷ trọng> × <tỷ lệ hoàn thành>`.
-  var nhan = function (w, rt) { return rt == null ? '-' : pct(w) + ' × ' + pct(rt); };
-
+  /* KHÔNG MỤC TIÊU NÀO CÓ THÀNH PHẦN (chỉ thị 08/10/2026): tiêu đề `Tỷ trọng × Tỷ lệ hoàn thành` và BỎ
+     cột `thành phần` — cột đó sẽ trống toàn bộ, mà tiêu đề hai thừa số trải ba cột thì đọc lệch. Chỉ cần
+     một mục tiêu có thành phần là giữ đủ năm cột. */
+  var subsOf = function (r) { return (typeof pbKpiSubs === 'function') ? pbKpiSubs(r) : (r.subGoals || []); };
+  var coThanhPhan = ((set && set.rows) || []).some(function (r) { var x = subsOf(r); return x && x.length; });
   var body = '';
   ((set && set.rows) || []).forEach(function (r, i) {
     var wObj = num(r.weight) || 0;
-    var subs = (typeof pbKpiSubs === 'function') ? pbKpiSubs(r) : (r.subGoals || []);
-    var rowRate = null;
-    var subRows = '';
+    var subs = subsOf(r);
     if (subs && subs.length) {
-      var acc = 0, miss = false;
       subs.forEach(function (sg, j) {
         var w = num(sg.weight) || 0;
         var rt = num(isSelf ? sg.rate : sg.mgrRate);
-        if (rt == null) { miss = true; }
-        else { acc += w * rt / 100; }
-        subRows += tr([(i + 1) + '.' + (j + 1), nhan(w, rt), rt == null ? '-' : pct(w * rt / 100)], false, true);
+        body += '<tr>' + td((i + 1) + '.' + (j + 1), true) + td(pct(wObj)) + td(pct(w)) + td(pct(rt))
+          + td(rt == null ? '-' : pct(wObj * w * rt / 10000)) + '</tr>';
       });
-      rowRate = miss ? null : acc;
     } else {
-      rowRate = num(isSelf ? r.selfRate : r.mgrRate);
+      var rt0 = num(isSelf ? r.selfRate : r.mgrRate);
+      body += '<tr>' + td(String(i + 1), true) + td(pct(wObj)) + (coThanhPhan ? td('') : '') + td(pct(rt0))
+        + td(rt0 == null ? '-' : pct(wObj * rt0 / 100)) + '</tr>';
     }
-    body += tr([String(i + 1), nhan(wObj, rowRate), rowRate == null ? '-' : pct(wObj * rowRate / 100)], true, false)
-      + subRows;
   });
   var total = (typeof pbKpiWeightedScore === 'function' && set)
     ? pbKpiWeightedScore(set, isSelf ? 'self' : 'mgr') : null;
   var tenTong = side === 'final' ? 'Kết quả cuối cùng'
     : (isSelf ? 'Tổng kết quả của nhân viên' : 'Tổng kết quả của quản lý');
-  body += tr([tenTong, '', pct(total)], true, false);
+  body += '<tr style="font-weight:var(--font-weight-emphasis);color:var(--text-default)">'
+    + td(tenTong, true, coThanhPhan ? ' colspan="4"' : ' colspan="3"') + td(pct(total)) + '</tr>';
 
-  var th = function (t, left) {
-    return '<th style="padding:var(--space-2xs) var(--space-xs);text-align:' + (left ? 'left' : 'right')
-      + ';font-weight:var(--font-weight-emphasis);color:var(--text-muted);white-space:nowrap;'
+  // Hai tiêu đề ngắn giữ một dòng (`nowrap`); tiêu đề dài trải ba cột giữa thì được xuống dòng — không
+  // vậy thì nó ép `Mục tiêu` / `Kết quả` gãy làm hai (đo được ở lượt đầu dựng năm cột).
+  var th = function (t, left, extra) {
+    return '<th' + (extra || '') + ' style="padding:var(--space-2xs) var(--space-xs);text-align:'
+      + (left ? 'left' : 'right') + (extra ? '' : ';white-space:nowrap')
+      // Cỡ chữ tiêu đề cột `--font-size-brand-secondary` (chỉ thị 08/10/2026) — mười, kèm
+      // `--line-height-micro` cho cùng bậc mười.
+      + ';font-size:var(--font-size-brand-secondary);line-height:var(--line-height-micro)'
+      // Viết hoa bằng CSS (chỉ thị 08/10/2026) — chuỗi nguồn giữ chữ thường để trình đọc màn hình
+      // không đánh vần từng chữ cái.
+      + ';text-transform:uppercase'
+      + ';font-weight:var(--font-weight-emphasis);color:var(--text-muted);'
       + 'border-bottom:var(--border-width) solid var(--border-app-default)">' + t + '</th>';
   };
-  // CHỈ BẢNG, KHÔNG MÔ TẢ (chỉ thị 07/10/2026, lượt ba) — ba gạch công thức và câu `H-17` đã gỡ.
+  // Chữ bảng `--font-size-body` (chỉ thị 08/10/2026), thay bậc caption.
   var msg = '<table style="width:100%;border-collapse:collapse;'
-    + 'font-size:var(--font-size-caption);line-height:var(--line-height-caption);color:var(--text-muted)">'
-    + '<thead><tr>' + th('Mục tiêu', true) + th('Tỷ trọng × Tỷ lệ hoàn thành') + th('Kết quả')
+    + 'font-size:var(--font-size-body);line-height:var(--line-height-body);color:var(--text-muted)">'
+    + '<thead><tr>' + th('Mục tiêu', true)
+    // Chữ tiêu đề đổi 08/10/2026 (chỉ thị).
+    + (coThanhPhan
+        ? th('Tỷ trọng chính × thành phần × Tỷ lệ hoàn thành', false, ' colspan="3"')
+        : th('Tỷ trọng × Tỷ lệ hoàn thành', false, ' colspan="2"'))
+    + th('Kết quả')
     + '</tr></thead><tbody>' + body + '</tbody></table>';
-  pbInform({ title: 'Chi tiết', message: msg, ctaLabel: 'Đóng', ctaVariant: 'secondary' });
+  pbInform({ title: 'Chi tiết', message: msg, ctaLabel: 'Đóng', ctaVariant: 'secondary',
+    padding: 'var(--space-md)' });
 }
 
 // ── ĐIỂM CỦA MỘT MỤC TIÊU CHÍNH: CUỘN LÊN TỪ MỤC TIÊU PHỤ KHI CÓ (2026-09-10) ──────────────────
