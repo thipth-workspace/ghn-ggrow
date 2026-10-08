@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- pb-shell v1.11.0 · rendered 2026-10-08T06:54:02Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-10-08T08:23:36Z -->
 <!--
   ============================================================================
   PRODUCT BUILDER — the rendered prototype shell
@@ -43635,9 +43635,9 @@ function renderScreenChiTietPhongBan(props) {
     value: scopeValue,
     onChange: 'cdpbSetScope(this.value)',
     options: [
-      // Nhãn đổi 07/10/2026 (chỉ thị), khớp Hiệu suất phòng ban; `value` giữ nguyên.
-      { value: 'dept', label: 'Đánh giá theo phòng ban' },
-      { value: 'title', label: 'Đánh giá theo chức danh' }
+      // Nhãn đổi 07/10 rồi 08/10/2026 (chỉ thị), khớp Hiệu suất phòng ban; `value` giữ nguyên.
+      { value: 'dept', label: 'Nhóm theo Phòng ban' },
+      { value: 'title', label: 'Nhóm theo Chức danh' }
     ]
   };
 
@@ -68553,9 +68553,11 @@ function renderScreenHieuSuatPhongBanChiTiet() {
       // Nhãn đổi 07/10/2026 (chỉ thị): `Đánh giá quản lý` · `Đánh giá theo phòng ban` ·
       // `Đánh giá theo chức danh`. Chỉ đổi NHÃN — `value` (`subs`/`dept`/`title`) giữ nguyên vì
       // stash `PB_HPBD_SCOPE`, luật CSS và id dẫn xuất đều khoá theo nó.
-      options: (hasSubsTab ? [{ value: 'subs', label: 'Đánh giá quản lý' }] : []).concat([
-        { value: 'dept', label: 'Đánh giá theo phòng ban' },
-        { value: 'title', label: 'Đánh giá theo chức danh' }
+      // Nhãn đổi lần nữa 08/10/2026 (chỉ thị): `Nhóm Quản lý trực tiếp` · `Nhóm theo Phòng ban` ·
+      // `Nhóm theo Chức danh`. Viết hoa chữ đầu của danh từ đúng như chỉ thị.
+      options: (hasSubsTab ? [{ value: 'subs', label: 'Nhóm Quản lý trực tiếp' }] : []).concat([
+        { value: 'dept', label: 'Nhóm theo Phòng ban' },
+        { value: 'title', label: 'Nhóm theo Chức danh' }
       ])
     }
   });
