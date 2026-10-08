@@ -1,4 +1,4 @@
-<!-- pb-shell v1.11.0 · rendered 2026-10-08T02:21:14Z -->
+<!-- pb-shell v1.11.0 · rendered 2026-10-08T02:31:51Z -->
 <!doctype html>
 <!-- pb design-system site — a deterministic projection of registry.json (components + tokens).
      render.py inlines the registry + per-component node JSON and injects the shared runtime plus the
@@ -66750,12 +66750,22 @@ function hpbdModePane(o, p) {
        Mai Thị Ngọc Yến có `finalScore` nên kỳ Thiết lập bị đọc thành `done` và cột ra `-`. */
     if (coCotPhongBan) {
       var viec = [];
-      var lcR = hpbMemberLifecycle(pbKpiSet(e.m.id, ggCycleIdOf('review')), e.m);
-      var lcS = pbCycleLifecycleOf(pbKpiSet(e.m.id, ggCycleIdOf('setup')));
+      /* SỐ ĐẾM THEO KỲ (chỉ thị 08/10/2026): `N kỳ chờ quản lý đánh giá` · `N kỳ chưa thiết lập`. Đếm
+         qua DANH SÁCH kỳ đang chạy chứ không hỏi đúng một kỳ — hôm nay mỗi người có một kỳ Đánh giá và
+         một kỳ Thiết lập (cặp toàn cục) nên số là 0 hoặc 1, nhưng thêm kỳ (chu kỳ kép…) chỉ là thêm
+         phần tử vào hai mảng dưới. Dòng bằng 0 thì không in. */
+      var kyDanhGia = [ggCycleIdOf('review')];
+      var kyThietLap = [ggCycleIdOf('setup')];
+      var nCho = kyDanhGia.filter(function (c) {
+        return hpbMemberLifecycle(pbKpiSet(e.m.id, c), e.m) === 'waiting';
+      }).length;
+      var nChua = kyThietLap.filter(function (c) {
+        return pbCycleLifecycleOf(pbKpiSet(e.m.id, c)) === 'not-set';
+      }).length;
       // Mỗi việc kèm màu chấm (chỉ thị 07/10/2026): chờ QL `--icon-warning-hover`, chưa thiết lập
       // `--icon-muted`.
-      if (lcR === 'waiting') { viec.push({ t: pbCycleLabel('waiting'), c: 'var(--icon-warning-hover)' }); }
-      if (lcS === 'not-set') { viec.push({ t: pbCycleLabel('not-set'), c: 'var(--icon-muted)' }); }
+      if (nCho) { viec.push({ t: nCho + ' kỳ chờ quản lý đánh giá', c: 'var(--icon-warning-hover)' }); }
+      if (nChua) { viec.push({ t: nChua + ' kỳ chưa thiết lập', c: 'var(--icon-muted)' }); }
       row.todo = viec.length
         ? '<div style="display:flex;flex-direction:column;gap:var(--space-3xs);'
           + 'font-size:var(--font-size-body);line-height:var(--line-height-body);color:var(--text-default)">'
