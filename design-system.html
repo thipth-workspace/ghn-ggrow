@@ -1,4 +1,4 @@
-<!-- pb-shell v2.3.0 · rendered 2026-10-13T04:51:44Z -->
+<!-- pb-shell v2.3.0 · rendered 2026-10-13T05:05:46Z -->
 <!doctype html>
 <!-- pb design-system site — a deterministic projection of registry.json (components + tokens).
      render.py inlines the registry + per-component node JSON and injects the shared runtime plus the
@@ -5724,14 +5724,24 @@ function renderCmpOverallReview(props) {
      Nền cột (`colBg`) mang `ovr-span`, desktop là `1/-1`; khi chồng thì mỗi nền phủ đúng nửa của
      mình, nếu không một tấm trắng sẽ trải suốt 2N hàng và nuốt cả thẻ bên kia. */
   var N = topics.length + 2;
-  var stackTpl = 'auto'; for (var si = 1; si < N * 2; si++) { stackTpl += ' auto'; }
+  /* ── CHECKBOX KÝ HỢP ĐỒNG ĐI THEO CỘT CỦA NÓ KHI XẾP CHỒNG (chỉ thị 13/10/2026) ──────────────
+     Hàng checkbox (`contractRow` = N + 1) KHÔNG có luật vị trí nào: vòng `rowRules` dừng ở N, nên ở
+     desktop nó chỉ tình cờ đúng nhờ tự xếp chỗ, còn khi xếp chồng thì hai ô tự rơi xuống CUỐI lưới
+     — cả hai checkbox gom dưới khối quản lý (ảnh chủ sản phẩm). Chỉ thị: mỗi checkbox nằm ngay dưới
+     khối nhận xét của chính bên đó.
+     Nên khi có checkbox, mỗi cột chiếm M = N + 1 hàng (khối + checkbox của nó): luật vị trí phủ tới
+     hàng M, và khi chồng thì cột 2 dời xuống M + 1..2M thay vì N + 1..2N — checkbox của nhân viên
+     nằm giữa hai khối. Nền cột 2 dời theo, vẫn phủ đúng N hàng nội dung (checkbox nằm ngoài thẻ, như
+     desktop). Không có checkbox thì M = N, mọi thứ y như trước. */
+  var M = (props.showContract === true) ? N + 1 : N;
+  var stackTpl = 'auto'; for (var si = 1; si < M * 2; si++) { stackTpl += ' auto'; }
   var rowRules = '';
-  for (var rk = 1; rk <= N; rk++) {
+  for (var rk = 1; rk <= M; rk++) {
     rowRules += '.ovr-r' + rk + '{grid-row:' + rk + '}';
   }
   var stackRowRules = '';
-  for (var sk = 1; sk <= N; sk++) {
-    stackRowRules += '.ovr-c2.ovr-r' + sk + '{grid-row:' + (N + sk) + '}';
+  for (var sk = 1; sk <= M; sk++) {
+    stackRowRules += '.ovr-c2.ovr-r' + sk + '{grid-row:' + (M + sk) + '}';
   }
   /* `grid-template-*` CŨNG PHẢI RỜI INLINE. Bản đầu chỉ chuyển vị trí của từng ô rồi để hai dòng
      template ở lại inline — và đo được nó hỏng theo kiểu dễ nhận nhầm là đã chạy: các ô ĐÚNG LÀ
@@ -5748,7 +5758,7 @@ function renderCmpOverallReview(props) {
     +   '.ovr-c1,.ovr-c2{grid-column:1}'
     +   stackRowRules
     +   '.ovr-c1.ovr-span{grid-row:1/span ' + N + '}'
-    +   '.ovr-c2.ovr-span{grid-row:' + (N + 1) + '/span ' + N + '}'
+    +   '.ovr-c2.ovr-span{grid-row:' + (M + 1) + '/span ' + N + '}'
     + '}'
     + '</style>';
 
