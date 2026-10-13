@@ -1681,11 +1681,6 @@
       "$type": "dimension",
       "description": "Bề ngang tối thiểu của bảng ở mobile, để bảng tràn ra và cuộn ngang thay vì bóp cột. Lấy theo số đo thật ở tablet: cột hẹp nhất của bảng ba cột là 194, ba cột là 582 — ngưỡng này đặt dưới mức đó nên không nới rộng hơn cái tablet đang hiển thị."
     },
-    "size-bottom-nav": {
-      "$value": "79px",
-      "$type": "dimension",
-      "description": "Cao thanh nav dưới, chỉ mobile. Figma 10247:47757 (04/10/2026) — dựng theo cấu tạo chứ không đo bằng mắt: hai viền chỉ báo cộng mười trên cộng hai mươi biểu tượng cộng tám khe cộng hai dòng nhãn mười sáu cộng sáu dưới, cộng một viền trên của chính thanh (thanh khai box-sizing:border-box nên viền ăn vào trong, không cộng thêm thì ô con bị ép hụt đúng một). Bản trước là sáu mươi lăm, hợp với nhãn một dòng viết tắt."
-    },
     "size-topbar-mobile": {
       "$value": "57px",
       "$type": "dimension",
@@ -2440,6 +2435,11 @@
           "id": "padX",
           "type": "string",
           "default": ""
+        },
+        {
+          "id": "mobileIcon",
+          "type": "boolean",
+          "default": false
         }
       ],
       "code": {
@@ -3772,6 +3772,11 @@
               "value": "collapsed"
             }
           ]
+        },
+        {
+          "id": "mobileToggleId",
+          "type": "string",
+          "default": "shell-mobile-nav-toggle"
         }
       ],
       "code": {
@@ -3781,43 +3786,6 @@
       "renderSrc": "render/components/sidebar.js",
       "specSrc": "spec/components/sidebar.json",
       "logicSrc": "logic/components/sidebar.json"
-    },
-    {
-      "id": "bottom-nav",
-      "name": "Bottom Nav",
-      "renderFn": "renderCmpBottomNav",
-      "scope": "local",
-      "level": "template",
-      "description": "Thanh điều hướng đáy, chỉ hiện ở mobile. Bốn mục theo bản chốt 23/09; phân vai giao cho runtime qua data-roles.",
-      "properties": [
-        {
-          "id": "activeId",
-          "type": "string",
-          "default": "quan-ly-chu-ky"
-        },
-        {
-          "id": "state",
-          "type": "string",
-          "default": "default",
-          "options": [
-            {
-              "label": "Default",
-              "value": "default"
-            },
-            {
-              "label": "Active item",
-              "value": "active"
-            }
-          ]
-        }
-      ],
-      "code": {
-        "lang": "html",
-        "snippet": "<nav class=\"pb-bottom-nav\">…</nav>"
-      },
-      "renderSrc": "render/components/bottom-nav.js",
-      "specSrc": "spec/components/bottom-nav.json",
-      "logicSrc": "logic/components/bottom-nav.json"
     },
     {
       "id": "header-footer-app",
@@ -3849,6 +3817,11 @@
               "value": "open"
             }
           ]
+        },
+        {
+          "id": "navToggleId",
+          "type": "string",
+          "default": "shell-mobile-nav-toggle"
         }
       ],
       "code": {
@@ -8059,6 +8032,21 @@
           "id": "label",
           "type": "string",
           "default": "Thu gọn"
+        },
+        {
+          "id": "icon",
+          "type": "string",
+          "default": "chevrons-left"
+        },
+        {
+          "id": "iconColor",
+          "type": "string",
+          "default": "var(--icon-placeholder)"
+        },
+        {
+          "id": "className",
+          "type": "string",
+          "default": ""
         }
       ],
       "code": {
@@ -8215,6 +8203,11 @@
           "id": "hasSearchBar",
           "type": "boolean",
           "default": false
+        },
+        {
+          "id": "navToggleId",
+          "type": "string",
+          "default": ""
         }
       ],
       "code": {
@@ -9533,6 +9526,11 @@
           "type": "boolean",
           "default": false,
           "description": "Ép ô giá trị thành textarea kể cả khi không có droplist đơn vị. Ô có đơn vị tự chuyển khi chọn Tự nhập, không cần prop này."
+        },
+        {
+          "id": "leadErrorText",
+          "type": "string",
+          "default": ""
         }
       ],
       "code": {
