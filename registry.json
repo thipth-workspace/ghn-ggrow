@@ -10970,9 +10970,9 @@
       "logicSrc": "logic/components/export-data-dialog.json"
     },
     {
-      "id": "org-customer-division",
-      "name": "Org Customer Division",
-      "renderFn": "renderCmpOrgCustomerDivision",
+      "id": "org-mock-tree",
+      "name": "Org Mock Tree",
+      "renderFn": "renderCmpOrgMockTree",
       "scope": "local",
       "level": "atom",
       "dsMatch": null,
@@ -10989,9 +10989,9 @@
           ]
         }
       ],
-      "renderSrc": "render/components/org-customer-division.js",
-      "specSrc": "spec/components/org-customer-division.json",
-      "logicSrc": "logic/components/org-customer-division.json"
+      "renderSrc": "render/components/org-mock-tree.js",
+      "specSrc": "spec/components/org-mock-tree.json",
+      "logicSrc": "logic/components/org-mock-tree.json"
     },
     {
       "id": "period-chip-group",
@@ -12519,7 +12519,7 @@
     },
     {
       "id": "hieu-suat-phong-ban-gian-tiep",
-      "name": "Hiệu suất phòng ban · Gián tiếp quản lý",
+      "name": "Hiệu suất phòng ban · Phòng ban bên dưới",
       "renderFn": "renderScreenHieuSuatPhongBanGianTiep",
       "roles": [
         "high-level-manager"
