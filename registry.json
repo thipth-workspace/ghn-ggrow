@@ -10992,6 +10992,165 @@
       "renderSrc": "render/components/org-customer-division.js",
       "specSrc": "spec/components/org-customer-division.json",
       "logicSrc": "logic/components/org-customer-division.json"
+    },
+    {
+      "id": "period-chip-group",
+      "name": "Period Chip Group",
+      "renderFn": "renderCmpPeriodChipGroup",
+      "scope": "local",
+      "level": "organism",
+      "dsMatch": null,
+      "properties": [
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Error",
+              "value": "error"
+            },
+            {
+              "label": "Disabled",
+              "value": "disabled"
+            }
+          ]
+        },
+        {
+          "id": "id",
+          "type": "string",
+          "default": "pcg-demo"
+        },
+        {
+          "id": "label",
+          "type": "string",
+          "default": "Kỳ đánh giá"
+        },
+        {
+          "id": "required",
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "id": "groups",
+          "type": "json",
+          "default": [
+            {
+              "label": "Quý",
+              "columns": 4,
+              "options": [
+                {
+                  "value": "q-1",
+                  "label": "Quý 1"
+                },
+                {
+                  "value": "q-2",
+                  "label": "Quý 2"
+                },
+                {
+                  "value": "q-3",
+                  "label": "Quý 3"
+                },
+                {
+                  "value": "q-4",
+                  "label": "Quý 4"
+                }
+              ],
+              "narrowColumns": 2
+            },
+            {
+              "label": "Tháng",
+              "columns": 4,
+              "options": [
+                {
+                  "value": "m-1",
+                  "label": "Tháng 1"
+                },
+                {
+                  "value": "m-2",
+                  "label": "Tháng 2"
+                },
+                {
+                  "value": "m-3",
+                  "label": "Tháng 3"
+                },
+                {
+                  "value": "m-4",
+                  "label": "Tháng 4"
+                },
+                {
+                  "value": "m-5",
+                  "label": "Tháng 5"
+                },
+                {
+                  "value": "m-6",
+                  "label": "Tháng 6"
+                },
+                {
+                  "value": "m-7",
+                  "label": "Tháng 7"
+                },
+                {
+                  "value": "m-8",
+                  "label": "Tháng 8"
+                },
+                {
+                  "value": "m-9",
+                  "label": "Tháng 9"
+                },
+                {
+                  "value": "m-10",
+                  "label": "Tháng 10"
+                },
+                {
+                  "value": "m-11",
+                  "label": "Tháng 11"
+                },
+                {
+                  "value": "m-12",
+                  "label": "Tháng 12"
+                }
+              ],
+              "narrowColumns": 3
+            }
+          ]
+        },
+        {
+          "id": "value",
+          "type": "json",
+          "default": [
+            "q-2",
+            "m-1"
+          ]
+        },
+        {
+          "id": "errorText",
+          "type": "string",
+          "default": "Vui lòng chọn ít nhất một giá trị."
+        },
+        {
+          "id": "helperText",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "onChange",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "emptyText",
+          "type": "string",
+          "default": ""
+        }
+      ],
+      "renderSrc": "render/components/period-chip-group.js",
+      "specSrc": "spec/components/period-chip-group.json",
+      "logicSrc": "logic/components/period-chip-group.json"
     }
   ],
   "screens": [
