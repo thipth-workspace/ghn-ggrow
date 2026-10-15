@@ -110,7 +110,7 @@
       "executiveSummary": "GGrow (Quản lý hiệu suất) đưa quy trình đánh giá hiệu suất — hiện đang làm offline/thủ công — vào PaySight, dưới dạng hệ thống cấu hình được, phân quyền theo 4 vai trò (HR, Manager, Supervisor, Employee), gồm thiết lập chu kỳ, tiêu chí theo từng cấp nhân viên, và theo dõi. Tiêu chí thành công: được cả 4 vai trò áp dụng, không chỉ HR/admin. Bản dựng hiện tại bổ sung: mục tiêu thử việc (quản lý quyết định Đạt/Không đạt, HR giám sát), OKR có trọng số 2 cấp (mỗi cấp tổng 100%, tự chia đều + chặn gửi khi lệch), cổng sửa suy-từ-ngày (chỉ sửa khi chu kỳ đang diễn ra), màn 'Hiệu suất của tôi' mở thẳng chi tiết chu kỳ mới nhất (chồng 2 chu kỳ nếu dual-cadence), và lịch sử đánh giá của nhân viên."
     },
     "tradeoffs": [],
-    "others": "<div class=\"meta-section\">\n  <div class=\"meta-h2\">Nội dung sản phẩm — Định nghĩa &amp; thuật ngữ (GGrow)</div>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">\n    Tổng hợp thuật ngữ &amp; quy tắc đang dùng trong GGrow (Quản lý hiệu suất). Nguồn: <code>prd.md</code> + <code>decisions.md</code>. Phản ánh trạng thái hiện hành của sản phẩm.\n  </p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">1. Vai trò &amp; quyền</div>\n  <p class=\"meta-label\">Định nghĩa vai trò</p>\n  <ul class=\"meta-p\">\n    <li><strong>HR</strong> — quyền cao nhất (admin), thấy toàn bộ màn hình.</li>\n    <li><strong>Manager</strong> — trưởng phòng/nhóm, toàn quyền trên dữ liệu phòng ban của mình.</li>\n    <li><strong>Supervisor</strong> — giống hệt Manager; là người được uỷ quyền khi chủ KPI không phải Line Manager trực tiếp.</li>\n    <li><strong>Employee</strong> — nhân viên, xem/nhập đánh giá của chính mình (tự soạn KPI và gửi duyệt, trừ khi quản lý đã áp KPI).</li>\n    <li><strong>Upper Manager</strong> — không phải vai trò riêng mà là dữ liệu <code>accessLevel</code> (<code>oversight</code>) theo phòng ban: chỉ xem + bình luận, không sửa/xoá.</li>\n  </ul>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">✓ = có quyền &nbsp;·&nbsp; — = không có quyền. Quyền của Manager/Supervisor/Upper Manager áp dụng trên dữ liệu phòng ban họ phụ trách; Employee trên dữ liệu của chính mình.</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Vai trò</th><th>Xem</th><th>Bình luận</th><th>Chỉnh sửa</th><th>Xoá</th><th>Cấu hình &amp; khởi tạo chu kỳ</th></tr></thead>\n    <tbody>\n      <tr><td><strong>HR</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>\n      <tr><td><strong>Manager</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>—</td></tr>\n      <tr><td><strong>Supervisor</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>—</td></tr>\n      <tr><td><strong>Employee</strong></td><td>✓</td><td>—</td><td>✓<sup>*</sup></td><td>—</td><td>—</td></tr>\n      <tr><td><strong>Upper Manager</strong></td><td>✓</td><td>✓</td><td>—</td><td>—</td><td>—</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><sup>*</sup> Employee chỉ \"nhập của mình\": tự soạn KPI rồi gửi quản lý duyệt; nếu quản lý đã áp KPI cho họ thì chỉ xem — không sửa dữ liệu của người khác.</p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">2. Bốn màn hình chính</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>#</th><th>Màn hình</th><th>Vai trò</th><th>Mục đích</th></tr></thead>\n    <tbody>\n      <tr><td>1</td><td><strong>Theo dõi chu kỳ</strong> (tháng/quý · thử việc)</td><td>HR</td><td>Bảng giám sát trạng thái chu kỳ (chỉ đọc — không tạo). Việc tạo nằm ở luồng 'Cài đặt chu kỳ'.</td></tr>\n      <tr><td>2</td><td><strong>Cài đặt chu kỳ</strong> (tháng/quý · thử việc)</td><td>HR</td><td>Tạo &amp; cấu hình chu kỳ toàn công ty theo sơ đồ tổ chức — tách thành hai trang cố định loại chu kỳ: 'Cài đặt chu kỳ tháng/quý' và 'Cài đặt chu kỳ thử việc'. Mở từ dropdown 'Sửa chu kỳ ▾' trên 'Cấu hình phòng ban'.</td></tr>\n      <tr><td>2b</td><td><strong>Cấu hình phòng ban</strong></td><td>HR / C&amp;B</td><td>Danh sách/bảng cây cấu hình theo phòng ban → nhóm (trước đây tên là 'Cài đặt chu kỳ'). Là nơi mở dropdown tạo chu kỳ ở trên.</td></tr>\n      <tr><td>3</td><td><strong>Hiệu suất phòng ban</strong></td><td>Manager / Supervisor</td><td>Xem / sửa / xoá hiệu suất phòng ban.</td></tr>\n      <tr><td>4</td><td><strong>Hiệu suất của tôi</strong></td><td>Employee</td><td>Xem &amp; nhập hiệu suất của mình.</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><em>Sidebar: nhóm CHU KÌ — 'Theo dõi chu kỳ' (tháng/quý · thử việc) và 'Cấu hình phòng ban' (nút 'Sửa chu kỳ ▾' mở 2 trang Cài đặt chu kỳ tháng/quý · thử việc, không phải mục sidebar) · nhóm CÁ NHÂN (Hiệu suất phòng ban / của tôi) · footer \"Góp ý sản phẩm\".</em></p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">3. Các bộ trạng thái (mỗi ý nghĩa là một bộ riêng — màu có thể trùng, ý nghĩa không gộp)</div>\n\n  <p class=\"meta-label\">3.1 · Trạng thái chu kỳ (Theo dõi chu kỳ) — suy ra từ ngày</p>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">Vòng đời gồm <strong>4 giai đoạn</strong>: Chưa thiết lập → Đã thiết lập → Đang đánh giá → Hoàn thành (<em>thiết lập</em> = đã có cấu hình chu kỳ, không phải đã giao mục tiêu). <strong>Sắp hết hạn</strong> và <strong>Quá hạn</strong> KHÔNG phải giai đoạn — chúng là lớp phủ theo hạn, đè lên giai đoạn hiện tại. Xem <code>constitution.md</code> Nguyên tắc 7.</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Trạng thái</th><th>Điều kiện</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Chưa thiết lập</strong></td><td>Phòng/nhóm chưa gắn cấu hình chu kỳ (giai đoạn 1).</td></tr>\n      <tr><td><strong>Đã thiết lập</strong></td><td>Đã có cấu hình, trong 14 ngày trước ngày bắt đầu (giai đoạn 2).</td></tr>\n      <tr><td><strong>Đang đánh giá</strong></td><td>Từ ngày bắt đầu đến hết giai đoạn hoạt động (giai đoạn 3).</td></tr>\n      <tr><td><strong>Sắp hết hạn</strong></td><td>Trong 48 giờ trước hạn kết thúc.</td></tr>\n      <tr><td><strong>Quá hạn</strong></td><td>Đã qua ngày kết thúc.</td></tr>\n      <tr><td><strong>Hoàn thành</strong></td><td>Đạt 100% (hoặc chu kỳ trước còn hiển thị hoàn thành, chưa tới cửa sổ 2 tuần của chu kỳ kế).</td></tr>\n    </tbody>\n  </table>\n\n  <p class=\"meta-label\">3.2 · Các bộ trạng thái khác (theo màn hình)</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Bộ</th><th>Giá trị</th><th>Dùng ở</th></tr></thead>\n    <tbody>\n      <tr><td>Thiết lập &amp; duyệt mục tiêu <span style=\"color:var(--text-tertiary)\">(nhân viên ↔ quản lý)</span></td><td>Chưa thiết lập → Đã thiết lập → Chờ duyệt → Đã duyệt</td><td>Hiệu suất của tôi (nhân viên) + Hiệu suất phòng ban (quản lý)</td></tr>\n      <tr><td>Cờ hiệu lực</td><td>Hiệu lực / Ngừng hiệu lực</td><td>Cấu hình</td></tr>\n    </tbody>\n  </table>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">4. Thực thể &amp; thuật ngữ</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Thuật ngữ</th><th>Định nghĩa</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Chu kỳ</strong></td><td>Một chu kỳ đánh giá hiệu suất; tạo qua trang 'Cài đặt chu kỳ' (tháng/quý hoặc thử việc), mở từ 'Cấu hình phòng ban'.</td></tr>\n      <tr><td><strong>Khối / Phòng ban / Nhóm</strong></td><td>Đơn vị tổ chức, xếp cây (phòng ban → nhóm con).</td></tr>\n      <tr><td><strong>Nhân viên</strong></td><td>Lá của sơ đồ tổ chức.</td></tr>\n      <tr><td><strong>KPI - Chỉ tiêu</strong></td><td>Loại hiệu suất DUY NHẤT. Một KPI gồm <strong>Tên · Tỷ trọng · Đơn vị</strong>; một nhân viên có nhiều KPI, tổng tỷ trọng 100%. Dạng bảng.</td></tr>\n      <tr><td><strong>Đơn vị</strong></td><td>Đơn vị đo của một KPI: % · VNĐ · Số lượng · Thời gian (bộ cố định).</td></tr><tr><td><strong>Người thiết lập</strong></td><td>Ai soạn bộ KPI của một nhân viên trong kỳ: <em>nhân viên</em> (tự đề xuất, cần duyệt) hoặc <em>quản lý</em> (áp trực tiếp, nhân viên chỉ xem). Ai viết trước thì giữ quyền cho kỳ đó.</td></tr>\n      \n      <tr><td><strong>Chu kì hiệu suất</strong></td><td>Nhịp: Tháng / Quý.</td></tr>\n      <tr><td><strong>Period Duration</strong></td><td>Cửa sổ hoàn tất đánh giá: 7 / 14 / 21 ngày.</td></tr>\n      <tr><td><strong>Đối tượng áp dụng</strong></td><td>Theo điều kiện / Theo nhân viên (hoặc Theo phòng ban / Theo cá nhân).</td></tr>\n      <tr><td><strong>Thời hạn</strong></td><td>Mốc kết thúc (từ vựng đã thống nhất — thay cho \"Thời gian kết thúc\").</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><em>Sơ đồ tổ chức: Phòng ban → Phòng ban cha/con ↔ Quản lý trên/dưới ↔ Line Manager · Nhân viên (+ Supervisor) · Nhịp · Period Duration.</em></p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">5. Quy tắc nghiệp vụ chính</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Quy tắc</th><th>Nội dung</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Luồng KPI</strong></td><td><strong>Ai viết trước thắng.</strong> Nhân viên tự soạn KPI (Tên/Tỷ trọng/Đơn vị) rồi <em>Gửi để duyệt</em>; mọi lần gửi hoặc sửa đều cần quản lý duyệt, không duyệt thì <em>Trả lại</em> và hoàn về bản đã duyệt gần nhất. Ngược lại, nếu quản lý <em>Áp dụng KPI</em> trước thì nhân viên không sửa được kỳ đó. Trong kỳ mọi thứ sửa được cho tới hạn; quá hạn thì cả hai phía chỉ xem.</td></tr>\n      \n      <tr><td><strong>Kiểu quyền</strong></td><td>Xem / Bình luận / Chỉnh sửa / Xoá — cấp theo từng vai trò × từng màn hình.</td></tr>\n      <tr><td><strong>Tỉ lệ hoàn thành</strong></td><td>Nhóm hoàn thành ⇔ mọi thành viên xong (100%). Bất kỳ cấp dưới chưa xong đều dồn lên cấp trên. Tỉ lệ phòng ban = tổng thành viên hoàn thành ÷ tổng thành viên (gộp mọi nhóm). Chưa 100% → lấy trạng thái theo-ngày \"xấu nhất\" của nhóm con (Quá hạn &gt; Sắp hết hạn &gt; Đang đánh giá &gt; Đã thiết lập).</td></tr>\n      <tr><td><strong>Trạng thái thành viên</strong></td><td>Xong → Hoàn thành. Chưa xong → theo hạn nhóm: Quá hạn / Sắp hết hạn / Đang đánh giá.</td></tr>\n    </tbody>\n  </table>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">6. Nhãn cột &amp; từ vựng cố định</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Nơi</th><th>Nhãn</th></tr></thead>\n    <tbody>\n      <tr><td>Bảng cây Theo dõi chu kỳ</td><td>Tên Khối/Phòng Ban · Tỉ Lệ Hoàn Thành · Thời Hạn · Trạng Thái · Chu Kì Hiệu Suất</td></tr>\n      <tr><td>Bảng Cấu hình phòng ban</td><td>Phòng ban · Trưởng phòng · Supervisor · Chu kỳ · Thời hạn</td></tr>\n      <tr><td>Chip xám (neutral)</td><td>Quý · Tháng · KPI - Chỉ tiêu</td></tr>\n      <tr><td>Nút / nhãn view</td><td>Dạng bảng · Dạng lưới · Sửa chu kỳ ▾ (Chu kỳ tháng/quý · Chu kỳ thử việc) · Lưu nháp · Tạo và kích hoạt chu kỳ · Quay lại</td></tr>\n      <tr><td>Khác</td><td>Ngôn ngữ: tiếng Việt · Wordmark: GGrow · Placeholder chưa dựng: \"Sắp ra mắt\"</td></tr>\n    </tbody>\n  </table>\n</div>\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">7. Đánh giá & chấm điểm (KPI / Thử việc) — quy tắc mới</div>\n  <p class=\"meta-p\">Bổ sung bản dựng hiện tại. Chi tiết luồng ở tab <strong>UX Design</strong>, mô hình dữ liệu ở tab <strong>Data</strong>.</p>\n  <p class=\"meta-label\">Mục tiêu thử việc (Thử việc)</p>\n  <ul class=\"meta-p\">\n    <li>Nhân viên thử việc là một <strong>dòng trong roster</strong> ở \"Hiệu suất phòng ban\" (phòng \"Nhân viên thử việc\"); quản lý thao tác, HR giám sát chỉ đọc ở drawer roster của \"Theo dõi chu kỳ\".</li>\n    <li><strong>Đạt thử việc</strong> → mục tiêu tiếp theo mặc định chuyển theo chu kỳ &amp; mục tiêu của nhóm; dữ liệu hoàn thành trong thời gian thử việc được tính vào chu kỳ hiện tại.</li>\n    <li><strong>Không đạt</strong> → thông báo không đạt + đếm ngược đến ngày gỡ khỏi hệ thống (cuối thời gian thử việc).</li>\n    <li><strong>Đang thử việc</strong> → chờ quản lý đánh giá.</li>\n    <li>Thời gian thử việc mặc định <strong>2 tháng</strong>, cho phép chọn dài hơn.</li>\n  </ul>\n  <p class=\"meta-label\">KPI khi chu kỳ đang diễn ra</p>\n  <ul class=\"meta-p\">\n    <li><strong>Cổng sửa theo thời gian:</strong> chỉ cho xem-và-sửa khi chu kỳ đã tới cửa sổ hoạt động (Đang đánh giá / Sắp hết hạn); ngoài ra chỉ xem (\"Chu kỳ đã đóng — chỉ xem\"). Bên quản lý: sửa được ⇔ toàn quyền VÀ chu kỳ đang diễn ra.</li>\n    <li><strong>Soạn KPI</strong> — nhân viên tự đề xuất (cần duyệt mỗi lần gửi/sửa), hoặc quản lý áp trực tiếp (khoá nhân viên khỏi việc sửa). Ai viết trước giữ quyền cho kỳ đó.</li>\n    <li><strong>Duyệt / Trả lại</strong> — quản lý xem bản đề xuất đặt cạnh bản đã duyệt gần nhất, rồi Duyệt hoặc Trả lại. Trả lại sẽ khôi phục bản đã duyệt đó.</li>\n  </ul>\n  <p class=\"meta-label\">\"Hiệu suất của tôi\" — màn đầu tiên</p>\n  <ul class=\"meta-p\">\n    <li>Bình thường một thời điểm chỉ <strong>một chu kỳ</strong>; màn mở thẳng vào <strong>chi tiết chu kỳ mới nhất</strong> (sửa được nếu đang diễn ra), không phải lưới thẻ.</li>\n    <li><strong>Dual-cadence</strong> (biệt lệ, bật bằng checkbox \"cả 2 loại chu kì\" khi tạo chu kỳ): nhân viên có cả chu kỳ tháng lẫn quý cùng hoạt động → màn đầu chồng <strong>cả hai chi tiết</strong> (tháng trên, quý dưới).</li>\n    <li>\"Lịch sử đánh giá\" mở trang lịch sử các chu kỳ đã qua.</li>\n  </ul>\n  <p class=\"meta-label\">Lịch sử đánh giá</p>\n  <p class=\"meta-p\">Bảng chỉ đọc các chu kỳ đã qua (Chu kỳ / Loại / Điểm / Xếp loại / Trạng thái), có ở chi tiết thành viên bên quản lý (\"Lịch sử đánh giá\") và ở màn nhân viên (\"Lịch sử của tôi\").</p>\n</div>\n",
+    "others": "<div class=\"meta-section\">\n  <div class=\"meta-h2\">Nội dung sản phẩm — Định nghĩa &amp; thuật ngữ (GGrow)</div>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">\n    Tổng hợp thuật ngữ &amp; quy tắc đang dùng trong GGrow (Quản lý hiệu suất). Nguồn: <code>prd.md</code> + <code>decisions.md</code>. Phản ánh trạng thái hiện hành của sản phẩm.\n  </p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">1. Vai trò &amp; quyền</div>\n  <p class=\"meta-label\">Định nghĩa vai trò</p>\n  <ul class=\"meta-p\">\n    <li><strong>HR</strong> — quyền cao nhất (admin), thấy toàn bộ màn hình.</li>\n    <li><strong>Manager</strong> — trưởng phòng/nhóm, toàn quyền trên dữ liệu phòng ban của mình.</li>\n    <li><strong>Supervisor</strong> — giống hệt Manager; là người được uỷ quyền khi chủ KPI không phải Line Manager trực tiếp.</li>\n    <li><strong>Employee</strong> — nhân viên, xem/nhập đánh giá của chính mình (tự soạn KPI và gửi duyệt, trừ khi quản lý đã áp KPI).</li>\n    <li><strong>Upper Manager</strong> — không phải vai trò riêng mà là dữ liệu <code>accessLevel</code> (<code>oversight</code>) theo phòng ban: chỉ xem + bình luận, không sửa/xoá.</li>\n  </ul>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">✓ = có quyền &nbsp;·&nbsp; — = không có quyền. Quyền của Manager/Supervisor/Upper Manager áp dụng trên dữ liệu phòng ban họ phụ trách; Employee trên dữ liệu của chính mình.</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Vai trò</th><th>Xem</th><th>Bình luận</th><th>Chỉnh sửa</th><th>Xoá</th><th>Cấu hình &amp; khởi tạo chu kỳ</th></tr></thead>\n    <tbody>\n      <tr><td><strong>HR</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>\n      <tr><td><strong>Manager</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>—</td></tr>\n      <tr><td><strong>Supervisor</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>—</td></tr>\n      <tr><td><strong>Employee</strong></td><td>✓</td><td>—</td><td>✓<sup>*</sup></td><td>—</td><td>—</td></tr>\n      <tr><td><strong>Upper Manager</strong></td><td>✓</td><td>✓</td><td>—</td><td>—</td><td>—</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><sup>*</sup> Employee chỉ \"nhập của mình\": tự soạn KPI rồi gửi quản lý duyệt; nếu quản lý đã áp KPI cho họ thì chỉ xem — không sửa dữ liệu của người khác.</p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">2. Bốn màn hình chính</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>#</th><th>Màn hình</th><th>Vai trò</th><th>Mục đích</th></tr></thead>\n    <tbody>\n      <tr><td>1</td><td><strong>Theo dõi chu kỳ</strong> (tháng/quý · thử việc)</td><td>HR</td><td>Bảng giám sát trạng thái chu kỳ (chỉ đọc — không tạo). Việc tạo nằm ở luồng 'Cài đặt chu kỳ'.</td></tr>\n      <tr><td>2</td><td><strong>Cài đặt chu kỳ</strong> (tháng/quý · thử việc)</td><td>HR</td><td>Tạo &amp; cấu hình chu kỳ toàn công ty theo sơ đồ tổ chức — tách thành hai trang cố định loại chu kỳ: 'Cài đặt chu kỳ tháng/quý' và 'Cài đặt chu kỳ thử việc'. Mở từ dropdown 'Sửa chu kỳ ▾' trên 'Cấu hình phòng ban'.</td></tr>\n      <tr><td>2b</td><td><strong>Cấu hình phòng ban</strong></td><td>HR / C&amp;B</td><td>Danh sách/bảng cây cấu hình theo phòng ban → nhóm (trước đây tên là 'Cài đặt chu kỳ'). Là nơi mở dropdown tạo chu kỳ ở trên.</td></tr>\n      <tr><td>3</td><td><strong>Hiệu suất phòng ban</strong></td><td>Manager / Supervisor</td><td>Xem / sửa / xoá hiệu suất phòng ban.</td></tr>\n      <tr><td>4</td><td><strong>Hiệu suất của tôi</strong></td><td>Employee</td><td>Xem &amp; nhập hiệu suất của mình.</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><em>Sidebar: nhóm CHU KÌ — 'Theo dõi chu kỳ' (tháng/quý · thử việc) và 'Cấu hình phòng ban' (nút 'Sửa chu kỳ ▾' mở 2 trang Cài đặt chu kỳ tháng/quý · thử việc, không phải mục sidebar) · nhóm CÁ NHÂN (Hiệu suất phòng ban / của tôi) · footer \"Góp ý báo lỗi\".</em></p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">3. Các bộ trạng thái (mỗi ý nghĩa là một bộ riêng — màu có thể trùng, ý nghĩa không gộp)</div>\n\n  <p class=\"meta-label\">3.1 · Trạng thái chu kỳ (Theo dõi chu kỳ) — suy ra từ ngày</p>\n  <p class=\"meta-p\" style=\"color:var(--text-secondary)\">Vòng đời gồm <strong>4 giai đoạn</strong>: Chưa thiết lập → Đã thiết lập → Đang đánh giá → Hoàn thành (<em>thiết lập</em> = đã có cấu hình chu kỳ, không phải đã giao mục tiêu). <strong>Sắp hết hạn</strong> và <strong>Quá hạn</strong> KHÔNG phải giai đoạn — chúng là lớp phủ theo hạn, đè lên giai đoạn hiện tại. Xem <code>constitution.md</code> Nguyên tắc 7.</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Trạng thái</th><th>Điều kiện</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Chưa thiết lập</strong></td><td>Phòng/nhóm chưa gắn cấu hình chu kỳ (giai đoạn 1).</td></tr>\n      <tr><td><strong>Đã thiết lập</strong></td><td>Đã có cấu hình, trong 14 ngày trước ngày bắt đầu (giai đoạn 2).</td></tr>\n      <tr><td><strong>Đang đánh giá</strong></td><td>Từ ngày bắt đầu đến hết giai đoạn hoạt động (giai đoạn 3).</td></tr>\n      <tr><td><strong>Sắp hết hạn</strong></td><td>Trong 48 giờ trước hạn kết thúc.</td></tr>\n      <tr><td><strong>Quá hạn</strong></td><td>Đã qua ngày kết thúc.</td></tr>\n      <tr><td><strong>Hoàn thành</strong></td><td>Đạt 100% (hoặc chu kỳ trước còn hiển thị hoàn thành, chưa tới cửa sổ 2 tuần của chu kỳ kế).</td></tr>\n    </tbody>\n  </table>\n\n  <p class=\"meta-label\">3.2 · Các bộ trạng thái khác (theo màn hình)</p>\n  <table class=\"meta-table\">\n    <thead><tr><th>Bộ</th><th>Giá trị</th><th>Dùng ở</th></tr></thead>\n    <tbody>\n      <tr><td>Thiết lập &amp; duyệt mục tiêu <span style=\"color:var(--text-tertiary)\">(nhân viên ↔ quản lý)</span></td><td>Chưa thiết lập → Đã thiết lập → Chờ duyệt → Đã duyệt</td><td>Hiệu suất của tôi (nhân viên) + Hiệu suất phòng ban (quản lý)</td></tr>\n      <tr><td>Cờ hiệu lực</td><td>Hiệu lực / Ngừng hiệu lực</td><td>Cấu hình</td></tr>\n    </tbody>\n  </table>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">4. Thực thể &amp; thuật ngữ</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Thuật ngữ</th><th>Định nghĩa</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Chu kỳ</strong></td><td>Một chu kỳ đánh giá hiệu suất; tạo qua trang 'Cài đặt chu kỳ' (tháng/quý hoặc thử việc), mở từ 'Cấu hình phòng ban'.</td></tr>\n      <tr><td><strong>Khối / Phòng ban / Nhóm</strong></td><td>Đơn vị tổ chức, xếp cây (phòng ban → nhóm con).</td></tr>\n      <tr><td><strong>Nhân viên</strong></td><td>Lá của sơ đồ tổ chức.</td></tr>\n      <tr><td><strong>KPI - Chỉ tiêu</strong></td><td>Loại hiệu suất DUY NHẤT. Một KPI gồm <strong>Tên · Tỷ trọng · Đơn vị</strong>; một nhân viên có nhiều KPI, tổng tỷ trọng 100%. Dạng bảng.</td></tr>\n      <tr><td><strong>Đơn vị</strong></td><td>Đơn vị đo của một KPI: % · VNĐ · Số lượng · Thời gian (bộ cố định).</td></tr><tr><td><strong>Người thiết lập</strong></td><td>Ai soạn bộ KPI của một nhân viên trong kỳ: <em>nhân viên</em> (tự đề xuất, cần duyệt) hoặc <em>quản lý</em> (áp trực tiếp, nhân viên chỉ xem). Ai viết trước thì giữ quyền cho kỳ đó.</td></tr>\n      \n      <tr><td><strong>Chu kì hiệu suất</strong></td><td>Nhịp: Tháng / Quý.</td></tr>\n      <tr><td><strong>Period Duration</strong></td><td>Cửa sổ hoàn tất đánh giá: 7 / 14 / 21 ngày.</td></tr>\n      <tr><td><strong>Đối tượng áp dụng</strong></td><td>Theo điều kiện / Theo nhân viên (hoặc Theo phòng ban / Theo cá nhân).</td></tr>\n      <tr><td><strong>Thời hạn</strong></td><td>Mốc kết thúc (từ vựng đã thống nhất — thay cho \"Thời gian kết thúc\").</td></tr>\n    </tbody>\n  </table>\n  <p class=\"meta-p\" style=\"color:var(--text-tertiary)\"><em>Sơ đồ tổ chức: Phòng ban → Phòng ban cha/con ↔ Quản lý trên/dưới ↔ Line Manager · Nhân viên (+ Supervisor) · Nhịp · Period Duration.</em></p>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">5. Quy tắc nghiệp vụ chính</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Quy tắc</th><th>Nội dung</th></tr></thead>\n    <tbody>\n      <tr><td><strong>Luồng KPI</strong></td><td><strong>Ai viết trước thắng.</strong> Nhân viên tự soạn KPI (Tên/Tỷ trọng/Đơn vị) rồi <em>Gửi để duyệt</em>; mọi lần gửi hoặc sửa đều cần quản lý duyệt, không duyệt thì <em>Trả lại</em> và hoàn về bản đã duyệt gần nhất. Ngược lại, nếu quản lý <em>Áp dụng KPI</em> trước thì nhân viên không sửa được kỳ đó. Trong kỳ mọi thứ sửa được cho tới hạn; quá hạn thì cả hai phía chỉ xem.</td></tr>\n      \n      <tr><td><strong>Kiểu quyền</strong></td><td>Xem / Bình luận / Chỉnh sửa / Xoá — cấp theo từng vai trò × từng màn hình.</td></tr>\n      <tr><td><strong>Tỉ lệ hoàn thành</strong></td><td>Nhóm hoàn thành ⇔ mọi thành viên xong (100%). Bất kỳ cấp dưới chưa xong đều dồn lên cấp trên. Tỉ lệ phòng ban = tổng thành viên hoàn thành ÷ tổng thành viên (gộp mọi nhóm). Chưa 100% → lấy trạng thái theo-ngày \"xấu nhất\" của nhóm con (Quá hạn &gt; Sắp hết hạn &gt; Đang đánh giá &gt; Đã thiết lập).</td></tr>\n      <tr><td><strong>Trạng thái thành viên</strong></td><td>Xong → Hoàn thành. Chưa xong → theo hạn nhóm: Quá hạn / Sắp hết hạn / Đang đánh giá.</td></tr>\n    </tbody>\n  </table>\n</div>\n\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">6. Nhãn cột &amp; từ vựng cố định</div>\n  <table class=\"meta-table\">\n    <thead><tr><th>Nơi</th><th>Nhãn</th></tr></thead>\n    <tbody>\n      <tr><td>Bảng cây Theo dõi chu kỳ</td><td>Tên Khối/Phòng Ban · Tỉ Lệ Hoàn Thành · Thời Hạn · Trạng Thái · Chu Kì Hiệu Suất</td></tr>\n      <tr><td>Bảng Cấu hình phòng ban</td><td>Phòng ban · Trưởng phòng · Supervisor · Chu kỳ · Thời hạn</td></tr>\n      <tr><td>Chip xám (neutral)</td><td>Quý · Tháng · KPI - Chỉ tiêu</td></tr>\n      <tr><td>Nút / nhãn view</td><td>Dạng bảng · Dạng lưới · Sửa chu kỳ ▾ (Chu kỳ tháng/quý · Chu kỳ thử việc) · Lưu nháp · Tạo và kích hoạt chu kỳ · Quay lại</td></tr>\n      <tr><td>Khác</td><td>Ngôn ngữ: tiếng Việt · Wordmark: GGrow · Placeholder chưa dựng: \"Sắp ra mắt\"</td></tr>\n    </tbody>\n  </table>\n</div>\n<div class=\"meta-section\">\n  <div class=\"meta-h2\">7. Đánh giá & chấm điểm (KPI / Thử việc) — quy tắc mới</div>\n  <p class=\"meta-p\">Bổ sung bản dựng hiện tại. Chi tiết luồng ở tab <strong>UX Design</strong>, mô hình dữ liệu ở tab <strong>Data</strong>.</p>\n  <p class=\"meta-label\">Mục tiêu thử việc (Thử việc)</p>\n  <ul class=\"meta-p\">\n    <li>Nhân viên thử việc là một <strong>dòng trong roster</strong> ở \"Hiệu suất phòng ban\" (phòng \"Nhân viên thử việc\"); quản lý thao tác, HR giám sát chỉ đọc ở drawer roster của \"Theo dõi chu kỳ\".</li>\n    <li><strong>Đạt thử việc</strong> → mục tiêu tiếp theo mặc định chuyển theo chu kỳ &amp; mục tiêu của nhóm; dữ liệu hoàn thành trong thời gian thử việc được tính vào chu kỳ hiện tại.</li>\n    <li><strong>Không đạt</strong> → thông báo không đạt + đếm ngược đến ngày gỡ khỏi hệ thống (cuối thời gian thử việc).</li>\n    <li><strong>Đang thử việc</strong> → chờ quản lý đánh giá.</li>\n    <li>Thời gian thử việc mặc định <strong>2 tháng</strong>, cho phép chọn dài hơn.</li>\n  </ul>\n  <p class=\"meta-label\">KPI khi chu kỳ đang diễn ra</p>\n  <ul class=\"meta-p\">\n    <li><strong>Cổng sửa theo thời gian:</strong> chỉ cho xem-và-sửa khi chu kỳ đã tới cửa sổ hoạt động (Đang đánh giá / Sắp hết hạn); ngoài ra chỉ xem (\"Chu kỳ đã đóng — chỉ xem\"). Bên quản lý: sửa được ⇔ toàn quyền VÀ chu kỳ đang diễn ra.</li>\n    <li><strong>Soạn KPI</strong> — nhân viên tự đề xuất (cần duyệt mỗi lần gửi/sửa), hoặc quản lý áp trực tiếp (khoá nhân viên khỏi việc sửa). Ai viết trước giữ quyền cho kỳ đó.</li>\n    <li><strong>Duyệt / Trả lại</strong> — quản lý xem bản đề xuất đặt cạnh bản đã duyệt gần nhất, rồi Duyệt hoặc Trả lại. Trả lại sẽ khôi phục bản đã duyệt đó.</li>\n  </ul>\n  <p class=\"meta-label\">\"Hiệu suất của tôi\" — màn đầu tiên</p>\n  <ul class=\"meta-p\">\n    <li>Bình thường một thời điểm chỉ <strong>một chu kỳ</strong>; màn mở thẳng vào <strong>chi tiết chu kỳ mới nhất</strong> (sửa được nếu đang diễn ra), không phải lưới thẻ.</li>\n    <li><strong>Dual-cadence</strong> (biệt lệ, bật bằng checkbox \"cả 2 loại chu kì\" khi tạo chu kỳ): nhân viên có cả chu kỳ tháng lẫn quý cùng hoạt động → màn đầu chồng <strong>cả hai chi tiết</strong> (tháng trên, quý dưới).</li>\n    <li>\"Lịch sử đánh giá\" mở trang lịch sử các chu kỳ đã qua.</li>\n  </ul>\n  <p class=\"meta-label\">Lịch sử đánh giá</p>\n  <p class=\"meta-p\">Bảng chỉ đọc các chu kỳ đã qua (Chu kỳ / Loại / Điểm / Xếp loại / Trạng thái), có ở chi tiết thành viên bên quản lý (\"Lịch sử đánh giá\") và ở màn nhân viên (\"Lịch sử của tôi\").</p>\n</div>\n",
     "figmaFileKey": "Ckmv6HrRVGKZNPEecwqoxZ"
   },
   "tokens": {
@@ -1558,11 +1558,6 @@
       "$type": "dimension",
       "scope": "local"
     },
-    "size-nav-popover-w": {
-      "$value": "223px",
-      "$type": "dimension",
-      "description": "Bề ngang bảng chọn nổi trên thanh nav đáy. Figma 10260:49384 — tấm 223, dòng bên trong 207 cộng hai lần đệm tám. Khai thành token vì bảng tự co theo nội dung sẽ hẹp hơn hẳn frame: ba nhãn đều ngắn."
-    },
     "shadow-xl": {
       "$value": "0px 10px 15px -3px rgba(0,0,0,0.10), 0px 4px 6px -4px rgba(16,24,40,0.10)",
       "$type": "shadow",
@@ -1801,6 +1796,54 @@
       "$type": "dimension",
       "scope": "local",
       "description": "Bề ngang cột Kết quả cuối cùng — tiêu đề kèm icon sort, cộng đệm ô. 06/10/2026."
+    },
+    "size-gop-table-min-w": {
+      "$value": "950px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang tối thiểu của bảng gộp (Hiệu suất phòng ban · Trực tiếp quản lý): đúng bề ngang bảng ở màn 1440 (khung app tối đa) — 951. Màn hẹp hơn thì bảng giữ bề ngang này và cuộn ngang trong khung, thay vì ép cột. 08/10/2026."
+    },
+    "size-table-row-min-h": {
+      "$value": "56px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Chiều cao tối thiểu một dòng bảng gộp (Hiệu suất phòng ban · Trực tiếp quản lý) — chỉ thị 09/10/2026, áp lại 11/10."
+    },
+    "size-ff-pop-w": {
+      "$value": "600px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang popover bộ lọc Option F (spec 4.4)."
+    },
+    "size-ff-cat-w": {
+      "$value": "190px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang cột danh mục của popover bộ lọc Option F (spec 4.4)."
+    },
+    "size-ff-body-min-h": {
+      "$value": "248px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Chiều cao tối thiểu thân popover bộ lọc Option F (spec 4.4)."
+    },
+    "size-ff-token-max-w": {
+      "$value": "260px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang tối đa thân token bộ lọc Option F (spec 4.2)."
+    },
+    "size-ff-badge": {
+      "$value": "20px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Cỡ badge đếm của danh mục bộ lọc Option F (spec 4.4)."
+    },
+    "size-ff-drawer-w": {
+      "$value": "400px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang ngăn bộ lọc bên phải — filter-facets layout drawer (Concept G, phương án B, 13/10/2026)."
     }
   },
   "components": [
@@ -2103,6 +2146,11 @@
         },
         {
           "id": "mgrScore",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "contractLock",
           "type": "string",
           "default": ""
         }
@@ -3066,7 +3114,7 @@
               "value": "probation-failed"
             },
             {
-              "label": "Quản lý đã đánh giá",
+              "label": "Đã đánh giá",
               "value": "handoff-reviewed"
             },
             {
@@ -3074,11 +3122,11 @@
               "value": "handoff-calibrated"
             },
             {
-              "label": "Chờ quản lý đánh giá",
+              "label": "Chờ đánh giá",
               "value": "handoff-awaiting"
             },
             {
-              "label": "Chờ quản lý đánh giá (thử việc)",
+              "label": "Chờ đánh giá (thử việc)",
               "value": "probation-awaiting"
             }
           ]
@@ -5815,6 +5863,11 @@
               "value": "full"
             }
           ]
+        },
+        {
+          "id": "description",
+          "type": "string",
+          "default": ""
         }
       ],
       "code": {
@@ -6106,6 +6159,21 @@
               "value": "disabled"
             }
           ]
+        },
+        {
+          "id": "compact",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "id": "fitTrigger",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "id": "noChevron",
+          "type": "boolean",
+          "default": false
         }
       ],
       "code": {
@@ -7957,57 +8025,6 @@
       "renderSrc": "render/components/nav-item.js",
       "specSrc": "spec/components/nav-item.json",
       "logicSrc": "logic/components/nav-item.json"
-    },
-    {
-      "id": "nav-popover",
-      "name": "Nav Popover",
-      "renderFn": "renderCmpNavPopover",
-      "scope": "local",
-      "level": "molecule",
-      "description": "Bảng chọn nổi bung LÊN từ một ô của thanh nav đáy mobile, mũi nhọn chỉ xuống ô đó. Mở bằng cú bấm vào ô, đóng khi bấm ra ngoài hoặc khi chọn một dòng. Dòng dựng bằng `menu-item-button`, phân vai qua `data-roles` như submenu thanh bên.",
-      "properties": [
-        {
-          "id": "id",
-          "type": "string",
-          "default": "navpop"
-        },
-        {
-          "id": "trigger",
-          "type": "string",
-          "default": ""
-        },
-        {
-          "id": "items",
-          "type": "array",
-          "default": []
-        },
-        {
-          "id": "state",
-          "type": "string",
-          "default": "default",
-          "options": [
-            {
-              "label": "Closed",
-              "value": "default"
-            },
-            {
-              "label": "Open",
-              "value": "open"
-            },
-            {
-              "label": "Active row",
-              "value": "active"
-            }
-          ]
-        }
-      ],
-      "code": {
-        "lang": "html",
-        "snippet": "<div class=\"pb-navpop\">…</div>"
-      },
-      "renderSrc": "render/components/nav-popover.js",
-      "specSrc": "spec/components/nav-popover.json",
-      "logicSrc": "logic/components/nav-popover.json"
     },
     {
       "id": "collapse-toggle",
@@ -10639,6 +10656,25 @@
       "renderSrc": "render/components/probation-ld-card.js",
       "properties": [
         {
+          "id": "status",
+          "type": "enum",
+          "default": "completed",
+          "options": [
+            {
+              "label": "Đã hoàn thành",
+              "value": "completed"
+            },
+            {
+              "label": "Chưa hoàn thành",
+              "value": "not-completed"
+            },
+            {
+              "label": "Chưa có lộ trình",
+              "value": "no-path"
+            }
+          ]
+        },
+        {
           "id": "done",
           "type": "boolean",
           "default": true
@@ -10646,17 +10682,316 @@
         {
           "id": "title",
           "type": "string",
-          "default": "Tham gia khoá học đào tạo L&D"
+          "default": "Tham gia khoá học đào tạo"
         }
       ],
       "specSrc": "spec/components/probation-ld-card.json",
       "logicNotes": [
-        "Khối `Tham gia khoá học đào tạo L&D` đứng cuối danh sách mục tiêu của phiếu thử việc (`TV-07`).",
+        "Khối `Tham gia khoá học đào tạo` (13/10/2026 tạm gọi `Bài đánh giá thử việc`, đổi lại 14/10) đứng cuối danh sách mục tiêu của phiếu thử việc (`TV-07`).",
         "KHÔNG dùng `info-banner`: frame vẽ một THẺ TRẮNG ngang hàng với thẻ mục tiêu, còn `info-banner` là dải có nền tô theo tông — đặt vào sẽ ra một dải màu giữa hai thẻ trắng.",
         "`Xem kết quả` không có đích: prototype không có màn kết quả khoá học, và dữ liệu L&D do hệ thống ngoài trả về. Có đích thật thì truyền `onViewResult`."
       ],
       "description": "Thẻ trạng thái khoá học L&D trên phiếu nhân viên thử việc. Hai trạng thái: đã / chưa hoàn thành.",
       "logicSrc": "logic/components/probation-ld-card.json"
+    },
+    {
+      "id": "phuong-an-switch",
+      "name": "Phương án A/B Switch",
+      "renderFn": "renderCmpPhuongAnSwitch",
+      "scope": "local",
+      "level": "atom",
+      "dsMatch": null,
+      "renderSrc": "render/components/phuong-an-switch.js",
+      "properties": [],
+      "code": {
+        "lang": "html",
+        "snippet": "<!-- không vẽ gì; vá ô #sbx-role của Sandbox thành Option: Phương án A / B × vai -->"
+      },
+      "description": "Chọn phương án A / B của nhánh thử nghiệm — từ 12/10/2026 nằm trong ô Option của panel Sandbox (không còn nút trên header); chạy ở mọi máy chủ từ khi gộp vào main (12/10/2026), mặc định B.",
+      "specSrc": "spec/components/phuong-an-switch.json"
+    },
+    {
+      "id": "filter-facets",
+      "name": "Filter Facets (Option F)",
+      "renderFn": "renderCmpFilterFacets",
+      "scope": "local",
+      "level": "atom",
+      "dsMatch": null,
+      "renderSrc": "render/components/filter-facets.js",
+      "properties": [
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Open",
+              "value": "open"
+            }
+          ]
+        },
+        {
+          "id": "id",
+          "type": "string",
+          "default": "pb-ff"
+        },
+        {
+          "id": "scope",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "row",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "searchId",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "afterApply",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "fromYear",
+          "type": "number",
+          "default": null
+        },
+        {
+          "id": "cats",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "layout",
+          "type": "enum",
+          "default": "popover",
+          "options": [
+            {
+              "label": "Popover",
+              "value": "popover"
+            },
+            {
+              "label": "Drawer",
+              "value": "drawer"
+            }
+          ]
+        }
+      ],
+      "code": {
+        "lang": "html",
+        "snippet": "<span class=\"ff\"><span class=\"ff__tokens\"></span><button class=\"ff__open\">Bộ lọc</button><button class=\"ff__clear\">Xoá lọc</button><div class=\"ff__pop\" role=\"dialog\"></div></span>"
+      },
+      "description": "Bộ lọc Option F — 4 nhóm (Thời gian · Trạng thái · Loại kỳ · Phòng ban), chọn nhiều, áp dụng ngay; spec design-spec/spec-bo-loc-option-f.md (12/10/2026)."
+    },
+    {
+      "id": "combobox-tags",
+      "name": "Combobox Tags",
+      "renderFn": "renderCmpComboboxTags",
+      "scope": "local",
+      "level": "atom",
+      "dsMatch": null,
+      "properties": [
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Error",
+              "value": "error"
+            },
+            {
+              "label": "Disabled",
+              "value": "disabled"
+            }
+          ]
+        },
+        {
+          "id": "id",
+          "type": "string",
+          "default": "cbt-demo"
+        },
+        {
+          "id": "label",
+          "type": "string",
+          "default": "Kỳ đánh giá"
+        },
+        {
+          "id": "required",
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "id": "placeholder",
+          "type": "string",
+          "default": "Chọn kỳ đánh giá"
+        },
+        {
+          "id": "groups",
+          "type": "json",
+          "default": null
+        },
+        {
+          "id": "value",
+          "type": "json",
+          "default": null
+        },
+        {
+          "id": "errorText",
+          "type": "string",
+          "default": "Vui lòng chọn ít nhất một giá trị."
+        },
+        {
+          "id": "emptyText",
+          "type": "string",
+          "default": "Không có kết quả phù hợp"
+        },
+        {
+          "id": "onChange",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "helperText",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "countUnit",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "maxTags",
+          "type": "number",
+          "default": null
+        }
+      ],
+      "renderSrc": "render/components/combobox-tags.js",
+      "specSrc": "spec/components/combobox-tags.json",
+      "logicSrc": "logic/components/combobox-tags.json"
+    },
+    {
+      "id": "export-data-dialog",
+      "name": "Export Data Dialog",
+      "renderFn": "renderCmpExportDataDialog",
+      "scope": "local",
+      "level": "template",
+      "dsMatch": null,
+      "properties": [
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            }
+          ]
+        },
+        {
+          "id": "id",
+          "type": "string",
+          "default": "xdl-demo"
+        },
+        {
+          "id": "scope",
+          "type": "enum",
+          "default": "company",
+          "options": [
+            {
+              "label": "Toàn công ty",
+              "value": "company"
+            },
+            {
+              "label": "Trực tiếp quản lý",
+              "value": "truc-tiep"
+            },
+            {
+              "label": "Gián tiếp quản lý",
+              "value": "gian-tiep"
+            },
+            {
+              "label": "Ủy quyền đánh giá",
+              "value": "supervisor"
+            },
+            {
+              "label": "Phòng ban",
+              "value": "dept"
+            }
+          ]
+        },
+        {
+          "id": "scopeLabel",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "trigger",
+          "type": "enum",
+          "default": "button",
+          "options": [
+            {
+              "label": "Nút chữ",
+              "value": "button"
+            },
+            {
+              "label": "Nút More",
+              "value": "more"
+            }
+          ]
+        },
+        {
+          "id": "label",
+          "type": "string",
+          "default": "Xuất dữ liệu"
+        },
+        {
+          "id": "moreItems",
+          "type": "json",
+          "default": null
+        }
+      ],
+      "renderSrc": "render/components/export-data-dialog.js",
+      "specSrc": "spec/components/export-data-dialog.json",
+      "logicSrc": "logic/components/export-data-dialog.json"
+    },
+    {
+      "id": "org-customer-division",
+      "name": "Org Customer Division",
+      "renderFn": "renderCmpOrgCustomerDivision",
+      "scope": "local",
+      "level": "atom",
+      "dsMatch": null,
+      "properties": [
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            }
+          ]
+        }
+      ],
+      "renderSrc": "render/components/org-customer-division.js",
+      "specSrc": "spec/components/org-customer-division.json",
+      "logicSrc": "logic/components/org-customer-division.json"
     }
   ],
   "screens": [
@@ -10803,6 +11138,18 @@
           "tokens": [
             "--bg-app-hover"
           ],
+          "state": "default"
+        },
+        {
+          "id": "qlck-cfg",
+          "label": "[A] Modal Cài đặt chu kỳ (Admin) — gộp Cài đặt chu kỳ, 12/10/2026",
+          "orgId": "dialog",
+          "state": "default"
+        },
+        {
+          "id": "qlck-cfg-upload",
+          "label": "[A] Vùng tải file Excel cấu hình chu kỳ",
+          "orgId": "excel-upload-pane",
           "state": "default"
         }
       ],
@@ -12013,7 +12360,7 @@
     },
     {
       "id": "hieu-suat-phong-ban-gian-tiep",
-      "name": "Hiệu suất phòng ban · Phòng ban bên dưới",
+      "name": "Hiệu suất phòng ban · Gián tiếp quản lý",
       "renderFn": "renderScreenHieuSuatPhongBanGianTiep",
       "roles": [
         "high-level-manager"
@@ -13083,9 +13430,188 @@
           "id": "subs-bulk-split",
           "orgId": "split-button",
           "label": "Tab `Quản lý cấp dưới`: split button `Đánh giá hàng loạt` thay nút `Thiết lập bằng Excel`. Nửa trái mở ngăn Đánh giá hàng loạt; danh sách có `Đánh giá hàng loạt` và `Thiết lập hàng loạt`, mỗi mục mở ngăn tương ứng (mount với `hideTrigger`). Ngoại lệ có chủ ý với `HS-01`, chủ sản phẩm chốt 05/10/2026."
+        },
+        {
+          "id": "gop-employee-cell",
+          "label": "Bảng gộp (tuyến Trực tiếp quản lý): ô Tên dựng lại với nameRole subtitle3 — dòng mã + tên cỡ --font-size-caption (chỉ thị 08/10/2026).",
+          "orgId": "employee-cell",
+          "state": "default"
+        },
+        {
+          "id": "gop-probation-status",
+          "label": "Bảng gộp: chip trạng thái của dòng THỬ VIỆC đọc pbProbationVariantOf (như hpbProbationPane) — 08/10/2026.",
+          "orgId": "status-tag",
+          "state": "default"
+        },
+        {
+          "id": "gop-filter",
+          "label": "Danh sách gộp (A + B): bộ lọc Option F — Thời gian · Trạng thái · Loại kỳ · Phòng ban, chọn nhiều, áp dụng ngay; token + Xoá lọc + popover hai cột (12/10/2026, design-spec/spec-bo-loc-option-f.md). Thay dialog Bộ lọc 09/10.",
+          "orgId": "filter-facets",
+          "state": "default"
+        },
+        {
+          "id": "gop-pick",
+          "label": "Bảng gộp: chọn nhiều — ô chọn tất cả (tiêu đề cột Tên, dòng đang hiển thị), ô chọn mỗi người (ô gộp Tên, mọi kỳ), ô chọn mỗi kỳ (ô Chu kỳ); ô người / tiêu đề có trạng thái chọn một phần (09/10/2026).",
+          "orgId": "checkbox-radio",
+          "state": "default"
+        },
+        {
+          "id": "gop-a-list",
+          "label": "[A] Danh sách thẻ: nút mở / thu gọn mỗi thẻ (chevron) — phương án A, 12/10/2026.",
+          "orgId": "icon",
+          "state": "default"
+        },
+        {
+          "id": "gop-a-toggle",
+          "label": "[A] Danh sách thẻ: ô mở / thu gọn ẩn của mỗi thẻ — phương án A, 12/10/2026.",
+          "orgId": "toggle-input",
+          "state": "default"
+        },
+        {
+          "id": "gop-a-head",
+          "label": "[A] Danh sách thẻ: đầu thẻ bấm mở / thu gọn — phương án A, 12/10/2026.",
+          "orgId": "label-wrap",
+          "state": "default"
+        },
+        {
+          "id": "export-data",
+          "label": "Nút Xuất dữ liệu trên header (14/10/2026): mở dialog chọn Năm + Kỳ đánh giá, phạm vi = phòng ban đang mở. Dựng qua `pbXdlAction` (kiểu nút theo phương án).",
+          "state": "default"
         }
       ],
       "logicSrc": "logic/screens/hieu-suat-phong-ban-chi-tiet.json"
+    },
+    {
+      "id": "danh-gia-thu-viec",
+      "name": "Đánh giá thử việc",
+      "renderFn": "renderScreenDanhGiaThuViec",
+      "roles": [
+        "hr",
+        "manager",
+        "high-level-manager",
+        "supervisor"
+      ],
+      "layout": {
+        "type": "stack",
+        "gap": 24,
+        "maxWidth": 1440,
+        "padding": 24
+      },
+      "logicNotes": [
+        "[A] 12/10/2026 — màn riêng cho NV thử việc, mở từ sidebar (chỉ phương án A, nhánh explore/gop-tab). Admin thấy cả công ty + nút Cài đặt chu kỳ thử việc; vai quản lý thấy NV thử việc trong tuyến Trực tiếp quản lý + Ủy quyền đánh giá. Không có ai → trạng thái rỗng. Cột Kết quả chỉ có điểm khi Đạt thử việc. Bấm dòng → chi-tiet-nhan-vien, lối vào thu-viec.",
+        "[A] 12/10/2026 — nút Cài đặt (căn phải) mở modal upload Excel, chưa xử lý file; thêm Xuất dữ liệu (export-gop, NV đang hiện) và Thao tác hàng loạt (Đánh giá / Thiết lập bằng Excel, ghi vào chu kỳ thử việc qua PB_BULK_CYCLE)."
+      ],
+      "renderSrc": "render/screens/danh-gia-thu-viec.js",
+      "elements": [
+        {
+          "id": "dtv-shell",
+          "label": "[A] Khung app",
+          "orgId": "header-footer-app",
+          "state": "default"
+        },
+        {
+          "id": "dtv-header",
+          "label": "[A] Tiêu đề màn + nút Cài đặt chu kỳ thử việc (Admin)",
+          "orgId": "header-page",
+          "state": "default"
+        },
+        {
+          "id": "dtv-config-btn",
+          "label": "[A] Nút Cài đặt chu kỳ thử việc / Đặt lại tất cả",
+          "orgId": "button",
+          "state": "default"
+        },
+        {
+          "id": "dtv-card",
+          "label": "[A] Thẻ chứa bảng",
+          "orgId": "card",
+          "state": "default"
+        },
+        {
+          "id": "dtv-empty",
+          "label": "[A] Trạng thái rỗng: chưa có NV thử việc / không có kết quả lọc",
+          "orgId": "empty-state",
+          "state": "default"
+        },
+        {
+          "id": "dtv-toolbar",
+          "label": "[A] Thanh công cụ",
+          "orgId": "filter-toolbar",
+          "state": "default"
+        },
+        {
+          "id": "dtv-search",
+          "label": "[A] Ô tìm kiếm",
+          "orgId": "input",
+          "state": "default"
+        },
+        {
+          "id": "dtv-filter",
+          "label": "[A] Bộ lọc Option F: Trạng thái + Phòng ban",
+          "orgId": "filter-facets",
+          "state": "default"
+        },
+        {
+          "id": "dtv-table",
+          "label": "[A] Bảng NV thử việc: Tên · Phòng ban · Trạng thái · NV đánh giá · QL đánh giá · Kết quả",
+          "orgId": "table",
+          "state": "default"
+        },
+        {
+          "id": "dtv-emp",
+          "label": "[A] Ô nhân viên: avatar + mã + tên + chức danh",
+          "orgId": "employee-cell",
+          "state": "default"
+        },
+        {
+          "id": "dtv-status",
+          "label": "[A] Chip trạng thái phiếu thử việc",
+          "orgId": "status-tag",
+          "state": "default"
+        },
+        {
+          "id": "dtv-bulk",
+          "label": "[A] Nút Thao tác hàng loạt: Đánh giá / Thiết lập bằng Excel",
+          "orgId": "split-button",
+          "state": "default"
+        },
+        {
+          "id": "dtv-bev",
+          "label": "[A] Hộp Đánh giá bằng Excel — chu kỳ thử việc",
+          "orgId": "bulk-evaluate-action",
+          "state": "default"
+        },
+        {
+          "id": "dtv-bki",
+          "label": "[A] Hộp Thiết lập bằng Excel — chu kỳ thử việc",
+          "orgId": "bulk-assign-kpi-action",
+          "state": "default"
+        },
+        {
+          "id": "dtv-cfg",
+          "label": "[A] Modal Cài đặt chu kỳ thử việc (Admin)",
+          "orgId": "dialog",
+          "state": "default"
+        },
+        {
+          "id": "dtv-cfg-upload",
+          "label": "[A] Vùng tải file Excel cấu hình chu kỳ thử việc",
+          "orgId": "excel-upload-pane",
+          "state": "default"
+        },
+        {
+          "id": "dtv-roadmap-title",
+          "label": "[A] Thẻ Lộ trình đánh giá (bốn mốc chu kỳ thử việc)",
+          "orgId": "titled-section",
+          "state": "default"
+        },
+        {
+          "id": "dtv-roadmap",
+          "label": "[A] Thanh bốn mốc chu kỳ thử việc",
+          "orgId": "notice-period-timeline",
+          "state": "default"
+        }
+      ]
     },
     {
       "id": "thu-nghiem-ty-trong",
