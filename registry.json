@@ -3179,6 +3179,10 @@
             {
               "label": "Quý (3 / 3 bars)",
               "value": "quarter"
+            },
+            {
+              "label": "Chưa có chu kỳ",
+              "value": "none"
             }
           ]
         },
@@ -11151,6 +11155,490 @@
       "renderSrc": "render/components/period-chip-group.js",
       "specSrc": "spec/components/period-chip-group.json",
       "logicSrc": "logic/components/period-chip-group.json"
+    },
+    {
+      "id": "card-dept",
+      "name": "Card Dept",
+      "renderFn": "renderCmpCardDept",
+      "scope": "local",
+      "level": "organism",
+      "dsMatch": null,
+      "properties": [
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "collapsed",
+          "options": [
+            {
+              "label": "Thu gọn",
+              "value": "collapsed"
+            },
+            {
+              "label": "Xổ phòng ban con",
+              "value": "expanded"
+            }
+          ]
+        },
+        {
+          "id": "variant",
+          "type": "enum",
+          "default": "parent",
+          "options": [
+            {
+              "label": "Có phòng ban con",
+              "value": "parent"
+            },
+            {
+              "label": "Không có phòng ban con",
+              "value": "leaf"
+            }
+          ]
+        },
+        {
+          "id": "id",
+          "type": "string",
+          "default": "cdd-demo"
+        },
+        {
+          "id": "code",
+          "type": "string",
+          "default": "NK83925"
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "default": "Product Department"
+        },
+        {
+          "id": "cycle",
+          "type": "enum",
+          "default": "quarter",
+          "options": [
+            {
+              "label": "Quý",
+              "value": "quarter"
+            },
+            {
+              "label": "Tháng",
+              "value": "month"
+            },
+            {
+              "label": "Chưa có chu kỳ",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "id": "manager",
+          "type": "json",
+          "default": {
+            "code": "6487205",
+            "name": "Lê Bá Quý",
+            "title": "Giám đốc sản phẩm"
+          }
+        },
+        {
+          "id": "delegates",
+          "type": "json",
+          "default": [
+            {
+              "name": "Đào Thị Phương Linh"
+            },
+            {
+              "name": "Nguyễn Thị Hồng Vân"
+            },
+            {
+              "name": "Bùi Gia Trí"
+            }
+          ]
+        },
+        {
+          "id": "children",
+          "type": "json",
+          "default": [
+            {
+              "code": "DP40217",
+              "name": "Data Product & Operations Analytics",
+              "cycle": "quarter",
+              "manager": {
+                "code": "6487205",
+                "name": "Lê Bá Quý",
+                "title": "Giám đốc sản phẩm"
+              },
+              "delegates": []
+            },
+            {
+              "code": "JT81243",
+              "name": "Algility Team",
+              "cycle": "quarter",
+              "manager": {
+                "code": "2151313",
+                "name": "Võ Thị Bích Diễm",
+                "title": "Product Lead"
+              },
+              "delegates": []
+            },
+            {
+              "code": "IA87644",
+              "name": "Customer Management Team",
+              "cycle": "month",
+              "manager": {
+                "code": "6487205",
+                "name": "Lê Bá Quý",
+                "title": "Giám đốc sản phẩm"
+              },
+              "delegates": [
+                {
+                  "name": "Tạ Bá Cường"
+                },
+                {
+                  "name": "Tạ Thị Mai Chi"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "onClick",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "childCount",
+          "type": "number",
+          "default": null
+        },
+        {
+          "id": "nested",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "id": "nodeId",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "path",
+          "type": "string",
+          "default": ""
+        }
+      ],
+      "renderSrc": "render/components/card-dept.js",
+      "specSrc": "spec/components/card-dept.json",
+      "logicSrc": "logic/components/card-dept.json"
+    },
+    {
+      "id": "card-employee",
+      "name": "Card Employee",
+      "renderFn": "renderCmpCardEmployee",
+      "scope": "local",
+      "level": "organism",
+      "dsMatch": null,
+      "properties": [
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            }
+          ]
+        },
+        {
+          "id": "variant",
+          "type": "enum",
+          "default": "review",
+          "options": [
+            {
+              "label": "Có tag trạng thái + điểm đánh giá",
+              "value": "review"
+            },
+            {
+              "label": "Không có tag trạng thái + điểm (Nhóm quản lý trực tiếp)",
+              "value": "info"
+            },
+            {
+              "label": "Thử việc (danh sách NV thử việc)",
+              "value": "probation"
+            }
+          ]
+        },
+        {
+          "id": "id",
+          "type": "string",
+          "default": "cem-demo"
+        },
+        {
+          "id": "code",
+          "type": "string",
+          "default": "3354408"
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "default": "Thái Bảo Duy Lâm"
+        },
+        {
+          "id": "title",
+          "type": "string",
+          "default": "Senior Product Designer 1"
+        },
+        {
+          "id": "status",
+          "type": "enum",
+          "default": "handoff-reviewed",
+          "options": [
+            {
+              "label": "Delivered (original)",
+              "value": "delivered"
+            },
+            {
+              "label": "In transit (original)",
+              "value": "in-transit"
+            },
+            {
+              "label": "Pending (original)",
+              "value": "pending"
+            },
+            {
+              "label": "Failed (original)",
+              "value": "failed"
+            },
+            {
+              "label": "Hiệu lực",
+              "value": "active"
+            },
+            {
+              "label": "Ngừng hiệu lực",
+              "value": "inactive"
+            },
+            {
+              "label": "Bản nháp",
+              "value": "draft"
+            },
+            {
+              "label": "Đang thực hiện",
+              "value": "in-progress"
+            },
+            {
+              "label": "Đang đánh giá",
+              "value": "under-review"
+            },
+            {
+              "label": "Hoàn thành",
+              "value": "completed"
+            },
+            {
+              "label": "Neutral pill (cadence/type)",
+              "value": "neutral"
+            },
+            {
+              "label": "Chưa thiết lập",
+              "value": "goal-not-set"
+            },
+            {
+              "label": "Đã thiết lập",
+              "value": "goal-set"
+            },
+            {
+              "label": "Còn <3 ngày",
+              "value": "due-soon"
+            },
+            {
+              "label": "Quá hạn",
+              "value": "overdue"
+            },
+            {
+              "label": "Sắp diễn ra",
+              "value": "upcoming"
+            },
+            {
+              "label": "Đang diễn ra (Quản lý chu kỳ ongoing)",
+              "value": "ongoing"
+            },
+            {
+              "label": "Chưa thiết lập (thử việc)",
+              "value": "probation-not-set"
+            },
+            {
+              "label": "Đã thiết lập (thử việc)",
+              "value": "probation-ongoing"
+            },
+            {
+              "label": "Đạt thử việc",
+              "value": "probation-passed"
+            },
+            {
+              "label": "Không đạt thử việc",
+              "value": "probation-failed"
+            },
+            {
+              "label": "Đã đánh giá",
+              "value": "handoff-reviewed"
+            },
+            {
+              "label": "Đã hiệu chỉnh",
+              "value": "handoff-calibrated"
+            },
+            {
+              "label": "Chờ đánh giá",
+              "value": "handoff-awaiting"
+            },
+            {
+              "label": "Chờ đánh giá (thử việc)",
+              "value": "probation-awaiting"
+            }
+          ]
+        },
+        {
+          "id": "statusHtml",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "scores",
+          "type": "json",
+          "default": {
+            "self": "90,8%",
+            "manager": "88,5%",
+            "final": "88,5%"
+          }
+        },
+        {
+          "id": "dept",
+          "type": "string",
+          "default": "ZE53591 - Product Design Team"
+        },
+        {
+          "id": "todo",
+          "type": "string",
+          "default": "1 kỳ chưa thiết lập"
+        },
+        {
+          "id": "onClick",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "manager",
+          "type": "string",
+          "default": "1438883 - Bùi Ngọc Phúc Danh"
+        },
+        {
+          "id": "reviewDate",
+          "type": "string",
+          "default": "01/11/2026"
+        },
+        {
+          "id": "period",
+          "type": "string",
+          "default": "17/09/2026 - 16/11/2026"
+        }
+      ],
+      "renderSrc": "render/components/card-employee.js",
+      "specSrc": "spec/components/card-employee.json",
+      "logicSrc": "logic/components/card-employee.json"
+    },
+    {
+      "id": "card-cycle-title",
+      "name": "Card Cycle Title",
+      "renderFn": "renderCmpCardCycleTitle",
+      "scope": "local",
+      "level": "molecule",
+      "dsMatch": null,
+      "properties": [
+        {
+          "id": "state",
+          "type": "enum",
+          "default": "expanded",
+          "options": [
+            {
+              "label": "Thu gọn",
+              "value": "collapsed"
+            },
+            {
+              "label": "Xổ",
+              "value": "expanded"
+            }
+          ]
+        },
+        {
+          "id": "id",
+          "type": "string",
+          "default": "cct-demo"
+        },
+        {
+          "id": "title",
+          "type": "string",
+          "default": "Trưởng bưu cục"
+        },
+        {
+          "id": "cycle",
+          "type": "enum",
+          "default": "quarter",
+          "options": [
+            {
+              "label": "Quý",
+              "value": "quarter"
+            },
+            {
+              "label": "Tháng",
+              "value": "month"
+            },
+            {
+              "label": "Chưa có chu kỳ",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "id": "steps",
+          "type": "json",
+          "default": [
+            {
+              "label": "Thiết lập mục tiêu",
+              "day": "Ngày 5",
+              "sub": "Tháng 1 Quý N"
+            },
+            {
+              "label": "NV tự đánh giá",
+              "day": "Ngày 20",
+              "sub": "Tháng 3 Quý N"
+            },
+            {
+              "label": "QL đánh giá",
+              "day": "Ngày 25",
+              "sub": "Tháng 3 Quý N"
+            },
+            {
+              "label": "Kết quả cuối cùng",
+              "day": "Ngày 5",
+              "sub": "Tháng 1 Quý N+1"
+            }
+          ]
+        },
+        {
+          "id": "emptyText",
+          "type": "string",
+          "default": "Chưa thiết lập"
+        },
+        {
+          "id": "actionLabel",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "id": "onAction",
+          "type": "string",
+          "default": ""
+        }
+      ],
+      "renderSrc": "render/components/card-cycle-title.js",
+      "specSrc": "spec/components/card-cycle-title.json",
+      "logicSrc": "logic/components/card-cycle-title.json"
     }
   ],
   "screens": [
@@ -11482,6 +11970,18 @@
         {
           "id": "title-cycle-detail",
           "label": "CẤP 2 tab Chu kỳ chức danh (Figma 8903:86048 quý / 8903:86730 tháng): back link, dải kỳ riêng (cdpb-tperiod, độc lập với trục kỳ của tab phòng ban vì nhịp chức danh có thể khác nhịp đơn vị), card 'Chu kỳ {quý|tháng} của {chức danh}', bảng nhân viên 2 cột. Điều hướng bằng stash PB_CDPB_TITLE_TARGET + re-render, không phải :has() — số cặp (chức danh × nhịp) không cố định nên dựng sẵn mọi pane sẽ render N lộ trình mỗi lần vẽ."
+        },
+        {
+          "id": "m-card-employee",
+          "label": "Dải mobile — card-employee thay bảng (16/10/2026)",
+          "orgId": "card-employee",
+          "state": "default"
+        },
+        {
+          "id": "m-card-cycle-title",
+          "label": "Dải mobile — card-cycle-title thay bảng (16/10/2026)",
+          "orgId": "card-cycle-title",
+          "state": "default"
         }
       ],
       "logicNotes": [
@@ -13635,6 +14135,12 @@
         {
           "id": "export-data",
           "label": "Nút Xuất dữ liệu trên header (14/10/2026): mở dialog chọn Năm + Kỳ đánh giá, phạm vi = phòng ban đang mở. Dựng qua `pbXdlAction` (kiểu nút theo phương án).",
+          "state": "default"
+        },
+        {
+          "id": "mode-cards",
+          "label": "[C] Dải mobile của bảng ba tab — danh sách card-employee thay bảng cuộn ngang (16/10/2026)",
+          "orgId": "card-employee",
           "state": "default"
         }
       ],
