@@ -1786,16 +1786,16 @@
       "description": "Bề ngang cột Trạng thái của bảng nhân viên — chip dài nhất (`Chờ quản lý đánh giá`) cộng hai bên đệm ô. 06/10/2026."
     },
     "size-col-score-w": {
-      "$value": "112px",
+      "$value": "132px",
       "$type": "dimension",
       "scope": "local",
-      "description": "Bề ngang hai cột NV / QL đánh giá — tiêu đề kèm icon sort, cộng đệm ô. 06/10/2026."
+      "description": "Bề ngang hai cột NV / QL đánh giá — tiêu đề kèm icon sort, cộng đệm ô. 06/10/2026. · 19/10/2026: 112 → 132 — tiêu đề viết hoa \"NV ĐÁNH GIÁ\" + nút sắp xếp + đệm ngang --space-md cần 129."
     },
     "size-col-result-w": {
-      "$value": "148px",
+      "$value": "176px",
       "$type": "dimension",
       "scope": "local",
-      "description": "Bề ngang cột Kết quả cuối cùng — tiêu đề kèm icon sort, cộng đệm ô. 06/10/2026."
+      "description": "Bề ngang cột Kết quả cuối cùng — tiêu đề kèm icon sort, cộng đệm ô. 06/10/2026. 19/10/2026: 148 → 176 — tiêu đề viết hoa + đệm ngang --space-md cần 174 (đo bề ngang nhãn một dòng + hai lần đệm)."
     },
     "size-gop-table-min-w": {
       "$value": "950px",
@@ -1844,6 +1844,30 @@
       "$type": "dimension",
       "scope": "local",
       "description": "Bề ngang ngăn bộ lọc bên phải — filter-facets layout drawer (Concept G, phương án B, 13/10/2026)."
+    },
+    "size-table-tabs-h": {
+      "$value": "56px",
+      "$type": "dimension",
+      "scope": "local",
+      "$description": "Chiều cao dải tab nằm trong khung bảng (`table.topBar`) — 19/10/2026."
+    },
+    "size-col-status-w-md": {
+      "$value": "140px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang cột Trạng thái ở khung dưới tablet (< PB_BP_TABLET) — table thay token cùng tên không có -md bằng token này (19/10/2026, chống cuộn ngang)."
+    },
+    "size-col-score-w-md": {
+      "$value": "96px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang cột NV / QL đánh giá ở khung dưới tablet (< PB_BP_TABLET) — table thay token cùng tên không có -md bằng token này (19/10/2026, chống cuộn ngang)."
+    },
+    "size-col-result-w-md": {
+      "$value": "112px",
+      "$type": "dimension",
+      "scope": "local",
+      "description": "Bề ngang cột Kết quả cuối cùng ở khung dưới tablet (< PB_BP_TABLET) — table thay token cùng tên không có -md bằng token này (19/10/2026, chống cuộn ngang)."
     }
   },
   "components": [
@@ -3363,6 +3387,12 @@
           "id": "rows[].sortVals",
           "type": "object",
           "default": null
+        },
+        {
+          "id": "topBar",
+          "type": "string",
+          "default": "",
+          "description": "HTML đã dựng (vd dải `tabs`) đặt TRONG khung bảng, trên hàng tiêu đề cột (19/10/2026). Có prop này: khung ngoài `.tbl-frame` mang viền + bo `--radius-lg` (như mọi bảng) + nền trắng; dải nằm ngoài vùng cuộn của bảng nên bảng thả của nó không bị cắt."
         }
       ],
       "code": {
@@ -3518,7 +3548,13 @@
           "id": "maxVisible",
           "type": "number",
           "default": 5,
-          "description": "Số tab tối đa hiện trực tiếp ở biến thể pill; phần dư vào nút More."
+          "description": "Số tab tối đa hiện trực tiếp. Pill: mặc định 5, phần dư vào nút More (⋮). Underline: CHỈ khi caller truyền — đếm cả tab cuối `moreLabel` (5 = 4 tab + Khác), phần dư vào bảng thả của tab đó, số trên tab = tổng count các ô trong bảng thả (19/10/2026)."
+        },
+        {
+          "id": "moreLabel",
+          "type": "string",
+          "default": "Khác",
+          "description": "Underline + maxVisible: nhãn tab cuối chứa các ô tràn (mở bảng thả, mỗi dòng nhãn + count)."
         }
       ],
       "code": {
